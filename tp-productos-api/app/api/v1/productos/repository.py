@@ -88,7 +88,7 @@ def delete(producto_id: int):
         (
             producto
             for producto in db.productos
-            if producto.id == producto_id
+            if producto.id == producto_id and producto.activo
         ),
         None
     )
