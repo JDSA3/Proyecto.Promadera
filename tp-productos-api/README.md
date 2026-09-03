@@ -13,26 +13,28 @@ API REST desarrollada con FastAPI para la gestión de productos y categorías, c
 
 ## Estructura del proyecto
 
+```
 tp-productos-api/
 ├── app/
-│ ├── main.py # crea app, include_router
-│ ├── core/
-│ │ └── db.py # listas: categorias, productos
-│ ├── models/
-│ │ ├── categoria.py # @dataclass Categoria
-│ │ └── producto.py # @dataclass Producto
-│ └── api/
-│ └── v1/
-│ └── productos/
-│ ├── router.py # endpoints /productos (APIRouter)
-│ ├── schemas.py # Pydantic Base/Create/Update/Response
-│ └── repository.py # acceso a datos + validaciones
+│   ├── main.py                    # crea app, include_router
+│   ├── core/
+│   │   └── db.py                  # listas: categorias, productos
+│   ├── models/
+│   │   ├── categoria.py           # @dataclass Categoria
+│   │   └── producto.py            # @dataclass Producto
+│   └── api/
+│       └── v1/
+│           └── productos/
+│               ├── router.py      # endpoints /productos (APIRouter)
+│               ├── schemas.py     # Pydantic Base/Create/Update/Response
+│               └── repository.py  # acceso a datos + validaciones
 ├── docs/
-│ └── capturas/ # capturas de Swagger UI
+│   └── capturas/                  # capturas de Swagger UI
 ├── requirements.txt
 ├── README.md
-├── .gitignore # venv/, pycache/, *.pyc
+├── .gitignore                     # venv/, __pycache__/, *.pyc
 └── venv/
+```
 
 ```bash
 python -m venv venv
@@ -87,3 +89,17 @@ Se instanció `FastAPI` con `title` y `description`, se agregó un `GET /` con m
 
 ![Eliminar - 204](docs/capturas/08f-eliminar-204.png)
 ![Eliminar repetido - 404](docs/capturas/08f-eliminar-404.png)
+
+## Trabajo colaborativo en Git
+
+### Colaboradores del repositorio
+
+![Colaboradores](docs/capturas/09a-colaboradores.png)
+
+### Historial de commits por integrante
+
+![Contributors](docs/capturas/09b-contributors.png)
+
+### Pull Request mergeado
+
+![Pull Request mergeado](docs/capturas/09c-pull-request-mergeado.png)
