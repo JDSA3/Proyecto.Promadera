@@ -85,17 +85,12 @@ def update(producto_id: int, data):
     return _to_dict(producto)
 def delete(producto_id: int):
     producto = next(
-        (
-            producto
-            for producto in db.productos
-            if producto.id == producto_id and producto.activo
-        ),
+        (p for p in db.productos if p.id == producto_id),
         None
     )
 
     if producto is None:
         return None
 
-    producto.activo = False
-
-    return _to_dict(producto)
+    db.productos.remove(producto)
+    return True
