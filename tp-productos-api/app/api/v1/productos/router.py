@@ -84,13 +84,10 @@ def actualizar_producto(
     return repository.update(producto_id, datos)
 
 
-@router.delete(
-    "/{producto_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
+@router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_producto(producto_id: int):
-    producto = repository.delete(producto_id)
-    if producto is None:
+    eliminado = repository.delete(producto_id)
+    if eliminado is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Producto {producto_id} no encontrado",

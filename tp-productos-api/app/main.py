@@ -2,8 +2,10 @@ from fastapi import FastAPI
 
 from app.api.v1.productos.router import router as productos_router
 
-app = FastAPI()
-
+app = FastAPI(
+    title="API de Productos - MaderaPro",
+    description="API REST para gestión de productos y categorías",
+)
 
 @app.get("/")
 def hola():
