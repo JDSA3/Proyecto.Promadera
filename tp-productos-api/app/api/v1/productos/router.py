@@ -11,7 +11,12 @@ from app.api.v1.productos.schemas import (
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
 
-@router.get("", response_model=list[ProductoResponse])
+@router.get(
+    "",
+    response_model=list[ProductoResponse],
+    summary="Listar productos",
+    description="Devuelve la lista de productos. Permite filtrar por texto en el nombre (query) y/o por categoria_id.",
+)
 def listar_productos(
     query: str | None = None,
     categoria_id: int | None = None
@@ -31,7 +36,13 @@ def listar_productos(
     return productos
 
 
-@router.get("/{producto_id}", response_model=ProductoResponse)
+@router.get(
+    "/{producto_id}",
+    response_model=ProductoResponse,
+    summary="Obtener un producto por ID",
+    description="Devuelve los datos de un producto especifico segun su ID.",
+    responses={404: {"description": "Producto no encontrado"}},
+)
 def obtener_producto(producto_id: int):
     producto = repository.get_by_id(producto_id)
 
@@ -47,6 +58,9 @@ def obtener_producto(producto_id: int):
     "",
     response_model=ProductoResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Crear un producto",
+    description="Crea un nuevo producto. La categoria_id debe corresponder a una categoria existente.",
+    responses={400: {"description": "La categoria indicada no existe"}},
 )
 def crear_producto(datos: ProductoCreate):
     existe, mensaje = repository.ensure_categoria(
@@ -60,7 +74,16 @@ def crear_producto(datos: ProductoCreate):
     return repository.create(datos)
 
 
-@router.put("/{producto_id}", response_model=ProductoResponse)
+@router.put(
+    "/{producto_id}",
+    response_model=ProductoResponse,
+    summary="Actualizar un producto",
+    description="Actualiza uno o mas campos de un producto existente. Los campos no enviados, o enviados en null, no se modifican.",
+    responses={
+        404: {"description": "Producto no encontrado"},
+        400: {"description": "La categoria indicada no existe"},
+    },
+)
 def actualizar_producto(
     producto_id: int,
     datos: ProductoUpdate
@@ -87,6 +110,9 @@ def actualizar_producto(
 @router.delete(
     "/{producto_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Eliminar un producto",
+    description="Elimina (desactiva) un producto existente por su ID.",
+    responses={404: {"description": "Producto no encontrado"}},
 )
 def eliminar_producto(producto_id: int):
     producto = repository.delete(producto_id)
