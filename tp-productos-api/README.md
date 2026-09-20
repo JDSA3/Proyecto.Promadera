@@ -45,6 +45,41 @@ fastapi dev app/main.py
 
 La API queda en `http://127.0.0.1:8000` y la documentación interactiva en `http://127.0.0.1:8000/docs`.
 
+## Arquitectura
+
+### Arquitectura actual
+
+La API está organizada en capas. Cada capa tiene una sola responsabilidad y solo habla con la que tiene debajo:
+
+```
+Cliente (Swagger UI / navegador)
+        │  HTTP
+        ▼
+FastAPI  ─ router.py + schemas.py
+        │
+        ▼
+Repository  ─ repository.py
+        │
+        ▼
+Lista en memoria  ─ core/db.py
+```
+
+| Capa | Archivo | Qué hace |
+|---|---|---|
+| FastAPI | `router.py`, `schemas.py` | Recibe las peticiones HTTP, valida los datos con Pydantic y devuelve los códigos de estado (200, 201, 204, 400, 404, 422). No tiene lógica de filtrado. |
+| Repository | `repository.py` | Es el único lugar que accede a los datos: lista y filtra productos por nombre y categoría, busca por id, crea, actualiza y elimina. |
+| Datos | `core/db.py` | Listas de Python en memoria con las categorías y los productos. Los cambios se pierden al reiniciar el servidor. |
+
+El router nunca accede directo a `db.productos`: siempre pasa por el repository. Así, si cambia la forma de guardar los datos, solo hay que tocar una capa.
+
+### Arquitectura futura (PostgreSQL)
+
+```
+Cliente → FastAPI (router.py) → Repository (repository.py) → PostgreSQL
+```
+
+Está planificada pero todavía **no está implementada**. El único cambio será reemplazar las listas en memoria por una base de datos PostgreSQL. El `repository.py` pasa a consultar la base en lugar de las listas, y el router y los schemas siguen igual, porque ya dependen solo del repository.
+
 ## Endpoints
 
 | Método | Ruta | Descripción | Código éxito | Códigos error |
