@@ -16,19 +16,7 @@ def listar_productos(
     query: str | None = None,
     categoria_id: int | None = None
 ):
-    if query is not None:
-        productos = repository.search_by_nombre(query)
-    else:
-        productos = repository.list_productos()
-
-    if categoria_id is not None:
-        productos = [
-            producto
-            for producto in productos
-            if producto["categoria"]["id"] == categoria_id
-        ]
-
-    return productos
+    return repository.list_productos(query, categoria_id)
 
 
 @router.get("/{producto_id}", response_model=ProductoResponse)
