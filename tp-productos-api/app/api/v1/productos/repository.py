@@ -64,6 +64,7 @@ def create(data):
     db.productos.append(nuevo_producto)
 
     return _to_dict(nuevo_producto)
+
 def update(producto_id: int, data):
     producto = next(
         (
@@ -78,6 +79,7 @@ def update(producto_id: int, data):
         return None
 
     cambios = data.model_dump(exclude_unset=True)
+    cambios = {k: v for k, v in cambios.items() if v is not None}
 
     for campo, valor in cambios.items():
         setattr(producto, campo, valor)
