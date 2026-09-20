@@ -1,457 +1,100 @@
 :root {
-  /* Paleta principal */
-  --pm-navy-900: #16233d;   
-  --pm-navy-800: #1e2f4f;
-  --pm-gold-500: #c9a876;   
-  --pm-gold-600: #b3915f;
-  --pm-cream-100: #f6f2e9;  
-  --pm-cream-50:  #fbf9f4;
-  --pm-wood-700: #8a5a3b;   
+  --pm-navy-900: #16233d;
+  --pm-gold-500: #c9a876;
+  --pm-cream-100: #f6f2e9;
+  --pm-cream-50: #fbf9f4;
   --pm-white: #ffffff;
-  --pm-ink-900: #232323;
-  --pm-ink-600: #5c5c5c;
   --pm-line: #e2dccd;
-
-  /* Sombras y bordes */
-  --pm-radius-sm: 6px;
-  --pm-radius-md: 10px;
-  --pm-radius-lg: 16px;
-  --pm-shadow-sm: 0 1px 3px rgba(22, 35, 61, 0.10);
-  --pm-shadow-md: 0 6px 18px rgba(22, 35, 61, 0.14);
-  --pm-shadow-focus: 0 0 0 3px rgba(201, 168, 118, 0.45);
-
-  /* Tipografía */
-  --pm-font-display: "Fraunces", "Georgia", serif;   /* títulos, marca */
-  --pm-font-body: "Inter", "Segoe UI", sans-serif;    /* UI, datos técnicos */
-  --pm-font-mono: "IBM Plex Mono", monospace;         /* medidas de planos */
-
-  --pm-fs-h1: 1.75rem;
-  --pm-fs-h2: 1.25rem;
-  --pm-fs-body: 0.95rem;
-  --pm-fs-small: 0.8rem;
-
-  /* Layout */
-  --pm-sidebar-w: 240px;
-  --pm-panel-w: 240px;
-  --pm-gap: 24px;
+  --pm-font-display: "Fraunces", Georgia, serif;
+  --pm-font-body: "Inter", sans-serif;
 }
 
-/* ---------- 2. RESET BÁSICO ---------- */
-*, *::before, *::after { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: var(--pm-font-body);
-  font-size: var(--pm-fs-body);
-  color: var(--pm-ink-900);
   background: var(--pm-cream-100);
+  color: #232323;
 }
 
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-
-/* ---------- 3. LAYOUT GENERAL ---------- */
-.pm-app {
-  display: grid;
-  grid-template-columns: var(--pm-sidebar-w) 1fr var(--pm-panel-w);
-  grid-template-rows: auto 1fr auto;
-  grid-template-areas:
-    "header header header"
-    "sidebar canvas panel"
-    "footer footer footer";
-  min-height: 100vh;
-}
-
-/* ---------- 4. HEADER ---------- */
-.pm-header {
-  grid-area: header;
+/* HEADER - tu header */
+header {
   background: var(--pm-navy-900);
   color: var(--pm-white);
+  padding: 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 18px 32px;
+  gap: 12px;
 }
 
-.pm-header__logo {
-  width: 42px;
-  height: 42px;
+header h1 {
+  font-family: var(--pm-font-display);
+  color: var(--pm-gold-500);
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+header img {
   border-radius: 50%;
   border: 2px solid var(--pm-gold-500);
-  display: grid;
-  place-items: center;
-  background: var(--pm-navy-800);
 }
 
-.pm-header__title {
-  font-family: var(--pm-font-display);
-  font-weight: 600;
-  font-size: var(--pm-fs-h1);
-  color: var(--pm-gold-500);
-  letter-spacing: 0.01em;
-}
-
-/* toolbar superior (Editar / Animar / Posición) */
-.pm-toolbar {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  padding: 10px 32px;
-  background: var(--pm-navy-800);
-  color: var(--pm-cream-50);
-  font-size: var(--pm-fs-small);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.pm-toolbar__item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0.85;
-  transition: opacity 0.15s ease;
-}
-.pm-toolbar__item:hover { opacity: 1; }
-
-.pm-toolbar__icon-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--pm-radius-sm);
-  display: grid;
-  place-items: center;
-  color: var(--pm-cream-50);
-}
-.pm-toolbar__icon-btn:hover { background: rgba(255,255,255,0.08); }
-
-/* ---------- 5. SIDEBAR ---------- */
-.pm-sidebar {
-  grid-area: sidebar;
-  background: var(--pm-navy-900);
-  color: var(--pm-cream-50);
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.pm-sidebar__item {
-  padding: 12px 14px;
-  border-radius: var(--pm-radius-sm);
-  font-family: var(--pm-font-display);
-  font-size: 1.05rem;
-  color: var(--pm-gold-500);
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-
-.pm-sidebar__item:hover {
-  background: rgba(201, 168, 118, 0.12);
-}
-
-.pm-sidebar__item--active {
-  background: var(--pm-gold-500);
-  color: var(--pm-navy-900);
-  font-weight: 600;
-}
-
-/* mascota + chat asistente */
-.pm-assistant {
-  margin-top: auto;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.pm-assistant__avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.pm-assistant__avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.pm-assistant__bubble {
-  background: var(--pm-white);
-  color: var(--pm-ink-900);
-  border-radius: var(--pm-radius-md);
-  box-shadow: var(--pm-shadow-md);
-  padding: 14px 16px;
-  width: 200px;
-  position: relative;
-}
-
-.pm-assistant__bubble::after {
-  content: "";
-  position: absolute;
-  left: -6px;
-  bottom: 18px;
-  width: 12px;
-  height: 12px;
-  background: var(--pm-white);
-  transform: rotate(45deg);
-}
-
-.pm-assistant__prompt {
-  font-family: var(--pm-font-display);
-  font-size: var(--pm-fs-body);
-  margin: 0 0 10px;
-}
-
-.pm-assistant__input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--pm-line);
-  border-radius: var(--pm-radius-sm);
-  padding: 6px 8px;
-}
-
-.pm-assistant__input-row input {
-  border: none;
-  outline: none;
-  flex: 1;
-  font-size: var(--pm-fs-small);
-}
-
-.pm-assistant__send {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--pm-navy-900);
-  color: var(--pm-gold-500);
-  display: grid;
-  place-items: center;
-}
-
-/* ---------- 6. CANVAS (área del plano) ---------- */
-.pm-canvas {
-  grid-area: canvas;
-  background: var(--pm-cream-50);
-  padding: var(--pm-gap);
-  display: grid;
-  place-items: center;
-}
-
-.pm-canvas__sheet {
-  background: var(--pm-white);
-  border: 1px solid var(--pm-line);
-  border-radius: var(--pm-radius-sm);
-  box-shadow: var(--pm-shadow-sm);
-  padding: 32px;
-  max-width: 100%;
-}
-
-/* medidas y cotas del dibujo técnico */
-.pm-dimension {
-  font-family: var(--pm-font-mono);
-  font-size: 0.7rem;
-  fill: var(--pm-ink-600);
-  stroke: none;
-}
-
-.pm-canvas__zoom {
-  position: absolute;
-  bottom: 16px;
-  right: 32px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: var(--pm-fs-small);
-  color: var(--pm-ink-600);
-}
-
-/* ---------- 7. PANEL DERECHO (acciones) ---------- */
-.pm-panel {
-  grid-area: panel;
-  background: var(--pm-cream-100);
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.pm-btn-panel {
-  width: 100%;
-  padding: 14px 20px;
-  background: var(--pm-white);
-  border: 1px solid var(--pm-line);
-  border-radius: var(--pm-radius-md);
-  box-shadow: var(--pm-shadow-sm);
-  font-weight: 600;
-  font-size: var(--pm-fs-body);
-  color: var(--pm-navy-900);
-  text-align: center;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-
-.pm-btn-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--pm-shadow-md);
-  background: var(--pm-cream-50);
-}
-
-.pm-btn-panel:focus-visible {
-  outline: none;
-  box-shadow: var(--pm-shadow-focus);
-}
-
-.pm-btn-panel--primary {
-  background: var(--pm-gold-500);
-  color: var(--pm-navy-900);
-  border-color: var(--pm-gold-600);
-}
-.pm-btn-panel--primary:hover { background: var(--pm-gold-600); }
-
-/* ---------- 8. FOOTER / REDES ---------- */
-.pm-footer {
-  grid-area: footer;
-  background: var(--pm-navy-900);
-  color: var(--pm-cream-50);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 32px;
-}
-
-.pm-footer__handle {
-  font-family: var(--pm-font-display);
-  color: var(--pm-gold-500);
-  font-size: var(--pm-fs-body);
-}
-
-.pm-footer__social {
+/* NAV - tu nav */
+nav {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
 }
 
-.pm-footer__social svg {
-  width: 22px;
-  height: 22px;
-  color: var(--pm-cream-50);
-  transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.pm-footer__social a:hover svg {
+nav a {
   color: var(--pm-gold-500);
-  transform: translateY(-2px);
+  text-decoration: none;
+  font-family: var(--pm-font-display);
+  padding: 8px 12px;
+  border-radius: 6px;
 }
 
-/* ---------- 9. FILMSTRIP DE PROYECTOS ---------- */
-.pm-filmstrip {
-  display: flex;
-  gap: 12px;
-  padding: 16px 32px;
-  background: var(--pm-cream-50);
-  border-top: 1px solid var(--pm-line);
-  overflow-x: auto;
+nav a:hover {
+  background: rgba(201,168,118,0.15);
 }
 
-.pm-filmstrip__item {
-  flex: 0 0 auto;
-  width: 140px;
-  border-radius: var(--pm-radius-sm);
-  overflow: hidden;
-  border: 2px solid transparent;
-  cursor: pointer;
-  position: relative;
-  transition: border-color 0.15s ease;
+/* MAIN - tu main */
+main {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 16px;
 }
 
-.pm-filmstrip__item img {
-  width: 100%;
-  display: block;
+section {
+  background: var(--pm-white);
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
 }
 
-.pm-filmstrip__item--active {
-  border-color: var(--pm-gold-500);
-}
-
-.pm-filmstrip__index {
-  position: absolute;
-  bottom: 4px;
-  left: 6px;
-  font-family: var(--pm-font-mono);
-  font-size: var(--pm-fs-small);
+section h2 {
+  font-family: var(--pm-font-display);
   color: var(--pm-navy-900);
-  background: rgba(255,255,255,0.85);
-  padding: 1px 6px;
-  border-radius: 4px;
+  margin-top: 0;
+  border-bottom: 2px solid var(--pm-gold-500);
+  padding-bottom: 8px;
+  display: inline-block;
 }
 
-/* ---------- 10. RESPONSIVE ---------- */
-@media (max-width: 960px) {
-  .pm-app {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "header"
-      "canvas"
-      "sidebar"
-      "panel"
-      "footer";
-  }
-  .pm-sidebar, .pm-panel {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .pm-btn-panel { width: auto; flex: 1 1 45%; }
+/* Tus ids */
+#home p {
+  line-height: 1.6;
+  color: #5c5c5c;
 }
 
-@media (max-width: 600px) {
-  .pm-header {
-    padding: 12px 16px;
-    gap: 8px;
-  }
-  .pm-header__logo { width: 32px; height: 32px; }
-  .pm-header__title { font-size: 1.2rem; }
-
-  .pm-toolbar {
-    padding: 8px 16px;
-    gap: 14px;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  .pm-sidebar, .pm-panel {
-    padding: 16px;
-    gap: 8px;
-  }
-  .pm-sidebar__item {
-    font-size: 0.9rem;
-    padding: 10px 12px;
-  }
-
-  .pm-btn-panel {
-    flex: 1 1 100%;
-    padding: 12px 16px;
-    font-size: var(--pm-fs-small);
-  }
-
-  .pm-assistant {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .pm-assistant__bubble { width: 100%; }
-
-  .pm-canvas { padding: 12px; }
-  .pm-canvas__sheet { padding: 16px; }
-
-  .pm-footer {
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px 16px;
-    text-align: center;
-  }
-
-  .pm-filmstrip__item { width: 100px; }
-}
-
-/* ---------- 11. ACCESIBILIDAD ---------- */
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
-}
-
-:focus-visible {
-  outline: none;
-  box-shadow: var(--pm-shadow-focus);
+#productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
