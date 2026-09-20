@@ -106,3 +106,10 @@ def delete(producto_id: int):
 
     db.productos.remove(producto)
     return True
+
+
+def list_categorias():
+    return [
+        {"id": categoria.id, "nombre": categoria.nombre}
+        for categoria in db.categorias
+    ]
