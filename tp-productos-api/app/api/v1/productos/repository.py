@@ -1,12 +1,15 @@
 from app.core import db
 from app.models import Producto
 
+
 def _find_categoria(categoria_id: int):
     return next(
         (categoria for categoria in db.categorias
          if categoria.id == categoria_id),
         None
     )
+
+
 def _to_dict(producto: Producto):
     categoria = _find_categoria(producto.categoria_id)
 
@@ -21,8 +24,21 @@ def _to_dict(producto: Producto):
             "nombre": categoria.nombre,
         } if categoria else None,
     }
-def list_productos():
-    return [_to_dict(producto) for producto in db.productos]
+
+
+def list_productos(query: str | None = None, categoria_id: int | None = None):
+    productos = db.productos
+
+    if query is not None:
+        texto = query.lower()
+        productos = [p for p in productos if texto in p.nombre.lower()]
+
+    if categoria_id is not None:
+        productos = [p for p in productos if p.categoria_id == categoria_id]
+
+    return [_to_dict(p) for p in productos]
+
+
 def get_by_id(producto_id: int):
     producto = next(
         (producto for producto in db.productos
@@ -34,14 +50,8 @@ def get_by_id(producto_id: int):
         return None
 
     return _to_dict(producto)
-def search_by_nombre(query: str):
-    query = query.lower()
 
-    return [
-        _to_dict(producto)
-        for producto in db.productos
-        if query in producto.nombre.lower()
-    ]
+
 def ensure_categoria(categoria_id: int):
     categoria = _find_categoria(categoria_id)
 
@@ -49,6 +59,8 @@ def ensure_categoria(categoria_id: int):
         return False, f"La categoria {categoria_id} no existe"
 
     return True, None
+
+
 def create(data):
     datos = data.model_dump(exclude_unset=True)
 
@@ -64,13 +76,11 @@ def create(data):
     db.productos.append(nuevo_producto)
 
     return _to_dict(nuevo_producto)
+
+
 def update(producto_id: int, data):
     producto = next(
-        (
-            producto
-            for producto in db.productos
-            if producto.id == producto_id
-        ),
+        (p for p in db.productos if p.id == producto_id),
         None
     )
 
@@ -78,24 +88,29 @@ def update(producto_id: int, data):
         return None
 
     cambios = data.model_dump(exclude_unset=True)
+    cambios = {k: v for k, v in cambios.items() if v is not None}
 
     for campo, valor in cambios.items():
         setattr(producto, campo, valor)
 
     return _to_dict(producto)
+
+
 def delete(producto_id: int):
     producto = next(
-        (
-            producto
-            for producto in db.productos
-            if producto.id == producto_id and producto.activo
-        ),
+        (p for p in db.productos if p.id == producto_id),
         None
     )
 
     if producto is None:
         return None
 
-    producto.activo = False
+    db.productos.remove(producto)
+    return True
 
-    return _to_dict(producto)
+
+def list_categorias():
+    return [
+        {"id": categoria.id, "nombre": categoria.nombre}
+        for categoria in db.categorias
+    ]
