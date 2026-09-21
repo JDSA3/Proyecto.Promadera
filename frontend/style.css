@@ -98,3 +98,26 @@ section h2 {
   gap: 16px;
   margin-top: 16px;
 }
+.filtros {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.filtros input,
+.filtros select {
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid #c9b99a;
+    border-radius: 6px;
+}
+
+.filtros input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.mensaje {
+    grid-column: 1 / -1;
+}
