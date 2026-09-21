@@ -1,6 +1,5 @@
 const API_BASE = "http://127.0.0.1:8000/api/v1";
 
-// IDs de tu index.html (ajústalos si los tuyos son distintos)
 const contenedor = document.getElementById("productos");
 const inputBuscar = document.getElementById("buscador");
 const selectCategoria = document.getElementById("categoria");
@@ -23,6 +22,9 @@ function mostrarProductos(productos) {
     .map(
       (p) => `
       <div class="producto">
+        <img src="imagenes/${p.id}.webp"
+             alt="${p.nombre}"
+             onerror="this.onerror=null; this.src='logo.png'">
         <h3>${p.nombre}</h3>
         <p class="categoria">${p.categoria.nombre}</p>
         <p class="precio">${formatearPrecio(p.precio)}</p>

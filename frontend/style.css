@@ -121,3 +121,10 @@ section h2 {
 .mensaje {
     grid-column: 1 / -1;
 }
+.producto img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
