@@ -6,6 +6,6 @@ class Producto:
     id: int
     nombre: str
     precio: float
+    stock: int
     categoria_id: int
-    stock: int = 0
     activo: bool = True

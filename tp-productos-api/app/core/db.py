@@ -8,13 +8,13 @@ categorias: list[Categoria] = [
 ]
 
 productos: list[Producto] = [
-    Producto(id=1, nombre="Placa melamina MDF 18mm 1.83x2.60m", precio=95700, categoria_id=1),
-    Producto(id=2, nombre="Placa melamina MDF 15mm 260x183cm", precio=90000.0, categoria_id=1),
-    Producto(id=3, nombre="Bisagra bayoneta 35mm", precio=1292.0, categoria_id=2),
-    Producto(id=4, nombre="Corredera telescópica 45cm", precio=7750.0, categoria_id=2),
-    Producto(id=5, nombre="Tapacanto metalico 2,5m ", precio=10421.0, categoria_id=3),
-    Producto(id=6, nombre="Disco para Sierra Circular 7 1/4 24 Dientes TCT Kwb", precio=14432.0, categoria_id=3),
-    Producto(id=7, nombre="Sierra Circular 184 Mm 1400 W 5300 Rpm Black & Decker", precio=138.120, categoria_id=4),
+    Producto(id=1, nombre="Placa melamina MDF 18mm 1.83x2.60m", precio=95700, stock=15, categoria_id=1),
+    Producto(id=2, nombre="Placa melamina MDF 15mm 260x183cm", precio=90000.0, stock=10, categoria_id=1),
+    Producto(id=3, nombre="Bisagra bayoneta 35mm", precio=1292.0, stock=200, categoria_id=2),
+    Producto(id=4, nombre="Corredera telescópica 45cm", precio=7750.0, stock=40, categoria_id=2),
+    Producto(id=5, nombre="Tapacanto metalico 2,5m ", precio=10421.0, stock=30, categoria_id=3),
+    Producto(id=6, nombre="Disco para Sierra Circular 7 1/4 24 Dientes TCT Kwb", precio=14432.0, stock=25, categoria_id=3),
+    Producto(id=7, nombre="Sierra Circular 184 Mm 1400 W 5300 Rpm Black & Decker", precio=138120.0, stock=8, categoria_id=4),
 ]
 
 _ultimo_id_producto: int = len(productos)

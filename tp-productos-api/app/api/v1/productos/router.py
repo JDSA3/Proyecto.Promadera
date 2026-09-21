@@ -21,19 +21,7 @@ def listar_productos(
     query: str | None = None,
     categoria_id: int | None = None
 ):
-    if query is not None:
-        productos = repository.search_by_nombre(query)
-    else:
-        productos = repository.list_productos()
-
-    if categoria_id is not None:
-        productos = [
-            producto
-            for producto in productos
-            if producto["categoria"]["id"] == categoria_id
-        ]
-
-    return productos
+    return repository.list_productos(query, categoria_id)
 
 
 @router.get(
@@ -106,7 +94,6 @@ def actualizar_producto(
             )
     return repository.update(producto_id, datos)
 
-
 @router.delete(
     "/{producto_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -114,9 +101,11 @@ def actualizar_producto(
     description="Elimina (desactiva) un producto existente por su ID.",
     responses={404: {"description": "Producto no encontrado"}},
 )
+
+
 def eliminar_producto(producto_id: int):
-    producto = repository.delete(producto_id)
-    if producto is None:
+    eliminado = repository.delete(producto_id)
+    if eliminado is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Producto {producto_id} no encontrado",
