@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.core.db import categorias
+from app.api.v1.productos import repository
 from app.api.v1.productos.schemas import CategoriaOut
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
@@ -13,4 +13,4 @@ router = APIRouter(prefix="/categorias", tags=["Categorias"])
     description="Devuelve la lista completa de categorias disponibles.",
 )
 def listar_categorias():
-    return categorias
+    return repository.list_categorias()
