@@ -83,7 +83,7 @@ def actualizar_producto(
             detail=f"Producto {producto_id} no encontrado",
         )
     cambios = datos.model_dump(exclude_unset=True)
-    if "categoria_id" in cambios:
+    if cambios.get("categoria_id") is not None:
         existe, mensaje = repository.ensure_categoria(
             cambios["categoria_id"]
         )
