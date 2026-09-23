@@ -84,11 +84,12 @@ Está planificada pero todavía **no está implementada**. El único cambio ser�
 
 | Método | Ruta | Descripción | Código éxito | Códigos error |
 |---|---|---|---|---|
-| GET | `/productos` | Listar (con filtros `query`, `categoria_id`) | 200 | — |
-| GET | `/productos/{id}` | Obtener por ID | 200 | 404 |
-| POST | `/productos` | Crear producto | 201 | 400, 422 |
-| PUT | `/productos/{id}` | Actualizar (parcial) | 200 | 404, 400 |
-| DELETE | `/productos/{id}` | Eliminar (baja) | 204 | 404 |
+| GET | `/api/v1/productos` | Listar (con filtros `query`, `categoria_id`) | 200 | — |
+| GET | `/api/v1/productos/{id}` | Obtener por ID | 200 | 404 |
+| POST | `/api/v1/productos` | Crear producto | 201 | 400, 422 |
+| PUT | `/api/v1/productos/{id}` | Actualizar (parcial) | 200 | 404, 400 |
+| DELETE | `/api/v1/productos/{id}` | Eliminar (baja) | 204 | 404 |
+| GET | `/api/v1/categorias` | Listar categorías | 200 | — |
 
 ## Main: montar todo
 
@@ -97,6 +98,30 @@ Se instanció `FastAPI` con `title` y `description`, se agregó un `GET /` con m
 **Captura de Swagger UI** mostrando los endpoints agrupados bajo la tag "Productos":
 
 ![Swagger UI - Productos](docs/capturas/07-swagger-ui.png)
+
+## Frontend
+
+Interfaz web simple en HTML, CSS y JavaScript puro, en la carpeta `frontend/`:
+
+```
+frontend/
+├── index.html      # estructura de la página
+├── style.css        # estilos
+├── app.js            # lógica: fetch a la API, búsqueda, filtro y desplegable de categorías
+├── logo.png          # imagen de respaldo si un producto no tiene foto
+└── imagenes/         # fotos de productos
+```
+
+Muestra los productos activos en tarjetas con nombre, categoría, precio y stock. Consume la API con `fetch`:
+
+- Carga las categorías desde `GET /api/v1/categorias` para llenar el desplegable.
+- Busca con `?query=` (con una pequeña espera después de dejar de escribir) y filtra con `?categoria_id=`, ambos contra `GET /api/v1/productos`.
+- Muestra un mensaje si no hay resultados o si la API no responde.
+
+Para levantarlo:
+
+1. Iniciar el backend (`fastapi dev app/main.py`, ver arriba). Ya tiene CORS habilitado.
+2. Abrir `frontend/index.html` en el navegador (o usar una extensión como Live Server de VSCode).
 
 ## Pruebas en Swagger UI
 
