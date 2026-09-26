@@ -1,56 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ProMadera</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <h1>Bienvenidos a Pro Madera</h1>
-        <img src="logo.png" alt="Logo" width="100">
-        <nav>
-            <a href="#home">Inicio</a>
-            <a href="#diseño">Diseño</a>
-            <a href="#proyectos">Mis Proyectos</a>
-            <a href="#insumos">Productos</a>
-            <a href="#favoritos">Favoritos</a>
-            <a href="#localizacion">Localizacion</a>
-        </nav>     
-    </header>
-    <main>    
-        <section>
-            <section id="home">
-                <h2>Inicio</h2>
-                <p>Promadera es la plataforma inteligente diseñada para carpinteros y armadores que necesitan diseñar, presupuestar y generar despieces precisos de materiales, creando planos que se guardan como proyectos para brindar accesibilidad y organización total. Además, ofrece un espacio estratégico para que los corralones publiquen sus productos y se posicionen en el mercado, conectando la oferta con la demanda en un entorno digital moderno y eficiente.</p>
-            </section>
-            <section id="diseño">
-                <h2>Diseño</h2>
-            </section>
-            <section id="proyectos">
-                <h2>Mis Proyectos</h2>
-            </section>
-            <section id="insumos">
-         <h2>Productos</h2>
-
-         <div class="filtros">
-         <input type="text" id="buscador" placeholder="Buscar producto...">
-         <select id="categoria">
-            <option value="">Todas las categorías</option>
-         </select>
-     </div>
-
-    <div id="productos"></div>
-</section>
-            <section id="favoritos">
-                <h2>Favoritos</h2>
-            </section>
-            <section id="localizacion">
-                <h2>Localizacion</h2>
-            </section>
-            </section>
-    </main>
-    <script src="app.js"></script>  
-</body>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
