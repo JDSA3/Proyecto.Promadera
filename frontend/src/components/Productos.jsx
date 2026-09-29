@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { obtenerCategorias, obtenerProductos } from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
 
-export default function Productos() {
+export default function Productos({favoritos, onAlternarFavorito}) {
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState(null); // null = todavía no cargó
   const [error, setError] = useState(false);
@@ -57,7 +57,14 @@ export default function Productos() {
     if (activos.length === 0) {
       return <p className="mensaje">No se encontraron productos con esa búsqueda.</p>;
     }
-    return activos.map((p) => <ProductoCard key={p.id} producto={p} />);
+        return activos.map((p) => (
+      <ProductoCard
+        key={p.id}
+        producto={p}
+        esFavorito={favoritos.includes(p.id)}
+        onAlternarFavorito={onAlternarFavorito}
+      />
+    ));
   }
 
   return (
