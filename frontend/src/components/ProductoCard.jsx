@@ -2,9 +2,22 @@ function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
-export default function ProductoCard({ producto }) {
+export default function ProductoCard({ producto, esFavorito, onAlternarFavorito }) {
   return (
     <div className="producto">
+      <button
+        type="button"
+        className={`btn-favorito${esFavorito ? " activo" : ""}`}
+        onClick={() => onAlternarFavorito(producto.id)}
+        aria-pressed={esFavorito}
+        aria-label={
+          esFavorito
+            ? `Quitar ${producto.nombre} de favoritos`
+            : `Agregar ${producto.nombre} a favoritos`
+        }
+      >
+        {esFavorito ? "♥" : "♡"}
+      </button>
       <img
         src={`/imagenes/${producto.id}.webp`}
         alt={producto.nombre}
