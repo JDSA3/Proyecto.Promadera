@@ -128,3 +128,40 @@ section h2 {
     border-radius: 6px;
     margin-bottom: 12px;
 }
+/* FAVORITOS */
+.producto {
+  position: relative;
+}
+
+.btn-favorito {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--pm-line);
+  border-radius: 50%;
+  background: var(--pm-white);
+  color: var(--pm-navy-900);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn-favorito:hover {
+  border-color: var(--pm-gold-500);
+}
+
+.btn-favorito.activo {
+  background: var(--pm-navy-900);
+  color: var(--pm-gold-500);
+  border-color: var(--pm-navy-900);
+}
+
+#lista-favoritos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
