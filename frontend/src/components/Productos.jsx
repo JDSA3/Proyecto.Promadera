@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import { obtenerCategorias, obtenerProductos } from "../api.js";
+import {
+  obtenerCategorias,
+  obtenerProductos,
+  crearProducto,
+  editarProducto,
+  eliminarProducto,
+} from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
+import ProductoForm from "./ProductoForm.jsx";
 
 export default function Productos() {
   const [categorias, setCategorias] = useState([]);
@@ -10,6 +17,11 @@ export default function Productos() {
   const [busqueda, setBusqueda] = useState("");
   const [busquedaEspera, setBusquedaEspera] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
+
+  // CRUD
+  const [editando, setEditando] = useState(null);
+  const [errorCrud, setErrorCrud] = useState("");
+  const [recarga, setRecarga] = useState(0); // al sumarle 1, se vuelve a pedir la lista
 
   // Cargar categorías una sola vez, al montar el componente
   useEffect(() => {
@@ -24,7 +36,7 @@ export default function Productos() {
     return () => clearTimeout(temporizador);
   }, [busqueda]);
 
-  // Cargar productos al inicio y cada vez que cambia la búsqueda o la categoría
+  // Cargar productos al inicio y cada vez que cambia la búsqueda, la categoría o "recarga"
   useEffect(() => {
     let cancelado = false;
     obtenerProductos({ query: busquedaEspera, categoriaId })
@@ -41,7 +53,33 @@ export default function Productos() {
     return () => {
       cancelado = true;
     };
-  }, [busquedaEspera, categoriaId]);
+  }, [busquedaEspera, categoriaId, recarga]);
+
+  async function handleSubmit(data) {
+    try {
+      if (editando) {
+        await editarProducto(editando.id, data);
+        setEditando(null);
+      } else {
+        await crearProducto(data);
+      }
+      setErrorCrud("");
+      setRecarga((n) => n + 1);
+    } catch (err) {
+      setErrorCrud(err.message);
+    }
+  }
+
+  async function handleEliminar(id) {
+    if (!window.confirm("¿Eliminar este producto?")) return;
+    try {
+      await eliminarProducto(id);
+      setErrorCrud("");
+      setRecarga((n) => n + 1);
+    } catch (err) {
+      setErrorCrud(err.message);
+    }
+  }
 
   const activos = productos ? productos.filter((p) => p.activo) : [];
 
@@ -57,12 +95,26 @@ export default function Productos() {
     if (activos.length === 0) {
       return <p className="mensaje">No se encontraron productos con esa búsqueda.</p>;
     }
-    return activos.map((p) => <ProductoCard key={p.id} producto={p} />);
+    return activos.map((p) => (
+      <div key={p.id}>
+        <ProductoCard producto={p} />
+        <button onClick={() => setEditando(p)}>Editar</button>
+        <button onClick={() => handleEliminar(p.id)}>Eliminar</button>
+      </div>
+    ));
   }
 
   return (
     <section id="insumos">
       <h2>Productos</h2>
+
+      <ProductoForm
+        producto={editando}
+        categorias={categorias}
+        onSubmit={handleSubmit}
+        onCancel={() => setEditando(null)}
+      />
+      {errorCrud && <p style={{ color: "red" }}>{errorCrud}</p>}
 
       <div className="filtros">
         <input
