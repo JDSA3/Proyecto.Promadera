@@ -1,22 +1,16 @@
-from app.core import db
-from app.models import Producto
-
-
-def _find_categoria(categoria_id: int):
-    return next(
-        (categoria for categoria in db.categorias
-         if categoria.id == categoria_id),
-        None
-    )
-
-
-def _to_dict(producto: Producto):
-    categoria = _find_categoria(producto.categoria_id)
-
+from sqlalchemy import select
+ 
+from poc_postgresql.database import SessionLocal
+from poc_postgresql.models import CategoriaDB, ProductoDB
+ 
+ 
+def _to_dict(producto: ProductoDB):
+    categoria = producto.categoria
+ 
     return {
         "id": producto.id,
         "nombre": producto.nombre,
-        "precio": producto.precio,
+        "precio": float(producto.precio),
         "stock": producto.stock,
         "activo": producto.activo,
         "categoria": {
@@ -24,93 +18,95 @@ def _to_dict(producto: Producto):
             "nombre": categoria.nombre,
         } if categoria else None,
     }
-
-
+ 
+ 
 def list_productos(query: str | None = None, categoria_id: int | None = None):
-    productos = db.productos
-
+    consulta = select(ProductoDB).order_by(ProductoDB.id)
+ 
     if query is not None:
-        texto = query.lower()
-        productos = [p for p in productos if texto in p.nombre.lower()]
-
+        consulta = consulta.where(ProductoDB.nombre.ilike(f"%{query}%"))
+ 
     if categoria_id is not None:
-        productos = [p for p in productos if p.categoria_id == categoria_id]
-
-    return [_to_dict(p) for p in productos]
-
-
+        consulta = consulta.where(ProductoDB.categoria_id == categoria_id)
+ 
+    with SessionLocal() as session:
+        return [_to_dict(p) for p in session.scalars(consulta)]
+ 
+ 
 def get_by_id(producto_id: int):
-    producto = next(
-        (producto for producto in db.productos
-         if producto.id == producto_id),
-        None
-    )
-
-    if producto is None:
-        return None
-
-    return _to_dict(producto)
-
-
+    with SessionLocal() as session:
+        producto = session.get(ProductoDB, producto_id)
+ 
+        if producto is None:
+            return None
+ 
+        return _to_dict(producto)
+ 
+ 
 def ensure_categoria(categoria_id: int):
-    categoria = _find_categoria(categoria_id)
-
+    with SessionLocal() as session:
+        categoria = session.get(CategoriaDB, categoria_id)
+ 
     if categoria is None:
         return False, f"La categoria {categoria_id} no existe"
-
+ 
     return True, None
-
-
+ 
+ 
 def create(data):
     datos = data.model_dump(exclude_unset=True)
-
-    nuevo_producto = Producto(
-        id=db.bump_producto_id(),
-        nombre=datos["nombre"],
-        precio=datos["precio"],
-        stock=datos["stock"],
-        categoria_id=datos["categoria_id"],
-        activo=True,
-    )
-
-    db.productos.append(nuevo_producto)
-
-    return _to_dict(nuevo_producto)
-
-
+ 
+    with SessionLocal() as session:
+        nuevo_producto = ProductoDB(
+            nombre=datos["nombre"],
+            precio=datos["precio"],
+            stock=datos["stock"],
+            categoria_id=datos["categoria_id"],
+            activo=True,
+        )
+        session.add(nuevo_producto)
+        session.commit()
+        session.refresh(nuevo_producto)
+ 
+        return _to_dict(nuevo_producto)
+ 
+ 
 def update(producto_id: int, data):
-    producto = next(
-        (p for p in db.productos if p.id == producto_id),
-        None
-    )
-
-    if producto is None:
-        return None
-
-    cambios = data.model_dump(exclude_unset=True)
-    cambios = {k: v for k, v in cambios.items() if v is not None}
-
-    for campo, valor in cambios.items():
-        setattr(producto, campo, valor)
-
-    return _to_dict(producto)
-
-
+    with SessionLocal() as session:
+        producto = session.get(ProductoDB, producto_id)
+ 
+        if producto is None:
+            return None
+ 
+        cambios = data.model_dump(exclude_unset=True)
+        cambios = {k: v for k, v in cambios.items() if v is not None}
+ 
+        for campo, valor in cambios.items():
+            setattr(producto, campo, valor)
+ 
+        session.commit()
+        session.refresh(producto)
+ 
+        return _to_dict(producto)
+ 
+ 
 def delete(producto_id: int):
-    producto = next(
-        (p for p in db.productos if p.id == producto_id),
-        None
-    )
-
-    if producto is None:
-        return None
-
-    db.productos.remove(producto)
-    return True
-
-
+    with SessionLocal() as session:
+        producto = session.get(ProductoDB, producto_id)
+ 
+        if producto is None:
+            return None
+ 
+        session.delete(producto)
+        session.commit()
+        return True
+ 
+ 
 def list_categorias():
-    return [
-        {"id": categoria.id, "nombre": categoria.nombre}
-        for categoria in db.categorias
-    ]
+    with SessionLocal() as session:
+        categorias = session.scalars(select(CategoriaDB).order_by(CategoriaDB.id))
+        return [
+            {"id": categoria.id, "nombre": categoria.nombre}
+            for categoria in categorias
+        ]
+ 
