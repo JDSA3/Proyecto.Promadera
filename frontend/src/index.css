@@ -187,3 +187,51 @@ section h2 {
   color: var(--pm-navy-900);
   border-color: var(--pm-gold-500);
 }
+
+/* CONTACTO */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-family: var(--pm-font-display);
+  color: var(--pm-navy-900);
+}
+
+.campo input,
+.campo textarea {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #c9b99a;
+  border-radius: 6px;
+  font-family: var(--pm-font-body);
+}
+
+.error-campo {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.mensaje-exito {
+  background: rgba(201, 168, 118, 0.15);
+  border: 1px solid var(--pm-gold-500);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.formulario button {
+  align-self: flex-start;
+  cursor: pointer;
+  font-size: 1rem;
+}

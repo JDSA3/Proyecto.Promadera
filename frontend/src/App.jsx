@@ -6,6 +6,7 @@ import Productos from "./components/Productos.jsx";
 import Favoritos from "./components/Favoritos.jsx";
 import Localizacion from "./components/Localizacion.jsx";
 import useFavoritos from "./useFavoritos.js";
+import Contacto from "./components/Contacto.jsx";
 
 export default function App() {
   const { favoritos, alternarFavorito } = useFavoritos();
@@ -20,6 +21,7 @@ export default function App() {
           <Proyectos />
           <Productos favoritos={favoritos} onAlternarFavorito={alternarFavorito} />
           <Favoritos favoritos={favoritos} onAlternarFavorito={alternarFavorito} />
+          <Contacto />
           <Localizacion />
         </section>
       </main>
