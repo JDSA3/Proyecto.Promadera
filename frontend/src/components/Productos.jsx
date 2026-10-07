@@ -95,19 +95,20 @@ export default function Productos({favoritos, onAlternarFavorito}) {
     if (activos.length === 0) {
       return <p className="mensaje">No se encontraron productos con esa búsqueda.</p>;
     }
-return activos.map((p) => (
-  <div key={p.id}>
+    return activos.map((p) => (
+    <div key={p.id} className="producto-item">
     <ProductoCard
       producto={p}
       esFavorito={favoritos.includes(p.id)}
       onAlternarFavorito={onAlternarFavorito}
     />
 
-    <button onClick={() => setEditando(p)}>Editar</button>
-    <button onClick={() => handleEliminar(p.id)}>Eliminar</button>
+    <div className="acciones-producto">
+      <button className="btn-editar" onClick={() => setEditando(p)}>Editar</button>
+      <button className="btn-eliminar" onClick={() => handleEliminar(p.id)}>Eliminar</button>
+    </div>
   </div>
-))
-;
+));
   }
 
   return (
