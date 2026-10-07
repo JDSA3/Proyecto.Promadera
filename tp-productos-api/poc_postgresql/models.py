@@ -1,4 +1,12 @@
-from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Integer, Numeric, String
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    true,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -26,7 +34,7 @@ class ProductoDB(Base):
     nombre: Mapped[str] = mapped_column(String(100), nullable=False)
     precio: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
     categoria_id: Mapped[int] = mapped_column(ForeignKey("categorias.id"), nullable=False)
 
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
