@@ -165,3 +165,158 @@ section h2 {
   gap: 16px;
   margin-top: 16px;
 }
+/* LOCALIZACION */
+.direccion {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+}
+
+.boton-mapa {
+  display: inline-block;
+  background: var(--pm-navy-900);
+  color: var(--pm-gold-500);
+  text-decoration: none;
+  font-family: var(--pm-font-display);
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-navy-900);
+}
+
+.boton-mapa:hover {
+  background: var(--pm-gold-500);
+  color: var(--pm-navy-900);
+  border-color: var(--pm-gold-500);
+}
+
+/* CONTACTO */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-family: var(--pm-font-display);
+  color: var(--pm-navy-900);
+}
+
+.campo input,
+.campo textarea {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #c9b99a;
+  border-radius: 6px;
+  font-family: var(--pm-font-body);
+}
+
+.error-campo {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.mensaje-exito {
+  background: rgba(201, 168, 118, 0.15);
+  border: 1px solid var(--pm-gold-500);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.formulario button {
+  align-self: flex-start;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* FORMULARIO DE PRODUCTO (crear/editar) */
+.formulario-producto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--pm-line);
+}
+
+.formulario-producto input,
+.formulario-producto select {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #c9b99a;
+  border-radius: 6px;
+  font-family: var(--pm-font-body);
+}
+
+.btn-crear,
+.btn-cancelar {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--pm-navy-900);
+  background: var(--pm-navy-900);
+  color: var(--pm-gold-500);
+  font-family: var(--pm-font-display);
+  cursor: pointer;
+}
+
+.btn-crear:hover,
+.btn-cancelar:hover {
+  background: var(--pm-gold-500);
+  color: var(--pm-navy-900);
+  border-color: var(--pm-gold-500);
+}
+
+.btn-cancelar {
+  background: var(--pm-white);
+  color: var(--pm-navy-900);
+}
+
+/* ACCIONES DE PRODUCTO (editar/eliminar) */
+.producto-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.acciones-producto {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-editar,
+.btn-eliminar {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: var(--pm-font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid var(--pm-line);
+}
+
+.btn-editar {
+  background: var(--pm-white);
+  color: var(--pm-navy-900);
+}
+
+.btn-editar:hover {
+  border-color: var(--pm-gold-500);
+}
+
+.btn-eliminar {
+  background: #fdecea;
+  color: #b3261e;
+  border-color: #f3c6c2;
+}
+
+.btn-eliminar:hover {
+  background: #f9d4d1;
+}

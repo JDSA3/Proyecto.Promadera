@@ -22,9 +22,8 @@ export default function ProductoForm({ producto, categorias, onSubmit, onCancel 
     });
     setForm(vacio);
   };
-
-  return (
-    <form onSubmit={handleSubmit}>
+    return (
+    <form onSubmit={handleSubmit} className="formulario-producto">
       <input name="nombre" placeholder="Nombre" value={form.nombre}
              onChange={handleChange} required />
       <input name="precio" type="number" step="0.01" placeholder="Precio"
@@ -38,8 +37,8 @@ export default function ProductoForm({ producto, categorias, onSubmit, onCancel 
           <option key={c.id} value={c.id}>{c.nombre}</option>
         ))}
       </select>
-      <button type="submit">{producto ? "Guardar cambios" : "Crear"}</button>
-      {producto && <button type="button" onClick={onCancel}>Cancelar</button>}
+      <button type="submit" className="btn-crear">{producto ? "Guardar cambios" : "Crear"}</button>
+      {producto && <button type="button" className="btn-cancelar" onClick={onCancel}>Cancelar</button>}
     </form>
   );
 }
