@@ -17,6 +17,16 @@ CREATE TABLE IF NOT EXISTS productos (
     CONSTRAINT ck_productos_stock_positivo  CHECK (stock >= 0)
 );
 
+CREATE TABLE IF NOT EXISTS usuarios (
+    id            SERIAL PRIMARY KEY,
+    nombre        VARCHAR(100) NOT NULL,
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol           VARCHAR(20)  NOT NULL,
+    activo        BOOLEAN      NOT NULL DEFAULT TRUE,
+    CONSTRAINT ck_usuarios_rol CHECK (rol IN ('cliente', 'proveedor'))
+);
+
 INSERT INTO categorias (id, nombre) VALUES
     (1, 'Maderas y Tableros'),
     (2, 'Herrajes'),
