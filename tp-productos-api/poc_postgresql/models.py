@@ -36,6 +36,7 @@ class ProductoDB(Base):
     stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
     categoria_id: Mapped[int] = mapped_column(ForeignKey("categorias.id"), nullable=False)
+    proveedor_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
 
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
 
