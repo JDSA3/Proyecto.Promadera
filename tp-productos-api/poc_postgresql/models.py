@@ -38,3 +38,17 @@ class ProductoDB(Base):
     categoria_id: Mapped[int] = mapped_column(ForeignKey("categorias.id"), nullable=False)
 
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
+
+
+class UsuarioDB(Base):
+    __tablename__ = "usuarios"
+    __table_args__ = (
+        CheckConstraint("rol IN ('cliente', 'proveedor')", name="ck_usuarios_rol"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    rol: Mapped[str] = mapped_column(String(20), nullable=False)
+    activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
