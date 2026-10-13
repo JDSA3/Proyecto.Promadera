@@ -10,6 +10,7 @@ class ProductoBase(BaseModel):
 class ProductoCreate(ProductoBase):
     stock: int = Field(ge=0)
     categoria_id: int = Field(ge=1)
+    proveedor_id: Optional[int] = Field(default=None, ge=1)
 
 
 class ProductoUpdate(BaseModel):
@@ -29,3 +30,4 @@ class ProductoResponse(ProductoBase):
     stock: int
     activo: bool
     categoria: CategoriaOut
+    proveedor_id: Optional[int] = None
