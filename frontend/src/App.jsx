@@ -7,9 +7,12 @@ import Favoritos from "./components/Favoritos.jsx";
 import Localizacion from "./components/Localizacion.jsx";
 import useFavoritos from "./useFavoritos.js";
 import Contacto from "./components/Contacto.jsx";
+import Auth from "./components/Auth.jsx";
+import useAuth from "./UseAuth.js";
 
 export default function App() {
   const { favoritos, alternarFavorito } = useFavoritos();
+  const { usuario, guardarSesion, cerrarSesion} = useAuth();
 
   return (
     <>
@@ -17,6 +20,7 @@ export default function App() {
       <main>
         <section>
           <Inicio />
+          <Auth usuario={usuario} onLogin={guardarSesion} onLogout={cerrarSesion} />
           <Diseno />
           <Proyectos />
           <Productos favoritos={favoritos} onAlternarFavorito={alternarFavorito} />
