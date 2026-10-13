@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from poc_postgresql.database import SessionLocal
-from poc_postgresql.models import CategoriaDB, ProductoDB
+from poc_postgresql.models import CategoriaDB, ProductoDB, UsuarioDB
 
 
 def _to_dict(producto: ProductoDB):
@@ -13,6 +13,7 @@ def _to_dict(producto: ProductoDB):
         "precio": float(producto.precio),
         "stock": producto.stock,
         "activo": producto.activo,
+        "proveedor_id": producto.proveedor_id,
         "categoria": {
             "id": categoria.id,
             "nombre": categoria.nombre,
@@ -57,6 +58,19 @@ def ensure_categoria(categoria_id: int):
     return True, None
 
 
+def ensure_proveedor(proveedor_id: int):
+    with SessionLocal() as session:
+        usuario = session.get(UsuarioDB, proveedor_id)
+
+        if usuario is None or not usuario.activo:
+            return False, f"El proveedor {proveedor_id} no existe"
+
+        if usuario.rol != "proveedor":
+            return False, f"El usuario {proveedor_id} no es un proveedor"
+
+    return True, None
+
+
 def create(data):
     datos = data.model_dump(exclude_unset=True)
 
@@ -66,6 +80,7 @@ def create(data):
             precio=datos["precio"],
             stock=datos["stock"],
             categoria_id=datos["categoria_id"],
+            proveedor_id=datos.get("proveedor_id"),
             activo=True,
         )
         session.add(nuevo_producto)

@@ -47,8 +47,8 @@ def obtener_producto(producto_id: int):
     response_model=ProductoResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear un producto",
-    description="Crea un nuevo producto. La categoria_id debe corresponder a una categoria existente.",
-    responses={400: {"description": "La categoria indicada no existe"}},
+    description="Crea un nuevo producto. La categoria_id debe corresponder a una categoria existente. El proveedor_id es opcional; si se envia, tiene que ser un usuario activo con rol proveedor.",
+    responses={400: {"description": "La categoria o el proveedor indicado no existe (o el usuario no es proveedor)"}},
 )
 def crear_producto(datos: ProductoCreate):
     existe, mensaje = repository.ensure_categoria(
@@ -59,6 +59,13 @@ def crear_producto(datos: ProductoCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=mensaje,
         )
+    if datos.proveedor_id is not None:
+        existe, mensaje = repository.ensure_proveedor(datos.proveedor_id)
+        if not existe:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=mensaje,
+            )
     return repository.create(datos)
 
 

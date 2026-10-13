@@ -6,17 +6,6 @@ CREATE TABLE IF NOT EXISTS categorias (
     nombre VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS productos (
-    id           SERIAL PRIMARY KEY,
-    nombre       VARCHAR(100)   NOT NULL,
-    precio       NUMERIC(12, 2) NOT NULL,
-    stock        INTEGER        NOT NULL DEFAULT 0,
-    activo       BOOLEAN        NOT NULL DEFAULT TRUE,
-    categoria_id INTEGER        NOT NULL REFERENCES categorias (id),
-    CONSTRAINT ck_productos_precio_positivo CHECK (precio >= 0),
-    CONSTRAINT ck_productos_stock_positivo  CHECK (stock >= 0)
-);
-
 CREATE TABLE IF NOT EXISTS usuarios (
     id            SERIAL PRIMARY KEY,
     nombre        VARCHAR(100) NOT NULL,
@@ -25,6 +14,18 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol           VARCHAR(20)  NOT NULL,
     activo        BOOLEAN      NOT NULL DEFAULT TRUE,
     CONSTRAINT ck_usuarios_rol CHECK (rol IN ('cliente', 'proveedor'))
+);
+
+CREATE TABLE IF NOT EXISTS productos (
+    id           SERIAL PRIMARY KEY,
+    nombre       VARCHAR(100)   NOT NULL,
+    precio       NUMERIC(12, 2) NOT NULL,
+    stock        INTEGER        NOT NULL DEFAULT 0,
+    activo       BOOLEAN        NOT NULL DEFAULT TRUE,
+    categoria_id INTEGER        NOT NULL REFERENCES categorias (id),
+    proveedor_id INTEGER        REFERENCES usuarios (id),  -- opcional: puede ser NULL
+    CONSTRAINT ck_productos_precio_positivo CHECK (precio >= 0),
+    CONSTRAINT ck_productos_stock_positivo  CHECK (stock >= 0)
 );
 
 INSERT INTO categorias (id, nombre) VALUES
