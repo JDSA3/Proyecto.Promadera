@@ -11,6 +11,7 @@ export default function Header() {
         <a href="#favoritos">Favoritos</a>
         <a href="#contacto">Contacto</a>
         <a href="#localizacion">Localizacion</a>
+        <a href="#cuenta">Mi cuenta</a>
       </nav>
     </header>
   );
