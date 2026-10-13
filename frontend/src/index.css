@@ -383,3 +383,33 @@ section h2 {
   height: 100%;
   border: 0;
 }
+
+.modal-seccion {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pm-line);
+}
+
+.modal-seccion h3 {
+  font-family: var(--pm-font-display);
+  color: var(--pm-navy-900);
+  margin: 0 0 12px;
+}
+
+.tabla-caracteristicas {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-caracteristicas th,
+.tabla-caracteristicas td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--pm-line);
+}
+
+.tabla-caracteristicas th {
+  width: 40%;
+  background: var(--pm-cream-50);
+  font-weight: 600;
+}

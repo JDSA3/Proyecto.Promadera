@@ -2,13 +2,16 @@ function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
-export default function ProductoCard({ producto, esFavorito, onAlternarFavorito }) {
+export default function ProductoCard({ producto, esFavorito, onAlternarFavorito, onVerDetalle }) {
   return (
-    <div className="producto">
+    <div className="producto" onClick={() => onVerDetalle(producto)} role="button" tabIndex={0}>
       <button
         type="button"
         className={`btn-favorito${esFavorito ? " activo" : ""}`}
-        onClick={() => onAlternarFavorito(producto.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAlternarFavorito(producto.id);
+        }}
         aria-pressed={esFavorito}
         aria-label={
           esFavorito
