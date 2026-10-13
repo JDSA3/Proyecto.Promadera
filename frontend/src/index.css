@@ -367,3 +367,19 @@ section h2 {
 .link-boton:hover {
   color: var(--pm-gold-500);
 }
+
+.mapa-embebido {
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 16 / 9;
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--pm-line);
+}
+
+.mapa-embebido iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
