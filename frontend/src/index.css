@@ -320,3 +320,50 @@ section h2 {
 .btn-eliminar:hover {
   background: #f9d4d1;
 }
+
+/* AUTENTICACION (LOGIN / REGISTRO) */
+.formulario-auth {
+  max-width: 420px;
+}
+
+.tabs-rol {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab-rol {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--pm-navy-900);
+  background: var(--pm-white);
+  color: var(--pm-navy-900);
+  font-family: var(--pm-font-display);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab-rol.activo {
+  background: var(--pm-navy-900);
+  color: var(--pm-gold-500);
+}
+
+.texto-auxiliar {
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+
+.link-boton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--pm-navy-900);
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: var(--pm-font-body);
+  font-size: inherit;
+}
+
+.link-boton:hover {
+  color: var(--pm-gold-500);
+}
