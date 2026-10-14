@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  obtenerCategorias,
-  obtenerProductos,
-  crearProducto,
-  editarProducto,
-  eliminarProducto,
-} from "../api.js";
+import { obtenerCategorias, obtenerProductos } from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
-import ProductoForm from "./ProductoForm.jsx";
+import ProductoDetalle from "./ProductoDetalle.jsx";
 
-export default function Productos({favoritos, onAlternarFavorito}) {
+export default function Productos({ favoritos, onAlternarFavorito }) {
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState(null); // null = todavía no cargó
   const [error, setError] = useState(false);
@@ -17,11 +11,7 @@ export default function Productos({favoritos, onAlternarFavorito}) {
   const [busqueda, setBusqueda] = useState("");
   const [busquedaEspera, setBusquedaEspera] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
-
-  // CRUD
-  const [editando, setEditando] = useState(null);
-  const [errorCrud, setErrorCrud] = useState("");
-  const [recarga, setRecarga] = useState(0); // al sumarle 1, se vuelve a pedir la lista
+  const [detalle, setDetalle] = useState(null);
 
   // Cargar categorías una sola vez, al montar el componente
   useEffect(() => {
@@ -36,7 +26,7 @@ export default function Productos({favoritos, onAlternarFavorito}) {
     return () => clearTimeout(temporizador);
   }, [busqueda]);
 
-  // Cargar productos al inicio y cada vez que cambia la búsqueda, la categoría o "recarga"
+  // Cargar productos al inicio y cada vez que cambia la búsqueda o la categoría
   useEffect(() => {
     let cancelado = false;
     obtenerProductos({ query: busquedaEspera, categoriaId })
@@ -53,33 +43,7 @@ export default function Productos({favoritos, onAlternarFavorito}) {
     return () => {
       cancelado = true;
     };
-  }, [busquedaEspera, categoriaId, recarga]);
-
-  async function handleSubmit(data) {
-    try {
-      if (editando) {
-        await editarProducto(editando.id, data);
-        setEditando(null);
-      } else {
-        await crearProducto(data);
-      }
-      setErrorCrud("");
-      setRecarga((n) => n + 1);
-    } catch (err) {
-      setErrorCrud(err.message);
-    }
-  }
-
-  async function handleEliminar(id) {
-    if (!window.confirm("¿Eliminar este producto?")) return;
-    try {
-      await eliminarProducto(id);
-      setErrorCrud("");
-      setRecarga((n) => n + 1);
-    } catch (err) {
-      setErrorCrud(err.message);
-    }
-  }
+  }, [busquedaEspera, categoriaId]);
 
   const activos = productos ? productos.filter((p) => p.activo) : [];
 
@@ -96,32 +60,19 @@ export default function Productos({favoritos, onAlternarFavorito}) {
       return <p className="mensaje">No se encontraron productos con esa búsqueda.</p>;
     }
     return activos.map((p) => (
-    <div key={p.id} className="producto-item">
-    <ProductoCard
-      producto={p}
-      esFavorito={favoritos.includes(p.id)}
-      onAlternarFavorito={onAlternarFavorito}
-    />
-
-    <div className="acciones-producto">
-      <button className="btn-editar" onClick={() => setEditando(p)}>Editar</button>
-      <button className="btn-eliminar" onClick={() => handleEliminar(p.id)}>Eliminar</button>
-    </div>
-  </div>
-));
+      <ProductoCard
+        key={p.id}
+        producto={p}
+        esFavorito={favoritos.includes(p.id)}
+        onAlternarFavorito={onAlternarFavorito}
+        onVerDetalle={setDetalle}
+      />
+    ));
   }
 
   return (
     <section id="insumos">
-      <h2>Productos</h2>
-
-      <ProductoForm
-        producto={editando}
-        categorias={categorias}
-        onSubmit={handleSubmit}
-        onCancel={() => setEditando(null)}
-      />
-      {errorCrud && <p style={{ color: "red" }}>{errorCrud}</p>}
+      <h2>Insumos</h2>
 
       <div className="filtros">
         <input
@@ -146,6 +97,13 @@ export default function Productos({favoritos, onAlternarFavorito}) {
       </div>
 
       <div id="productos">{contenido()}</div>
+
+      <ProductoDetalle
+        producto={detalle}
+        esFavorito={detalle ? favoritos.includes(detalle.id) : false}
+        onAlternarFavorito={onAlternarFavorito}
+        onCerrar={() => setDetalle(null)}
+      />
     </section>
   );
 }

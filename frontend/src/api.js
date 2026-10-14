@@ -50,3 +50,21 @@ export async function eliminarProducto(id) {
   });
   return manejarRespuesta(res);
 }
+
+export async function loginUsuario({ email, password }) {
+  const res = await fetch(`${API_BASE}/usuarios/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function registrarUsuario({ nombre, email, password, rol }) {
+  const res = await fetch(`${API_BASE}/usuarios/registro`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre, email, password, rol }),
+  });
+  return manejarRespuesta(res);
+}
