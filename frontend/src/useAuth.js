@@ -4,7 +4,8 @@ const CLAVE = "promadera_usuario";
 
 function leerUsuarioGuardado() {
   try {
-    const guardado = localStorage.getItem(CLAVE);
+    const guardado =
+      localStorage.getItem(CLAVE) ?? sessionStorage.getItem(CLAVE);
     return guardado ? JSON.parse(guardado) : null;
   } catch {
     return null;
@@ -14,12 +15,15 @@ function leerUsuarioGuardado() {
 export default function useAuth() {
   const [usuario, setUsuario] = useState(leerUsuarioGuardado);
 
-  const guardarSesion = useCallback((datosUsuario) => {
+  // recordar = true  -> sigue iniciada al cerrar el navegador
+  // recordar = false -> se pierde al cerrar la pestaña
+  const guardarSesion = useCallback((datosUsuario, recordar = true) => {
     setUsuario(datosUsuario);
     try {
-      localStorage.setItem(CLAVE, JSON.stringify(datosUsuario));
+      const storage = recordar ? localStorage : sessionStorage;
+      storage.setItem(CLAVE, JSON.stringify(datosUsuario));
     } catch {
-      // si falla el localStorage, la sesion sigue viva en memoria igual
+      // si falla el storage, la sesión sigue viva en memoria
     }
   }, []);
 
@@ -27,6 +31,7 @@ export default function useAuth() {
     setUsuario(null);
     try {
       localStorage.removeItem(CLAVE);
+      sessionStorage.removeItem(CLAVE);
     } catch {
       // nada que hacer si falla
     }

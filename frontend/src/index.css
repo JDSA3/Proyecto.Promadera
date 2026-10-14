@@ -613,3 +613,116 @@ body {
     z-index: 50;
   }
 }
+
+/* ===== PANTALLA DE LOGIN ===== */
+.pantalla-auth {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 24px;
+  padding: 24px;
+  background: var(--pm-beige-100);
+}
+
+.mancha {
+  position: absolute;
+  background: var(--pm-navy-800);
+  z-index: 0;
+}
+.m1 { top: -130px; right: -90px; width: 440px; height: 300px; border-radius: 50% 40% 60% 50% / 60% 50% 50% 40%; }
+.m2 { bottom: -170px; left: -110px; width: 400px; height: 360px; border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%; }
+.m3 { bottom: -110px; right: -130px; width: 340px; height: 260px; border-radius: 55% 45% 50% 50% / 50% 60% 40% 50%; }
+
+.auth-marca,
+.auth-tarjeta { position: relative; z-index: 1; }
+
+.auth-marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--pm-font-display);
+  font-size: 3rem;
+  color: var(--pm-navy-800);
+}
+
+.auth-marca img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+
+.auth-tarjeta {
+  width: min(420px, 92vw);
+  padding: 32px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 40px rgba(31, 47, 80, 0.15);
+}
+
+.auth-tarjeta h2 {
+  margin: 0;
+  font-family: var(--pm-font-body);
+  font-weight: 500;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  color: var(--pm-navy-800);
+}
+
+.auth-linea { width: 40px; height: 3px; margin: 10px 0 20px; background: var(--pm-tan-500); }
+
+.auth-subtitulo { margin: 0 0 12px; font-weight: 600; color: var(--pm-navy-800); }
+
+.tabs-rol { display: flex; gap: 8px; margin-bottom: 16px; }
+
+.tab-rol {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--pm-navy-800);
+  background: var(--pm-white);
+  color: var(--pm-navy-800);
+  font-family: var(--pm-font-body);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tab-rol.activo { background: var(--pm-navy-800); color: var(--pm-white); }
+
+.campo-password { position: relative; display: flex; }
+.campo-password input { flex: 1; padding-right: 44px; }
+.btn-ojo {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.fila-recordar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.formulario .btn-ingresar,
+.btn-ingresar {
+  align-self: stretch;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--pm-navy-800);
+  color: var(--pm-white);
+  font-family: var(--pm-font-body);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.btn-ingresar:hover { background: var(--pm-navy-600); }
+.btn-ingresar:disabled { opacity: 0.6; cursor: wait; }
+
+.texto-auxiliar.centrado { text-align: center; }
+
+@media (max-width: 800px) {
+  .pantalla-auth { flex-direction: column; justify-content: center; }
+  .auth-marca { font-size: 2.2rem; }
+  .auth-marca img { width: 52px; height: 52px; }
+}

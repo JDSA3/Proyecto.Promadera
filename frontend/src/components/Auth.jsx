@@ -1,62 +1,55 @@
 import { useState } from "react";
-
 import Login from "./Login.jsx";
 import Registro from "./Registro.jsx";
 
-const etiquetaPorRol = { cliente: "Armador", proveedor: "Proveedor" };
-
-export default function Auth({ usuario, onLogin, onLogout }) {
+export default function Auth({ onLogin }) {
   const [rol, setRol] = useState("cliente");
   const [modo, setModo] = useState("login");
 
-  if (usuario) {
-    return (
-      <section id="cuenta">
-        <h2>Mi cuenta</h2>
-        <p>
-          Hola, <strong>{usuario.nombre}</strong> ({etiquetaPorRol[usuario.rol]})
-        </p>
-        <button type="button" className="btn-cancelar" onClick={onLogout}>
-          Cerrar sesión
-        </button>
-      </section>
-    );
-  }
-
   return (
-    <section id="cuenta">
-      <h2>Mi cuenta</h2>
+    <div className="pantalla-auth">
+      <span className="mancha m1" aria-hidden="true" />
+      <span className="mancha m2" aria-hidden="true" />
+      <span className="mancha m3" aria-hidden="true" />
 
-      <div className="tabs-rol">
-        <button
-          type="button"
-          className={rol === "cliente" ? "tab-rol activo" : "tab-rol"}
-          onClick={() => setRol("cliente")}
-        >
-          Armador
-        </button>
-        <button
-          type="button"
-          className={rol === "proveedor" ? "tab-rol activo" : "tab-rol"}
-          onClick={() => setRol("proveedor")}
-        >
-          Proveedor
-        </button>
+      <div className="auth-marca">
+        <img src="/logo.png" alt="" />
+        <span>ProMadera</span>
       </div>
 
-      {modo === "login" ? (
-        <Login
-          rol={rol}
-          onLogin={onLogin}
-          onIrARegistro={() => setModo("registro")}
-        />
-      ) : (
-        <Registro
-          rol={rol}
-          onRegistroExitoso={onLogin}
-          onIrALogin={() => setModo("login")}
-        />
-      )}
-    </section>
+      <div className="auth-tarjeta">
+        <h2>
+          {modo === "login" ? (
+            <>Bienvenido a<br />ProMadera</>
+          ) : (
+            "Crear una cuenta"
+          )}
+        </h2>
+        <div className="auth-linea" />
+
+        <div className="tabs-rol">
+          <button
+            type="button"
+            className={rol === "cliente" ? "tab-rol activo" : "tab-rol"}
+            onClick={() => setRol("cliente")}
+          >
+            Carpintero
+          </button>
+          <button
+            type="button"
+            className={rol === "proveedor" ? "tab-rol activo" : "tab-rol"}
+            onClick={() => setRol("proveedor")}
+          >
+            Corralón
+          </button>
+        </div>
+
+        {modo === "login" ? (
+          <Login rol={rol} onLogin={onLogin} onIrARegistro={() => setModo("registro")} />
+        ) : (
+          <Registro rol={rol} onRegistroExitoso={onLogin} onIrALogin={() => setModo("login")} />
+        )}
+      </div>
+    </div>
   );
 }
