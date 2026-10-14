@@ -1,12 +1,20 @@
 :root {
   --pm-navy-900: #16233d;
-  --pm-gold-500: #c9a876;
-  --pm-cream-100: #f6f2e9;
-  --pm-cream-50: #fbf9f4;
+  --pm-navy-800: #1f2f50;
+  --pm-navy-600: #34486f;
+  --pm-tan-500: #b88a5e;
+  --pm-tan-300: #d4b08c;
+  --pm-beige-100: #ece6e0;
+  --pm-beige-50: #f6f2ee;
   --pm-white: #ffffff;
-  --pm-line: #e2dccd;
-  --pm-font-display: "Fraunces", Georgia, serif;
-  --pm-font-body: "Inter", sans-serif;
+  --pm-line: #ddd3ca;
+  --pm-font-display: "Oswald", sans-serif;
+  --pm-font-body: "Outfit", sans-serif;
+
+  /* alias de los nombres viejos */
+  --pm-gold-500: var(--pm-tan-500);
+  --pm-cream-100: var(--pm-beige-100);
+  --pm-cream-50: var(--pm-beige-50);
 }
 
 * { box-sizing: border-box; }
