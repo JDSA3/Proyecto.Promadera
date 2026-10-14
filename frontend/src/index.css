@@ -26,73 +26,8 @@ body {
   color: #232323;
 }
 
-/* HEADER - tu header */
-header {
-  background: var(--pm-navy-900);
-  color: var(--pm-white);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
 
-header h1 {
-  font-family: var(--pm-font-display);
-  color: var(--pm-gold-500);
-  margin: 0;
-  font-size: 1.8rem;
-}
 
-header img {
-  border-radius: 50%;
-  border: 2px solid var(--pm-gold-500);
-}
-
-/* NAV - tu nav */
-nav {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-nav a {
-  color: var(--pm-gold-500);
-  text-decoration: none;
-  font-family: var(--pm-font-display);
-  padding: 8px 12px;
-  border-radius: 6px;
-}
-
-nav a:hover {
-  background: rgba(201,168,118,0.15);
-}
-
-/* MAIN - tu main */
-main {
-  max-width: 900px;
-  margin: 24px auto;
-  padding: 0 16px;
-}
-
-section {
-  background: var(--pm-white);
-  border: 1px solid var(--pm-line);
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 20px;
-}
-
-section h2 {
-  font-family: var(--pm-font-display);
-  color: var(--pm-navy-900);
-  margin-top: 0;
-  border-bottom: 2px solid var(--pm-gold-500);
-  padding-bottom: 8px;
-  display: inline-block;
-}
 
 /* Tus ids */
 #home p {
@@ -551,12 +486,130 @@ section h2 {
   .modal-contenido { padding: 20px; }
 }
 
-.link-nav {
+/* ===== LAYOUT ===== */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--pm-beige-100);
+}
+
+.app-header {
+  background: var(--pm-navy-800);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 16px;
+}
+
+.btn-hamburguesa {
+  position: absolute;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--pm-tan-500);
+  background: transparent;
+  color: var(--pm-tan-300);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.app-marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--pm-font-display);
+  font-size: 1.9rem;
+  color: var(--pm-tan-300);
+}
+
+.app-marca img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.app-cuerpo {
+  flex: 1;
+  display: flex;
+}
+
+.app-menu {
+  width: 200px;
+  background: var(--pm-navy-800);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 16px;
+}
+
+.menu-etiqueta {
+  margin: 0;
+  padding: 8px 12px 12px;
+  text-align: center;
+  font-style: italic;
+  color: var(--pm-tan-300);
+}
+
+.menu-item {
   background: none;
   border: none;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  font: inherit;
+  padding: 10px 12px;
+  text-align: center;
+  font-family: var(--pm-font-display);
+  font-size: 1.05rem;
+  color: var(--pm-tan-500);
   cursor: pointer;
+}
+
+.menu-item:hover { color: var(--pm-tan-300); }
+
+.menu-item.activo {
+  background: var(--pm-navy-600);
+  color: var(--pm-beige-100);
+}
+
+.menu-salir { margin-top: auto; }
+
+.app-contenido {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+.app-contenido h2 {
+  font-family: var(--pm-font-display);
+  color: var(--pm-navy-900);
+  font-weight: 500;
+}
+
+.app-footer {
+  background: var(--pm-navy-800);
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  color: var(--pm-tan-300);
+  font-family: var(--pm-font-display);
+}
+
+.footer-redes a {
+  color: var(--pm-tan-300);
+  text-decoration: none;
+  font-weight: 600;
+  margin: 0 10px;
+}
+
+@media (max-width: 760px) {
+  .app-menu {
+    position: fixed;
+    top: 64px;
+    bottom: 48px;
+    left: 0;
+    z-index: 50;
+  }
 }
