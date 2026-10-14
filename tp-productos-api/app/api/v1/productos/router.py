@@ -19,9 +19,10 @@ router = APIRouter(prefix="/productos", tags=["Productos"])
 )
 def listar_productos(
     query: str | None = None,
-    categoria_id: int | None = None
+    categoria_id: int | None = None,
+    proveedor_id: int | None = None
 ):
-    return repository.list_productos(query, categoria_id)
+    return repository.list_productos(query, categoria_id, proveedor_id)
 
 
 @router.get(
