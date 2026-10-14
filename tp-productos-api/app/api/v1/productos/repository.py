@@ -21,7 +21,11 @@ def _to_dict(producto: ProductoDB):
     }
 
 
-def list_productos(query: str | None = None, categoria_id: int | None = None):
+def list_productos(
+    query: str | None = None,
+    categoria_id: int | None = None,
+    proveedor_id: int | None = None,
+):
     consulta = (
         select(ProductoDB)
         .where(ProductoDB.activo.is_(True))
@@ -34,13 +38,12 @@ def list_productos(query: str | None = None, categoria_id: int | None = None):
     if categoria_id is not None:
         consulta = consulta.where(ProductoDB.categoria_id == categoria_id)
 
+    if proveedor_id is not None:
+        consulta = consulta.where(ProductoDB.proveedor_id == proveedor_id)
+
     with SessionLocal() as session:
         return [_to_dict(p) for p in session.scalars(consulta)]
-    with SessionLocal() as session:
-        consulta = select(ProductoDB).where(ProductoDB.activo == True)
-        if proveedor_id is not None:
-            consulta = consulta.where(ProductoDB.proveedor_id == proveedor_id)
-
+    
 def get_by_id(producto_id: int):
     with SessionLocal() as session:
         producto = session.get(ProductoDB, producto_id)
