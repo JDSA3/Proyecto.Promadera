@@ -8,6 +8,7 @@ import {
 } from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
 import ProductoForm from "./ProductoForm.jsx";
+import ProductoDetalle from "./ProductoDetalle.jsx";
 
 export default function Productos({favoritos, onAlternarFavorito}) {
   const [categorias, setCategorias] = useState([]);
@@ -17,6 +18,7 @@ export default function Productos({favoritos, onAlternarFavorito}) {
   const [busqueda, setBusqueda] = useState("");
   const [busquedaEspera, setBusquedaEspera] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
+  const [detalle, setDetalle] = useState(null);
 
   // CRUD
   const [editando, setEditando] = useState(null);
@@ -101,6 +103,7 @@ export default function Productos({favoritos, onAlternarFavorito}) {
       producto={p}
       esFavorito={favoritos.includes(p.id)}
       onAlternarFavorito={onAlternarFavorito}
+      onVerDetalle={setDetalle}
     />
 
     <div className="acciones-producto">
@@ -146,6 +149,12 @@ export default function Productos({favoritos, onAlternarFavorito}) {
       </div>
 
       <div id="productos">{contenido()}</div>
+      <ProductoDetalle
+      producto={detalle}
+      esFavorito={detalle ? favoritos.includes(detalle.id) : false}
+      onAlternarFavorito={onAlternarFavorito}
+      onCerrar={() => setDetalle(null)}
+      />
     </section>
   );
 }
