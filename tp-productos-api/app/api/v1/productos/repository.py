@@ -36,7 +36,10 @@ def list_productos(query: str | None = None, categoria_id: int | None = None):
 
     with SessionLocal() as session:
         return [_to_dict(p) for p in session.scalars(consulta)]
-
+    with SessionLocal() as session:
+        consulta = select(ProductoDB).where(ProductoDB.activo == True)
+        if proveedor_id is not None:
+            consulta = consulta.where(ProductoDB.proveedor_id == proveedor_id)
 
 def get_by_id(producto_id: int):
     with SessionLocal() as session:
