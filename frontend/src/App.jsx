@@ -8,6 +8,7 @@ import Favoritos from "./components/Favoritos.jsx";
 import Localizacion from "./components/Localizacion.jsx";
 import useFavoritos from "./useFavoritos.js";
 import useAuth from "./useAuth.js";
+import MisProductos from "./components/MisProductos.jsx";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
@@ -19,14 +20,14 @@ const MENU_CARPINTERO = [
 
 const MENU_CORRALON = [
   { id: "inicio", label: "Inicio" },
-  { id: "productos", label: "Productos" },
+  { id: "productos", label: "Mis Productos" },
   { id: "stock", label: "Stock" },
   { id: "pedidos", label: "Pedidos" },
   { id: "perfil", label: "Perfil" },
 ];
 
 function vistaInicial(usuario) {
-  return usuario?.rol === "proveedor" ? "inicio" : "diseno";
+  return usuario?.rol === "proveedor" ? "productos" : "diseno";
 }
 
 export default function App() {
@@ -51,9 +52,14 @@ export default function App() {
         etiqueta="Corralón"
         onCerrarSesion={cerrarSesion}
       >
-        {/* Provisorio: se reemplaza en los commits del lado Corralón */}
-        <h2>{actual ? actual.label : "Inicio"}</h2>
-        <p className="mensaje">Hola, {usuario.nombre}. Próximamente.</p>
+        {vista === "productos" ? (
+          <MisProductos usuario={usuario} />
+        ) : (
+          <>
+            <h2>{actual ? actual.label : "Inicio"}</h2>
+            <p className="mensaje">Hola, {usuario.nombre}. Próximamente.</p>
+          </>
+        )}
       </Layout>
     );
   }

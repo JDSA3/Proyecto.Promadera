@@ -4,23 +4,30 @@ function formatearPrecio(precio) {
 
 export default function ProductoCard({ producto, esFavorito, onAlternarFavorito, onVerDetalle }) {
   return (
-    <div className="producto" onClick={() => onVerDetalle(producto)} role="button" tabIndex={0}>
-      <button
-        type="button"
-        className={`btn-favorito${esFavorito ? " activo" : ""}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onAlternarFavorito(producto.id);
-        }}
-        aria-pressed={esFavorito}
-        aria-label={
-          esFavorito
-            ? `Quitar ${producto.nombre} de favoritos`
-            : `Agregar ${producto.nombre} a favoritos`
-        }
-      >
-        {esFavorito ? "♥" : "♡"}
-      </button>
+    <div
+      className="producto"
+      onClick={() => onVerDetalle?.(producto)}
+      role="button"
+      tabIndex={0}
+    >
+      {onAlternarFavorito && (
+        <button
+          type="button"
+          className={`btn-favorito${esFavorito ? " activo" : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAlternarFavorito(producto.id);
+          }}
+          aria-pressed={esFavorito}
+          aria-label={
+            esFavorito
+              ? `Quitar ${producto.nombre} de favoritos`
+              : `Agregar ${producto.nombre} a favoritos`
+          }
+        >
+          {esFavorito ? "♥" : "♡"}
+        </button>
+      )}
       <img
         src={`/imagenes/${producto.id}.webp`}
         alt={producto.nombre}

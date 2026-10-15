@@ -726,6 +726,144 @@ body {
   .auth-marca { font-size: 2.2rem; }
   .auth-marca img { width: 52px; height: 52px; }
 }
+<<<<<<< HEAD
+
+
+
+/* ===== CORRALON: MIS PRODUCTOS (TABLA) ===== */
+.cabecera-productos {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.cabecera-productos h2 { margin: 0 0 4px; font-size: 2rem; }
+.subtitulo-productos { margin: 0; color: #5c5c5c; }
+
+.btn-tan {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: var(--pm-tan-500);
+  color: var(--pm-white);
+  font-family: var(--pm-font-display);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.btn-tan:hover { background: var(--pm-tan-300); }
+
+.panel-form {
+  background: var(--pm-white);
+  border: 1px solid var(--pm-line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.panel-form-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.panel-form-cabecera h3 {
+  margin: 0;
+  font-family: var(--pm-font-display);
+  color: var(--pm-navy-900);
+  font-weight: 500;
+}
+
+.panel-form .formulario-producto {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.filtros-productos {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filtros-productos input,
+.filtros-productos select {
+  padding: 12px 16px;
+  border: 1px solid var(--pm-tan-300);
+  border-radius: 999px;
+  background: var(--pm-tan-500);
+  color: var(--pm-white);
+  font-family: var(--pm-font-display);
+  font-size: 1rem;
+}
+
+.filtros-productos input { flex: 1; min-width: 220px; }
+.filtros-productos input::placeholder { color: rgba(255, 255, 255, 0.85); }
+
+.tabla-scroll { overflow-x: auto; border-radius: 12px; }
+
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+  background: #d8d3ce;
+  font-family: var(--pm-font-display);
+}
+
+.tabla-productos th {
+  padding: 12px;
+  background: #bdb8b3;
+  color: var(--pm-white);
+  font-weight: 500;
+  text-align: left;
+}
+
+.tabla-productos td {
+  padding: 10px 12px;
+  color: var(--pm-white);
+  background: #cfc9c3;
+  border-bottom: 1px solid #bdb8b3;
+  vertical-align: middle;
+}
+
+.tabla-productos td.tabla-vacia {
+  text-align: center;
+  color: #5c5c5c;
+  padding: 24px;
+}
+
+.miniatura {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--pm-white);
+}
+
+.chip-categoria {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--pm-tan-500);
+  color: var(--pm-white);
+}
+
+.estado-ok { color: #1f9d3a !important; font-weight: 600; }
+.estado-bajo { color: #f0b429 !important; font-weight: 600; }
+.estado-agotado { color: #d64545 !important; font-weight: 600; }
+
+.celda-acciones { white-space: nowrap; }
+
+.btn-icono {
+  border: none;
+  background: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 6px;
+=======
 .grilla-productos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -743,4 +881,5 @@ body {
   display: flex;
   gap: 8px;
   margin-top: 8px;
+>>>>>>> 40b97492a2f0e92dcd28cd5076fce8000623b830
 }
