@@ -6,10 +6,11 @@ export async function obtenerCategorias() {
   return res.json();
 }
 
-export async function obtenerProductos({ query, categoriaId }) {
+export async function obtenerProductos({ query, categoriaId, proveedorId } = {}) {
   const params = new URLSearchParams();
   if (query) params.set("query", query);
   if (categoriaId) params.set("categoria_id", categoriaId);
+  if (proveedorId) params.set("proveedor_id", proveedorId);
 
   const url = `${API_BASE}/productos` + (params.toString() ? `?${params}` : "");
   const res = await fetch(url);
