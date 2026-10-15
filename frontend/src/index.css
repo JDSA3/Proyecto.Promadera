@@ -726,10 +726,6 @@ body {
   .auth-marca { font-size: 2.2rem; }
   .auth-marca img { width: 52px; height: 52px; }
 }
-<<<<<<< HEAD
-
-
-
 /* ===== CORRALON: MIS PRODUCTOS (TABLA) ===== */
 .cabecera-productos {
   display: flex;
@@ -863,13 +859,15 @@ body {
   font-size: 1.2rem;
   cursor: pointer;
   padding: 4px 6px;
-=======
+}
+
 .grilla-productos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 16px;
   margin-top: 16px;
 }
+
 .encabezado-mis-productos {
   display: flex;
   justify-content: space-between;
@@ -877,9 +875,9 @@ body {
   flex-wrap: wrap;
   gap: 12px;
 }
+
 .acciones-mis-productos {
   display: flex;
   gap: 8px;
   margin-top: 8px;
->>>>>>> 40b97492a2f0e92dcd28cd5076fce8000623b830
 }
