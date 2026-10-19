@@ -1,8 +1,10 @@
+import ProductosRecomendados from "./ProductosRecomendados";
+
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
-export default function ProductoDetalle({ producto, esFavorito, onAlternarFavorito, onCerrar }) {
+export default function ProductoDetalle({ producto, esFavorito, onAlternarFavorito, onCerrar, onVerDetalle }) {
   if (!producto) return null;
 
   const caracteristicas = producto.caracteristicas
@@ -66,6 +68,14 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
               </tbody>
             </table>
           </section>
+        )}
+
+        {onVerDetalle && (
+          <ProductosRecomendados
+            key={producto.id}
+            productoId={producto.id}
+            onVerDetalle={onVerDetalle}
+          />
         )}
       </div>
     </div>

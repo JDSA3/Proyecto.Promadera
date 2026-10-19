@@ -1,0 +1,89 @@
+/* Sección "Productos que combinan" dentro del detalle de producto */
+
+.recomendados-estado {
+  margin: 0;
+  color: var(--pm-navy-600);
+  font-size: 0.95rem;
+}
+
+.recomendados-lista {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.recomendados-lista li {
+  flex: 0 0 168px;
+  scroll-snap-align: start;
+}
+
+.recomendado {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  text-align: left;
+  font-family: var(--pm-font-body);
+  color: #232323;
+  background: var(--pm-white);
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.recomendado:hover,
+.recomendado:focus-visible {
+  border-color: var(--pm-gold-500);
+  outline: none;
+}
+
+.recomendado img {
+  width: 100%;
+  height: 96px;
+  margin-bottom: 4px;
+  object-fit: contain;
+  background: var(--pm-cream-50);
+  border-radius: 6px;
+}
+
+.recomendado-nombre {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--pm-navy-900);
+}
+
+.recomendado-motivo {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  color: var(--pm-navy-600);
+}
+
+.recomendado-precio {
+  margin-top: auto;
+  padding-top: 4px;
+  font-weight: 600;
+  color: var(--pm-navy-900);
+}
+
+.recomendado-agotado {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  color: var(--pm-white);
+  background: var(--pm-navy-800);
+  border-radius: 999px;
+}

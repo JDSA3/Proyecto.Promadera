@@ -103,6 +103,7 @@ export default function Productos({ favoritos, onAlternarFavorito }) {
         esFavorito={detalle ? favoritos.includes(detalle.id) : false}
         onAlternarFavorito={onAlternarFavorito}
         onCerrar={() => setDetalle(null)}
+        onVerDetalle={setDetalle}
       />
     </section>
   );
