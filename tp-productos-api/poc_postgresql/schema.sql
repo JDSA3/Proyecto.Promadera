@@ -51,6 +51,18 @@ CREATE TABLE IF NOT EXISTS pedido_items (
     CONSTRAINT ck_pedido_items_precio_positivo CHECK (precio_unitario >= 0)
 );
 
+-- Piezas que combinan entre si. Una fila por pareja (la API la busca en los dos sentidos).
+CREATE TABLE IF NOT EXISTS producto_compatible (
+    producto_id   INTEGER      NOT NULL REFERENCES productos (id) ON DELETE CASCADE,
+    compatible_id INTEGER      NOT NULL REFERENCES productos (id) ON DELETE CASCADE,
+    motivo        VARCHAR(150) NOT NULL DEFAULT '',
+    PRIMARY KEY (producto_id, compatible_id),
+    CONSTRAINT ck_compatible_distintos CHECK (producto_id <> compatible_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_producto_compatible_pareja
+    ON producto_compatible (LEAST(producto_id, compatible_id), GREATEST(producto_id, compatible_id));
+
 INSERT INTO categorias (id, nombre) VALUES
     (1, 'Maderas y Tableros'),
     (2, 'Herrajes'),

@@ -44,3 +44,7 @@ class ProductoResponse(ProductoBase):
     largo_cm: Optional[float] = None
     ancho_cm: Optional[float] = None
     espesor_mm: Optional[float] = None
+
+
+class RecomendadoResponse(ProductoResponse):
+    motivo: str

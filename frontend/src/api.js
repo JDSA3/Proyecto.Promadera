@@ -27,6 +27,11 @@ async function manejarRespuesta(res) {
   return res.status === 204 ? null : res.json();
 }
 
+export async function obtenerRecomendados(id, limite = 6) {
+  const res = await fetch(`${API_BASE}/productos/${id}/recomendados?limite=${limite}`);
+  return manejarRespuesta(res);
+}
+
 export async function crearProducto(data) {
   const res = await fetch(`${API_BASE}/productos`, {
     method: "POST",

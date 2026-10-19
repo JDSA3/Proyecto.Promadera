@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from . import repository
 
@@ -6,6 +6,7 @@ from app.api.v1.productos.schemas import (
     ProductoCreate,
     ProductoUpdate,
     ProductoResponse,
+    RecomendadoResponse,
 )
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
@@ -41,6 +42,22 @@ def obtener_producto(producto_id: int):
             detail=f"Producto {producto_id} no encontrado",
         )
     return producto
+
+
+@router.get(
+    "/{producto_id}/recomendados",
+    response_model=list[RecomendadoResponse],
+    summary="Productos que combinan con otro",
+    description="Devuelve los productos que combinan con el indicado (por ejemplo, tapacanto, bisagras o tornillos para una placa), con el motivo. Primero los que tienen stock.",
+    responses={404: {"description": "Producto no encontrado"}},
+)
+def listar_recomendados(producto_id: int, limite: int = Query(default=6, ge=1, le=20)):
+    if repository.get_by_id(producto_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Producto {producto_id} no encontrado",
+        )
+    return repository.list_recomendados(producto_id, limite)
 
 
 @router.post(

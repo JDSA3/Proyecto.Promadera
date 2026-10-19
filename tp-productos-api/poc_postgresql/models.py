@@ -94,3 +94,20 @@ class PedidoItemDB(Base):
 
     pedido: Mapped[PedidoDB] = relationship(back_populates="items")
     producto: Mapped[ProductoDB] = relationship()
+
+    
+class ProductoCompatibleDB(Base):
+    """Pareja de productos que combinan entre si (relacion simetrica: una fila por pareja)."""
+
+    __tablename__ = "producto_compatible"
+    __table_args__ = (
+        CheckConstraint("producto_id <> compatible_id", name="ck_compatible_distintos"),
+    )
+
+    producto_id: Mapped[int] = mapped_column(
+        ForeignKey("productos.id", ondelete="CASCADE"), primary_key=True
+    )
+    compatible_id: Mapped[int] = mapped_column(
+        ForeignKey("productos.id", ondelete="CASCADE"), primary_key=True
+    )
+    motivo: Mapped[str] = mapped_column(String(150), nullable=False, default="", server_default="")
