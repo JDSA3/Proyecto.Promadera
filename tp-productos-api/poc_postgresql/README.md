@@ -13,6 +13,7 @@ No modifica la API actual: el router y el repository siguen usando las listas.
 | `crear_tablas.py` | Crea las tablas y carga las categorías y productos de `app/core/db.py`. |
 | `schema.sql` | Lo mismo que `crear_tablas.py`, pero en SQL para pegar en el SQL Editor de Supabase. |
 | `migracion_proveedor_id.sql` | Agrega la columna `proveedor_id` a la tabla `productos` en una base que ya existe, sin borrar datos. |
+| `migracion_pedidos.sql` | Agrega las tablas `pedidos` y `pedido_items` a una base que ya existe, sin borrar datos. |
 
 ## Tablas
 
@@ -65,3 +66,29 @@ Si se prefiere no usar Python: Supabase > **SQL Editor** > pegar `schema.sql` > 
 sin perder datos: Supabase > **SQL Editor** > pegar `migracion_proveedor_id.sql` > **Run**.
 Hay que hacerlo **antes** de levantar la API con el código nuevo; si no, `GET /productos` falla con
 `column productos.proveedor_id does not exist`.
+
+## Pedidos
+
+```
+pedidos                              pedido_items
+-------------------------            ------------------------------
+id         SERIAL PK   <───────────  pedido_id       INTEGER FK
+cliente_id INTEGER FK (usuarios)     id              SERIAL PK
+estado     VARCHAR(20)               producto_id     INTEGER FK (productos)
+           ('pendiente', 'pagado',   cantidad        INTEGER        (> 0)
+            'cancelado')             precio_unitario NUMERIC(12,2)  (precio al momento de comprar)
+total      NUMERIC(12,2)
+creado_en  TIMESTAMPTZ  (default now())
+```
+
+Para agregarlas a la base de Supabase que ya existe: Supabase > **SQL Editor** > pegar `migracion_pedidos.sql` > **Run**.
+Hay que hacerlo **antes** de levantar la API con el código nuevo.
+
+Endpoints (`app/api/v1/pedidos/`):
+
+- `POST /api/v1/pedidos` con `{"cliente_id": 1, "items": [{"producto_id": 3, "cantidad": 2}]}`: crea el pedido en
+  `pendiente`, toma los precios de la base y descuenta el stock. 400 si el cliente o un producto no existe,
+  409 si falta stock (en ese caso no se guarda nada).
+- `GET /api/v1/pedidos?cliente_id=1`: pedidos de un cliente.
+- `GET /api/v1/pedidos?proveedor_id=2`: pedidos con productos de ese proveedor (solo sus items, y el total de esos items).
+- `GET /api/v1/pedidos/{id}`: un pedido (404 si no existe).
