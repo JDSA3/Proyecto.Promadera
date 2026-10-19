@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS productos (
     activo       BOOLEAN        NOT NULL DEFAULT TRUE,
     categoria_id INTEGER        NOT NULL REFERENCES categorias (id),
     proveedor_id INTEGER        REFERENCES usuarios (id),  -- opcional: puede ser NULL
+    largo_cm     NUMERIC(8, 2),
+    ancho_cm     NUMERIC(8, 2),
+    espesor_mm   NUMERIC(8, 2),
     CONSTRAINT ck_productos_precio_positivo CHECK (precio >= 0),
     CONSTRAINT ck_productos_stock_positivo  CHECK (stock >= 0)
 );

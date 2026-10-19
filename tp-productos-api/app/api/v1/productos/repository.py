@@ -14,6 +14,9 @@ def _to_dict(producto: ProductoDB):
         "stock": producto.stock,
         "activo": producto.activo,
         "proveedor_id": producto.proveedor_id,
+        "largo_cm": float(producto.largo_cm) if producto.largo_cm is not None else None,
+        "ancho_cm": float(producto.ancho_cm) if producto.ancho_cm is not None else None,
+        "espesor_mm": float(producto.espesor_mm) if producto.espesor_mm is not None else None,
         "categoria": {
             "id": categoria.id,
             "nombre": categoria.nombre,
@@ -88,6 +91,9 @@ def create(data):
             categoria_id=datos["categoria_id"],
             proveedor_id=datos.get("proveedor_id"),
             activo=True,
+            largo_cm=datos.get("largo_cm"),
+            ancho_cm=datos.get("ancho_cm"),
+            espesor_mm=datos.get("espesor_mm"),
         )
         session.add(nuevo_producto)
         session.commit()

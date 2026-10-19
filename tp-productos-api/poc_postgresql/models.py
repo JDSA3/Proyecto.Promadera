@@ -37,7 +37,10 @@ class ProductoDB(Base):
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
     categoria_id: Mapped[int] = mapped_column(ForeignKey("categorias.id"), nullable=False)
     proveedor_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
-
+    largo_cm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
+    ancho_cm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
+    espesor_mm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
+    
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
 
 
