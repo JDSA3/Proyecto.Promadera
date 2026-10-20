@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.productos.router import router as productos_router
 from app.api.v1.categorias.router import router as categorias_router
 from app.api.v1.usuarios.router import router as usuarios_router
+from app.api.v1.pedidos.router import router as pedidos_router
 
 app = FastAPI(
     title="ProMadera - API de Productos",
@@ -26,3 +27,4 @@ def hola():
 app.include_router(productos_router, prefix="/api/v1")
 app.include_router(categorias_router, prefix="/api/v1")
 app.include_router(usuarios_router, prefix="/api/v1")
+app.include_router(pedidos_router, prefix="/api/v1")

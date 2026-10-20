@@ -1,10 +1,14 @@
+from datetime import datetime
+
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    DateTime,
     ForeignKey,
     Integer,
     Numeric,
     String,
+    func,
     true,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -58,6 +62,40 @@ class UsuarioDB(Base):
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
 
 
+class PedidoDB(Base):
+    __tablename__ = "pedidos"
+    __table_args__ = (
+        CheckConstraint("estado IN ('pendiente', 'pagado', 'cancelado')", name="ck_pedidos_estado"),
+        CheckConstraint("total >= 0", name="ck_pedidos_total_positivo"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cliente_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente", server_default="pendiente")
+    total: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    cliente: Mapped[UsuarioDB] = relationship()
+    items: Mapped[list["PedidoItemDB"]] = relationship(back_populates="pedido", cascade="all, delete-orphan")
+
+
+class PedidoItemDB(Base):
+    __tablename__ = "pedido_items"
+    __table_args__ = (
+        CheckConstraint("cantidad > 0", name="ck_pedido_items_cantidad_positiva"),
+        CheckConstraint("precio_unitario >= 0", name="ck_pedido_items_precio_positivo"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    pedido_id: Mapped[int] = mapped_column(ForeignKey("pedidos.id", ondelete="CASCADE"), nullable=False)
+    producto_id: Mapped[int] = mapped_column(ForeignKey("productos.id"), nullable=False)
+    cantidad: Mapped[int] = mapped_column(Integer, nullable=False)
+    precio_unitario: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+
+    pedido: Mapped[PedidoDB] = relationship(back_populates="items")
+    producto: Mapped[ProductoDB] = relationship()
+
+    
 class ProductoCompatibleDB(Base):
     """Pareja de productos que combinan entre si (relacion simetrica: una fila por pareja)."""
 
