@@ -74,6 +74,21 @@ def get_by_id(pedido_id: int):
         return _to_dict(pedido)
 
 
+def marcar_pagado(pedido_id: int):
+    with SessionLocal() as session, session.begin():
+        pedido = session.scalar(
+            _consulta_pedidos().where(PedidoDB.id == pedido_id).with_for_update(of=PedidoDB)
+        )
+
+        if pedido is None or pedido.estado != "pendiente":
+            return None
+
+        pedido.estado = "pagado"
+        session.flush()
+
+        return _to_dict(pedido)
+
+
 def create(data):
     cantidades: dict[int, int] = {}
     for item in data.items:
