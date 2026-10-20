@@ -92,3 +92,13 @@ Endpoints (`app/api/v1/pedidos/`):
 - `GET /api/v1/pedidos?cliente_id=1`: pedidos de un cliente.
 - `GET /api/v1/pedidos?proveedor_id=2`: pedidos con productos de ese proveedor (solo sus items, y el total de esos items).
 - `GET /api/v1/pedidos/{id}`: un pedido (404 si no existe).
+
+## Pagos
+
+Endpoints (`app/api/v1/pagos/`), los dos reciben `{"pedido_id": 1}` y solo aceptan pedidos en `pendiente`
+(404 si no existe, 409 si ya está pagado o cancelado):
+
+- `POST /api/v1/pagos/preferencia`: crea el pago en Mercado Pago (Checkout Pro) con los items del pedido y devuelve
+  el link `init_point`. Necesita `MP_ACCESS_TOKEN` en el `.env` (credenciales **de prueba**; nunca en el frontend).
+  503 si falta el token, 502 si Mercado Pago devuelve un error. `MP_BACK_URL` es opcional y no puede ser `localhost`.
+- `POST /api/v1/pagos/simular`: plan B sin Mercado Pago, pasa el pedido a `pagado`.
