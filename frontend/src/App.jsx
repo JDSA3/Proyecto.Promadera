@@ -9,6 +9,7 @@ import Localizacion from "./components/Localizacion.jsx";
 import useFavoritos from "./useFavoritos.js";
 import useAuth from "./useAuth.js";
 import MisProductos from "./components/MisProductos.jsx";
+import Stock from "./components/Stock.jsx";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
@@ -54,6 +55,8 @@ export default function App() {
       >
         {vista === "productos" ? (
           <MisProductos usuario={usuario} />
+        ) : vista === "stock" ? (
+          <Stock usuario={usuario} />
         ) : (
           <>
             <h2>{actual ? actual.label : "Inicio"}</h2>
