@@ -1,7 +1,12 @@
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from poc_postgresql.database import SessionLocal
-from poc_postgresql.models import CategoriaDB, ProductoDB, UsuarioDB
+from poc_postgresql.models import (
+    CategoriaDB,
+    ProductoCompatibleDB,
+    ProductoDB,
+    UsuarioDB,
+)
 
 
 def _to_dict(producto: ProductoDB):
@@ -14,6 +19,9 @@ def _to_dict(producto: ProductoDB):
         "stock": producto.stock,
         "activo": producto.activo,
         "proveedor_id": producto.proveedor_id,
+        "largo_cm": float(producto.largo_cm) if producto.largo_cm is not None else None,
+        "ancho_cm": float(producto.ancho_cm) if producto.ancho_cm is not None else None,
+        "espesor_mm": float(producto.espesor_mm) if producto.espesor_mm is not None else None,
         "categoria": {
             "id": categoria.id,
             "nombre": categoria.nombre,
@@ -54,6 +62,37 @@ def get_by_id(producto_id: int):
         return _to_dict(producto)
 
 
+def list_recomendados(producto_id: int, limite: int = 6):
+    """Productos que combinan con el indicado (la pareja se busca en los dos sentidos).
+
+    Primero van los que tienen stock; dentro de cada grupo, por id.
+    """
+    consulta = select(ProductoCompatibleDB).where(
+        or_(
+            ProductoCompatibleDB.producto_id == producto_id,
+            ProductoCompatibleDB.compatible_id == producto_id,
+        )
+    )
+
+    with SessionLocal() as session:
+        recomendados = []
+        for fila in session.scalars(consulta):
+            otro_id = (
+                fila.compatible_id
+                if fila.producto_id == producto_id
+                else fila.producto_id
+            )
+            otro = session.get(ProductoDB, otro_id)
+            if otro is None or not otro.activo:
+                continue
+            datos = _to_dict(otro)
+            datos["motivo"] = fila.motivo
+            recomendados.append(datos)
+
+    recomendados.sort(key=lambda p: (p["stock"] <= 0, p["id"]))
+    return recomendados[:limite]
+
+
 def ensure_categoria(categoria_id: int):
     with SessionLocal() as session:
         categoria = session.get(CategoriaDB, categoria_id)
@@ -88,6 +127,9 @@ def create(data):
             categoria_id=datos["categoria_id"],
             proveedor_id=datos.get("proveedor_id"),
             activo=True,
+            largo_cm=datos.get("largo_cm"),
+            ancho_cm=datos.get("ancho_cm"),
+            espesor_mm=datos.get("espesor_mm"),
         )
         session.add(nuevo_producto)
         session.commit()
