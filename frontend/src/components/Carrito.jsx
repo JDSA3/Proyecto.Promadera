@@ -83,9 +83,11 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
         <div className="carrito-resumen">
           <span className="carrito-total">Total: {dinero(pedido.total)}</span>
           <div className="carrito-acciones">
-            <p className="cr-sub">
-              Tu pedido está creado y pendiente de pago. Si no pagás ahora, lo encontrás en "Mis Pedidos".
-            </p>
+            {onVerPedidos && (
+              <button type="button" className="btn-secundario" disabled={trabajando} onClick={onVerPedidos}>
+                Pagar más tarde
+              </button>
+            )}
             <button type="button" className="btn-tan" disabled={trabajando} onClick={pagarConMercadoPago}>
               Pagar con Mercado Pago
             </button>
