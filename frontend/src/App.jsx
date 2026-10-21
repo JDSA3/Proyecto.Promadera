@@ -9,6 +9,7 @@ import Localizacion from "./components/Localizacion.jsx";
 import Carrito from "./components/Carrito.jsx";
 import useFavoritos from "./useFavoritos.js";
 import useCarrito from "./useCarrito.js";
+import useProyectos from "./useProyectos.js";
 import useAuth from "./useAuth.js";
 import MisProductos from "./components/MisProductos.jsx";
 import Stock from "./components/Stock.jsx";
@@ -41,6 +42,9 @@ export default function App() {
   const { usuario, guardarSesion, cerrarSesion } = useAuth();
   const carrito = useCarrito(usuario?.id);
   const [vista, setVista] = useState(() => vistaInicial(usuario));
+  const misProyectos = useProyectos(usuario?.id);
+  const [proyectoAbierto, setProyectoAbierto] = useState(null);
+  const cambiarVista = (id) => { setProyectoAbierto(null); setVista(id); };
 
   function handleLogin(datos, recordar) {
     guardarSesion(datos, recordar);
@@ -69,7 +73,7 @@ export default function App() {
       <Layout
         menu={MENU_CORRALON}
         vista={vista}
-        onCambiarVista={setVista}
+        onCambiarVista={cambiarVista}
         etiqueta="Corralón"
         onCerrarSesion={cerrarSesion}
       >
@@ -81,7 +85,7 @@ export default function App() {
   function contenido() {
     switch (vista) {
       case "proyectos":
-        return <Proyectos />;
+        return <Proyectos proyectos={misProyectos.proyectos} onAbrir={(p) => { setProyectoAbierto(p); setVista("diseno"); }} onEliminar={misProyectos.eliminar} onIrADiseno={() => cambiarVista("diseno")} />;
       case "insumos":
         return (
           <Productos
@@ -103,7 +107,7 @@ export default function App() {
           />
         );
       default:
-        return <Diseno carrito={carrito} onIrAlCarrito={() => setVista("carrito")} />;
+        return <Diseno key={proyectoAbierto?.id ?? "nuevo"} carrito={carrito} onIrAlCarrito={() => setVista("carrito")} proyectoInicial={proyectoAbierto} onGuardarProyecto={misProyectos.guardar} />;
     }
   }
 
@@ -114,11 +118,12 @@ export default function App() {
         { id: "carrito", label: carrito.cantidadTotal > 0 ? `Carrito (${carrito.cantidadTotal})` : "Carrito" },
       ]}
       vista={vista}
-      onCambiarVista={setVista}
+      onCambiarVista={cambiarVista}
       onCerrarSesion={cerrarSesion}
     >
       {contenido()}
     </Layout>
   );
 }
+
 
