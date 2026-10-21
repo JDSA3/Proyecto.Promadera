@@ -74,3 +74,32 @@ export async function registrarUsuario({ nombre, email, password, rol }) {
   });
   return manejarRespuesta(res);
 }
+export async function crearPedido({ clienteId, items }) {
+  const res = await fetch(`${API_BASE}/pedidos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      cliente_id: clienteId,
+      items: items.map((i) => ({ producto_id: i.producto_id, cantidad: i.cantidad })),
+    }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function crearPreferenciaPago(pedidoId) {
+  const res = await fetch(`${API_BASE}/pagos/preferencia`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pedido_id: pedidoId }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function simularPago(pedidoId) {
+  const res = await fetch(`${API_BASE}/pagos/simular`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pedido_id: pedidoId }),
+  });
+  return manejarRespuesta(res);
+}
