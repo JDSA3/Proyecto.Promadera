@@ -4,16 +4,17 @@ import { DISENOS, ACABADOS, medidasPorDefecto } from "../data/disenos.js";
 import { calcularPresupuesto } from "../presupuesto.js";
 import "./Carrito.css";
 import "./Diseno.css";
+import GuardarProyecto from "./GuardarProyecto.jsx";
 
 const dinero = (n) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 const cm = (n) => `${Number(n).toFixed(1).replace(/\.0$/, "")} cm`;
 
-export default function Diseno({ carrito, onIrAlCarrito }) {
+export default function Diseno({ carrito, onIrAlCarrito, proyectoInicial, onGuardarProyecto }) {
   const [productos, setProductos] = useState(null); // null = cargando
   const [error, setError] = useState(false);
-  const [disenoId, setDisenoId] = useState(DISENOS[0].id);
-  const [medidas, setMedidas] = useState(() => medidasPorDefecto(DISENOS[0]));
-  const [acabado, setAcabado] = useState(ACABADOS[0].id);
+  const [disenoId, setDisenoId] = useState(proyectoInicial?.disenoId ?? DISENOS[0].id);
+  const [medidas, setMedidas] = useState(() => proyectoInicial?.medidas ?? medidasPorDefecto(DISENOS[0]));
+  const [acabado, setAcabado] = useState(proyectoInicial?.acabado ?? ACABADOS[0].id);
   const [aviso, setAviso] = useState("");
 
   useEffect(() => {
@@ -185,9 +186,11 @@ export default function Diseno({ carrito, onIrAlCarrito }) {
               </div>
             </div>
             {aviso && <p className="mensaje-exito" role="status">{aviso}</p>}
+            {onGuardarProyecto && <GuardarProyecto nombreInicial={proyectoInicial?.nombre} ambienteInicial={proyectoInicial?.ambiente} onGuardar={(nombre, ambiente) => onGuardarProyecto({ nombre, ambiente, disenoId, medidas: resultado.medidas, acabado })} />}
           </div>
         </>
       )}
     </section>
   );
 }
+

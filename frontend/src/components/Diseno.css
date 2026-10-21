@@ -15,3 +15,14 @@
 .diseno-avisos { background: #fff7e6; border: 1px solid #f0b429; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
 .diseno-avisos p { margin: 4px 0; }
 .diseno-detalle { display: block; color: #5c5c5c; font-size: 0.85rem; }
+
+.diseno-guardar { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--pm-line); }
+.diseno-guardar h3 { margin: 0 0 12px; font-family: var(--pm-font-display); color: var(--pm-navy-900); font-weight: 500; }
+.diseno-guardar-fila { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.diseno-guardar-fila .diseno-campo { min-width: 200px; flex: 1; }
+
+.proyectos-grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.proyecto-card { background: var(--pm-white); border: 1px solid var(--pm-line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.proyecto-card h3 { margin: 0; font-family: var(--pm-font-display); color: var(--pm-navy-900); font-weight: 500; font-size: 1.2rem; }
+.proyecto-card p { margin: 0; color: #5c5c5c; font-size: 0.9rem; }
+.proyecto-acciones { display: flex; gap: 8px; margin-top: auto; padding-top: 8px; }
