@@ -103,7 +103,7 @@ export default function App() {
           />
         );
       default:
-        return <Diseno />;
+        return <Diseno carrito={carrito} onIrAlCarrito={() => setVista("carrito")} />;
     }
   }
 
@@ -121,3 +121,4 @@ export default function App() {
     </Layout>
   );
 }
+
