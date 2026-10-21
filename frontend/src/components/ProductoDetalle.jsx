@@ -1,10 +1,11 @@
 import ProductosRecomendados from "./ProductosRecomendados";
+import "./Carrito.css";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
-export default function ProductoDetalle({ producto, esFavorito, onAlternarFavorito, onCerrar, onVerDetalle }) {
+export default function ProductoDetalle({ producto, esFavorito, onAlternarFavorito, onCerrar, onVerDetalle, onAgregarAlCarrito }) {
   if (!producto) return null;
 
   const caracteristicas = producto.caracteristicas
@@ -36,6 +37,17 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
             <p className={producto.stock > 0 ? "stock-disponible" : "stock-agotado"}>
               {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}
             </p>
+
+                        {onAgregarAlCarrito && (
+              <button
+                type="button"
+                className="btn-tan btn-carrito"
+                disabled={producto.stock <= 0}
+                onClick={() => onAgregarAlCarrito(producto)}
+              >
+                {producto.stock > 0 ? "🛒 Agregar al carrito" : "Sin stock"}
+              </button>
+            )}
 
             <button
               type="button"
