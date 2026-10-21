@@ -26,3 +26,5 @@
 .proyecto-card h3 { margin: 0; font-family: var(--pm-font-display); color: var(--pm-navy-900); font-weight: 500; font-size: 1.2rem; }
 .proyecto-card p { margin: 0; color: #5c5c5c; font-size: 0.9rem; }
 .proyecto-acciones { display: flex; gap: 8px; margin-top: auto; padding-top: 8px; }
+
+.diseno-pagina .cr-sub { margin-bottom: 16px; }
