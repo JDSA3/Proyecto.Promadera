@@ -1,10 +1,11 @@
 import ProductosRecomendados from "./ProductosRecomendados";
+import BotonCarrito from "./BotonCarrito.jsx";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
-export default function ProductoDetalle({ producto, esFavorito, onAlternarFavorito, onCerrar, onVerDetalle }) {
+export default function ProductoDetalle({ producto, esFavorito, onAlternarFavorito, onCerrar, onVerDetalle, onAgregarAlCarrito }) {
   if (!producto) return null;
 
   const caracteristicas = producto.caracteristicas
@@ -36,6 +37,10 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
             <p className={producto.stock > 0 ? "stock-disponible" : "stock-agotado"}>
               {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}
             </p>
+
+                          {onAgregarAlCarrito && (
+              <BotonCarrito key={producto.id} producto={producto} onAgregar={onAgregarAlCarrito} />
+            )}
 
             <button
               type="button"
