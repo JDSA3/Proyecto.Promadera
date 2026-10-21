@@ -32,6 +32,16 @@ export async function obtenerRecomendados(id, limite = 6) {
   return manejarRespuesta(res);
 }
 
+export async function obtenerPedidos({ clienteId, proveedorId } = {}) {
+  const params = new URLSearchParams();
+  if (clienteId) params.set("cliente_id", clienteId);
+  if (proveedorId) params.set("proveedor_id", proveedorId);
+
+  const url = `${API_BASE}/pedidos` + (params.toString() ? `?${params}` : "");
+  const res = await fetch(url);
+  return manejarRespuesta(res);
+}
+
 export async function crearProducto(data) {
   const res = await fetch(`${API_BASE}/productos`, {
     method: "POST",

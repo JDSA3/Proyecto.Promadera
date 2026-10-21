@@ -36,7 +36,7 @@ def cargar_datos_iniciales(session):
 
 def main():
     Base.metadata.create_all(engine)
-    print("Tablas creadas: categorias, productos, usuarios")
+    print("Tablas creadas: categorias, productos, usuarios, pedidos, pedido_items")
 
     with SessionLocal() as session, session.begin():
         cargar_datos_iniciales(session)
