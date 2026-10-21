@@ -1,5 +1,5 @@
 import ProductosRecomendados from "./ProductosRecomendados";
-import "./Carrito.css";
+import BotonCarrito from "./BotonCarrito.jsx";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
@@ -38,15 +38,8 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
               {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}
             </p>
 
-                        {onAgregarAlCarrito && (
-              <button
-                type="button"
-                className="btn-tan btn-carrito"
-                disabled={producto.stock <= 0}
-                onClick={() => onAgregarAlCarrito(producto)}
-              >
-                {producto.stock > 0 ? "🛒 Agregar al carrito" : "Sin stock"}
-              </button>
+                          {onAgregarAlCarrito && (
+              <BotonCarrito key={producto.id} producto={producto} onAgregar={onAgregarAlCarrito} />
             )}
 
             <button
