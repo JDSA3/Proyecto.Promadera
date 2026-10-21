@@ -153,7 +153,7 @@ export default function Stock({ usuario }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="5" className="tabla-vacia">No se pudo conectar con el servidor.</td>
+          <td colSpan="4" className="cr-vacio">No se pudo conectar con el servidor.</td>
         </tr>
       );
     }
@@ -161,7 +161,7 @@ export default function Stock({ usuario }) {
     if (filtrados.length === 0) {
       return (
         <tr>
-          <td colSpan="5" className="tabla-vacia">
+          <td colSpan="4" className="cr-vacio">
             {lista.length === 0
               ? "Todavía no tenés productos. Cargalos desde \"Mis Productos\"."
               : "No hay productos que coincidan con la búsqueda."}
@@ -174,18 +174,20 @@ export default function Stock({ usuario }) {
       return (
         <tr key={p.id}>
           <td>
-            <img
-              className="miniatura"
-              src={`/imagenes/${p.id}.webp`}
-              alt=""
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/logo.png";
-              }}
-            />
+            <div className="cr-prod">
+              <img
+                className="cr-miniatura"
+                src={`/imagenes/${p.id}.webp`}
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/logo.png";
+                }}
+              />
+              {p.nombre}
+            </div>
           </td>
-          <td>{p.nombre}</td>
-          <td><span className="chip-categoria">{p.categoria.nombre}</span></td>
+          <td><span className="cr-chip">{p.categoria.nombre}</span></td>
           <td>
             <CeldaStock
               producto={p}
@@ -193,20 +195,20 @@ export default function Stock({ usuario }) {
               onGuardar={guardarStock}
             />
           </td>
-          <td className={estado.clase}>{estado.texto}</td>
+          <td className={`cr-estado ${estado.id}`}>{estado.texto}</td>
         </tr>
       );
     });
   }
 
   return (
-    <section id="stock-seccion">
-      <div className="cabecera-productos">
+    <section className="cr-pagina" id="stock-seccion">
+      <div className="cr-cabecera">
         <div>
-          <h2>Stock</h2>
-          <p className="subtitulo-productos">
-            Controlá y ajustá el stock de <strong>{usuario.nombre}</strong>. Se avisa como
-            "stock bajo" cuando quedan {STOCK_BAJO} unidades o menos.
+          <h2>Control de stock</h2>
+          <p className="cr-sub">
+            Revisá y actualizá el stock de tus productos. Se avisa como "stock bajo" cuando
+            quedan {STOCK_BAJO} unidades o menos.
           </p>
         </div>
       </div>
@@ -242,7 +244,7 @@ export default function Stock({ usuario }) {
 
       {errorEdicion && <p className="error-campo" role="alert">{errorEdicion}</p>}
 
-      <div className="filtros-productos">
+      <div className="cr-filtros">
         <input
           type="text"
           placeholder="Buscar productos..."
@@ -256,11 +258,17 @@ export default function Stock({ usuario }) {
         </select>
       </div>
 
-      <div className="tabla-scroll">
-        <table className="tabla-productos">
+      {productos === null && !error && (
+        <>
+          <div className="cr-esqueleto" />
+          <div className="cr-esqueleto" />
+        </>
+      )}
+
+      <div className="cr-tabla-wrap">
+        <table className="cr-tabla">
           <thead>
             <tr>
-              <th>Imagen</th>
               <th>Producto</th>
               <th>Categoría</th>
               <th>Stock</th>
