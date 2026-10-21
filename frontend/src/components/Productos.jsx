@@ -3,7 +3,7 @@ import { obtenerCategorias, obtenerProductos } from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
 import ProductoDetalle from "./ProductoDetalle.jsx";
 
-export default function Productos({ favoritos, onAlternarFavorito }) {
+export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCarrito }) {
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState(null); // null = todavía no cargó
   const [error, setError] = useState(false);
@@ -104,6 +104,7 @@ export default function Productos({ favoritos, onAlternarFavorito }) {
         onAlternarFavorito={onAlternarFavorito}
         onCerrar={() => setDetalle(null)}
         onVerDetalle={setDetalle}
+        onAgregarAlCarrito={onAgregarAlCarrito}
       />
     </section>
   );
