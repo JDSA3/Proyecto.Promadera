@@ -10,6 +10,9 @@ import useFavoritos from "./useFavoritos.js";
 import useAuth from "./useAuth.js";
 import MisProductos from "./components/MisProductos.jsx";
 import Stock from "./components/Stock.jsx";
+import CorralonInicio from "./components/corralon/CorralonInicio.jsx";
+import CorralonPedidos from "./components/corralon/CorralonPedidos.jsx";
+import CorralonPerfil from "./components/corralon/CorralonPerfil.jsx";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
@@ -43,8 +46,22 @@ export default function App() {
 
   if (!usuario) return <Auth onLogin={handleLogin} />;
 
-  if (usuario.rol === "proveedor") {
-    const actual = MENU_CORRALON.find((m) => m.id === vista);
+    if (usuario.rol === "proveedor") {
+    function pantallaCorralon() {
+      switch (vista) {
+        case "productos":
+          return <MisProductos usuario={usuario} />;
+        case "stock":
+          return <Stock usuario={usuario} />;
+        case "pedidos":
+          return <CorralonPedidos usuario={usuario} />;
+        case "perfil":
+          return <CorralonPerfil usuario={usuario} />;
+        default:
+          return <CorralonInicio usuario={usuario} onIr={setVista} />;
+      }
+    }
+
     return (
       <Layout
         menu={MENU_CORRALON}
@@ -53,16 +70,7 @@ export default function App() {
         etiqueta="Corralón"
         onCerrarSesion={cerrarSesion}
       >
-        {vista === "productos" ? (
-          <MisProductos usuario={usuario} />
-        ) : vista === "stock" ? (
-          <Stock usuario={usuario} />
-        ) : (
-          <>
-            <h2>{actual ? actual.label : "Inicio"}</h2>
-            <p className="mensaje">Hola, {usuario.nombre}. Próximamente.</p>
-          </>
-        )}
+        {pantallaCorralon()}
       </Layout>
     );
   }

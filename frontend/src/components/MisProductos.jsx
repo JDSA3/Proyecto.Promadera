@@ -1,39 +1,28 @@
 import { useEffect, useState } from "react";
 import {
   obtenerCategorias,
-  obtenerProductos,
   crearProducto,
   editarProducto,
   eliminarProducto,
 } from "../api.js";
 import ProductoForm from "./ProductoForm.jsx";
-
-// TODO: cuando el backend guarde un stock mínimo por producto, usarlo acá
-const STOCK_BAJO = 10;
-
-function estadoDe(stock) {
-  if (stock <= 0) return { texto: "Sin stock", clase: "estado-agotado" };
-  if (stock <= STOCK_BAJO) return { texto: "Stock bajo", clase: "estado-bajo" };
-  return { texto: "Disponible", clase: "estado-ok" };
-}
-
-function formatearPrecio(precio) {
-  return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
-}
+import useProductosCorralon, {
+  estadoStock,
+  formatearPrecio,
+} from "./corralon/useProductosCorralon.js";
 
 // `usuario` viene de useAuth, que lo lee de localStorage al abrir la app
 export default function MisProductos({ usuario }) {
-  const [productos, setProductos] = useState(null); // null = todavía no cargó
+  const { productos, error, recargar } = useProductosCorralon(usuario.id);
   const [categorias, setCategorias] = useState([]);
-  const [error, setError] = useState(false);
-  const [errorCrud, setErrorCrud] = useState("");
-  const [recarga, setRecarga] = useState(0);
 
   const [busqueda, setBusqueda] = useState("");
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
+  const [estadoFiltro, setEstadoFiltro] = useState("");
 
   const [formAbierto, setFormAbierto] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [aviso, setAviso] = useState({ tipo: "", texto: "" });
 
   useEffect(() => {
     obtenerCategorias()
@@ -41,27 +30,9 @@ export default function MisProductos({ usuario }) {
       .catch((err) => console.error("No se pudieron cargar las categorías:", err));
   }, []);
 
-  useEffect(() => {
-    let cancelado = false;
-    obtenerProductos({ proveedorId: usuario.id })
-      .then((datos) => {
-        if (cancelado) return;
-        setProductos(datos);
-        setError(false);
-      })
-      .catch((err) => {
-        if (cancelado) return;
-        console.error("No se pudieron cargar tus productos:", err);
-        setError(true);
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, [usuario.id, recarga]);
-
   function abrirAlta() {
     setEditando(null);
-    setErrorCrud("");
+    setAviso({ tipo: "", texto: "" });
     setFormAbierto(true);
   }
 
@@ -74,7 +45,7 @@ export default function MisProductos({ usuario }) {
       stock: p.stock,
       categoria_id: p.categoria.id,
     });
-    setErrorCrud("");
+    setAviso({ tipo: "", texto: "" });
     setFormAbierto(true);
   }
 
@@ -87,92 +58,88 @@ export default function MisProductos({ usuario }) {
     try {
       if (editando) {
         await editarProducto(editando.id, data);
+        setAviso({ tipo: "ok", texto: "Cambios guardados." });
       } else {
         await crearProducto({ ...data, proveedor_id: usuario.id });
+        setAviso({ tipo: "ok", texto: "Producto creado correctamente." });
       }
-      setErrorCrud("");
       cerrarForm();
-      setRecarga((n) => n + 1);
+      recargar();
     } catch (err) {
-      setErrorCrud(err.message);
+      setAviso({ tipo: "error", texto: `No se pudo guardar: ${err.message}` });
     }
   }
 
   async function handleEliminar(p) {
-    if (!window.confirm(`¿Eliminar "${p.nombre}"?`)) return;
+    if (!window.confirm(`¿Dar de baja "${p.nombre}"? Dejará de verse en el catálogo.`)) return;
     try {
       await eliminarProducto(p.id);
-      setErrorCrud("");
-      setRecarga((n) => n + 1);
+      setAviso({ tipo: "ok", texto: "Producto dado de baja." });
+      recargar();
     } catch (err) {
-      setErrorCrud(err.message);
+      setAviso({ tipo: "error", texto: `No se pudo dar de baja: ${err.message}` });
     }
   }
 
   const filtrados = (productos ?? []).filter((p) => {
     const coincideNombre = p.nombre.toLowerCase().includes(busqueda.trim().toLowerCase());
     const coincideCategoria = !categoriaFiltro || String(p.categoria.id) === categoriaFiltro;
-    return coincideNombre && coincideCategoria;
+    const coincideEstado = !estadoFiltro || estadoStock(p.stock).clase === estadoFiltro;
+    return coincideNombre && coincideCategoria && coincideEstado;
   });
 
   function cuerpoTabla() {
-    if (error) {
-      return (
-        <tr>
-          <td colSpan="7" className="tabla-vacia">No se pudo conectar con el servidor.</td>
-        </tr>
-      );
-    }
-    if (productos === null) return null;
     if (filtrados.length === 0) {
       return (
         <tr>
-          <td colSpan="7" className="tabla-vacia">
+          <td colSpan="6" className="cr-vacio">
             {productos.length === 0
-              ? "Todavía no cargaste productos. Tocá \"+ Agregar Productos\"."
-              : "No hay productos que coincidan con la búsqueda."}
+              ? "Todavía no cargaste ningún producto."
+              : "Ningún producto coincide con los filtros."}
           </td>
         </tr>
       );
     }
     return filtrados.map((p) => {
-      const estado = estadoDe(p.stock);
+      const est = estadoStock(p.stock);
       return (
         <tr key={p.id}>
           <td>
-            <img
-              className="miniatura"
-              src={`/imagenes/${p.id}.webp`}
-              alt=""
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/logo.png";
-              }}
-            />
+            <div className="cr-prod">
+              <img
+                className="cr-miniatura"
+                src={`/imagenes/${p.id}.webp`}
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/logo.png";
+                }}
+              />
+              {p.nombre}
+            </div>
           </td>
-          <td>{p.nombre}</td>
-          <td><span className="chip-categoria">{p.categoria.nombre}</span></td>
+          <td><span className="cr-chip">{p.categoria.nombre}</span></td>
           <td>{formatearPrecio(p.precio)}</td>
           <td>{p.stock}</td>
-          <td className={estado.clase}>{estado.texto}</td>
-          <td className="celda-acciones">
+          <td className={`cr-estado ${est.clase}`}>{est.texto}</td>
+          <td className="cr-acciones">
             <button
               type="button"
-              className="btn-icono"
+              className="cr-btn-icono"
               onClick={() => abrirEdicion(p)}
               aria-label={`Editar ${p.nombre}`}
               title="Editar"
             >
-              ✏️
+              ✎
             </button>
             <button
               type="button"
-              className="btn-icono"
+              className="cr-btn-icono peligro"
               onClick={() => handleEliminar(p)}
-              aria-label={`Eliminar ${p.nombre}`}
-              title="Eliminar"
+              aria-label={`Dar de baja ${p.nombre}`}
+              title="Dar de baja"
             >
-              🗑️
+              🗑
             </button>
           </td>
         </tr>
@@ -181,16 +148,16 @@ export default function MisProductos({ usuario }) {
   }
 
   return (
-    <section id="mis-productos-seccion">
-      <div className="cabecera-productos">
+    <section className="cr-pagina" id="mis-productos-seccion">
+      <div className="cr-cabecera">
         <div>
           <h2>Mis productos</h2>
-          <p className="subtitulo-productos">
+          <p className="cr-sub">
             Gestioná el catálogo de productos de <strong>{usuario.nombre}</strong>
           </p>
         </div>
         <button type="button" className="btn-tan" onClick={abrirAlta}>
-          + Agregar Productos
+          + Agregar producto
         </button>
       </div>
 
@@ -211,11 +178,19 @@ export default function MisProductos({ usuario }) {
           />
         </div>
       )}
-      {errorCrud && <p className="error-campo">{errorCrud}</p>}
 
-      <div className="filtros-productos">
+      {aviso.texto && (
+        <p
+          className={aviso.tipo === "ok" ? "mensaje-exito" : "error-campo"}
+          role="status"
+        >
+          {aviso.texto}
+        </p>
+      )}
+
+      <div className="cr-filtros">
         <input
-          type="text"
+          type="search"
           placeholder="Buscar productos..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
@@ -226,24 +201,45 @@ export default function MisProductos({ usuario }) {
             <option key={c.id} value={c.id}>{c.nombre}</option>
           ))}
         </select>
+        <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)}>
+          <option value="">Todos los estados</option>
+          <option value="ok">Disponible</option>
+          <option value="bajo">Stock bajo</option>
+          <option value="agotado">Agotado</option>
+        </select>
       </div>
 
-      <div className="tabla-scroll">
-        <table className="tabla-productos">
-          <thead>
-            <tr>
-              <th>Imagen</th>
-              <th>Producto</th>
-              <th>Categoría</th>
-              <th>Precio</th>
-              <th>Stock</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>{cuerpoTabla()}</tbody>
-        </table>
-      </div>
+      {error && (
+        <p className="mensaje">
+          No se pudo conectar con el servidor. Verificá que la API esté encendida.
+        </p>
+      )}
+
+      {productos === null && !error && (
+        <>
+          <div className="cr-esqueleto" />
+          <div className="cr-esqueleto" />
+          <div className="cr-esqueleto" />
+        </>
+      )}
+
+      {productos && (
+        <div className="cr-tabla-wrap">
+          <table className="cr-tabla">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>{cuerpoTabla()}</tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }
