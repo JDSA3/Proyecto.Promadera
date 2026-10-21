@@ -1,3 +1,13 @@
 ﻿/* ===== CARRITO ===== */
 .btn-carrito { width: 100%; margin-top: 16px; }
 .btn-carrito:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.carrito-pagina { max-width: 900px; }
+.carrito-cantidad { display: inline-flex; align-items: center; gap: 10px; }
+.carrito-cantidad button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--pm-tan-500); background: var(--pm-white); color: var(--pm-navy-800); font-size: 1rem; cursor: pointer; }
+.carrito-cantidad button:disabled { opacity: 0.4; cursor: not-allowed; }
+.carrito-resumen { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 16px; padding: 16px 20px; background: var(--pm-white); border: 1px solid var(--pm-line); border-radius: 14px; }
+.carrito-total { font-family: var(--pm-font-display); font-size: 1.6rem; color: var(--pm-navy-900); }
+.carrito-acciones { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-secundario { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--pm-navy-800); background: var(--pm-white); color: var(--pm-navy-800); font-family: var(--pm-font-display); font-size: 1rem; cursor: pointer; }
+.btn-secundario:disabled, .btn-tan:disabled { opacity: 0.5; cursor: not-allowed; }
