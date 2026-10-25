@@ -5,7 +5,7 @@ import "./Carrito.css";
 const dinero = (n) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 const limpiar = (msg) => String(msg).replace(/^"|"$/g, "");
 
-export default function Carrito({ usuario, carrito, onSeguirComprando }) {
+export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedidos }) {
   const { items, cambiarCantidad, quitar, vaciar, total } = carrito;
   const [pedido, setPedido] = useState(null); // pedido ya creado, pendiente de pago
   const [pagado, setPagado] = useState(false);
@@ -61,7 +61,9 @@ export default function Carrito({ usuario, carrito, onSeguirComprando }) {
     return (
       <section className="carrito-pagina">
         <h2>Pedido #{pedido.id}</h2>
-        <p className="cr-sub">Tu pedido está creado y pendiente de pago.</p>
+        <p className="cr-sub">
+          Tu pedido está creado y pendiente de pago. Si no pagás ahora, lo encontrás en "Mis Pedidos".
+        </p>
         <div className="cr-tabla-wrap">
           <table className="cr-tabla">
             <thead>
@@ -81,6 +83,11 @@ export default function Carrito({ usuario, carrito, onSeguirComprando }) {
         <div className="carrito-resumen">
           <span className="carrito-total">Total: {dinero(pedido.total)}</span>
           <div className="carrito-acciones">
+            {onVerPedidos && (
+              <button type="button" className="btn-secundario" disabled={trabajando} onClick={onVerPedidos}>
+                Pagar más tarde
+              </button>
+            )}
             <button type="button" className="btn-tan" disabled={trabajando} onClick={pagarConMercadoPago}>
               Pagar con Mercado Pago
             </button>

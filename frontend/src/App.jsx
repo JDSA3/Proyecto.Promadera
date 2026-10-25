@@ -7,6 +7,7 @@ import Productos from "./components/Productos.jsx";
 import Favoritos from "./components/Favoritos.jsx";
 import Localizacion from "./components/Localizacion.jsx";
 import Carrito from "./components/Carrito.jsx";
+import MisPedidos from "./components/MisPedidos.jsx";
 import useFavoritos from "./useFavoritos.js";
 import useCarrito from "./useCarrito.js";
 import useProyectos from "./useProyectos.js";
@@ -104,8 +105,11 @@ export default function App() {
             usuario={usuario}
             carrito={carrito}
             onSeguirComprando={() => setVista("insumos")}
+            onVerPedidos={() => setVista("mispedidos")}
           />
         );
+      case "mispedidos":
+        return <MisPedidos usuario={usuario} />;
       default:
         return <Diseno key={proyectoAbierto?.id ?? "nuevo"} carrito={carrito} onIrAlCarrito={() => setVista("carrito")} proyectoInicial={proyectoAbierto} onGuardarProyecto={misProyectos.guardar} />;
     }
@@ -116,6 +120,7 @@ export default function App() {
       menu={[
         ...MENU_CARPINTERO,
         { id: "carrito", label: carrito.cantidadTotal > 0 ? `Carrito (${carrito.cantidadTotal})` : "Carrito" },
+        { id: "mispedidos", label: "Mis Pedidos" },
       ]}
       vista={vista}
       onCambiarVista={cambiarVista}
