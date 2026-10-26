@@ -147,3 +147,52 @@ class PedidoCorralonDB(Base):
     pedido: Mapped[PedidoDB] = relationship(back_populates="corralones")
     proveedor: Mapped[UsuarioDB | None] = relationship()
     items: Mapped[list[PedidoItemDB]] = relationship(back_populates="corralon")
+
+
+class ProveedorInsumoDB(Base):
+    """Proveedor al que un corralón le compra mercadería."""
+
+    __tablename__ = "proveedores_insumo"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    corralon_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    nombre: Mapped[str] = mapped_column(String(100), nullable=False)
+    telefono: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
+
+
+class OrdenCompraDB(Base):
+    __tablename__ = "ordenes_compra"
+    __table_args__ = (
+        CheckConstraint("estado IN ('pendiente', 'recibida')", name="ck_ordenes_compra_estado"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    corralon_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    proveedor_insumo_id: Mapped[int] = mapped_column(ForeignKey("proveedores_insumo.id"), nullable=False)
+    estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente", server_default="pendiente")
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    recibida_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    proveedor: Mapped[ProveedorInsumoDB] = relationship()
+    items: Mapped[list["OrdenCompraItemDB"]] = relationship(
+        back_populates="orden", cascade="all, delete-orphan", order_by="OrdenCompraItemDB.id"
+    )
+
+
+class OrdenCompraItemDB(Base):
+    __tablename__ = "orden_compra_items"
+    __table_args__ = (
+        CheckConstraint("cantidad > 0", name="ck_orden_compra_items_cantidad_positiva"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    orden_compra_id: Mapped[int] = mapped_column(
+        ForeignKey("ordenes_compra.id", ondelete="CASCADE"), nullable=False
+    )
+    producto_id: Mapped[int] = mapped_column(ForeignKey("productos.id"), nullable=False)
+    cantidad: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    orden: Mapped[OrdenCompraDB] = relationship(back_populates="items")
+    producto: Mapped[ProductoDB] = relationship()
