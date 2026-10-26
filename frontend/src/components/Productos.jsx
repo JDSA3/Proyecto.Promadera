@@ -12,12 +12,29 @@ export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCa
   const [busquedaEspera, setBusquedaEspera] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [detalle, setDetalle] = useState(null);
+  const [proveedorId, setProveedorId] = useState("");
+  const [corralones, setCorralones] = useState([]);
 
   // Cargar categorías una sola vez, al montar el componente
   useEffect(() => {
     obtenerCategorias()
       .then(setCategorias)
       .catch((err) => console.error("No se pudieron cargar las categorías:", err));
+  }, []);
+
+    // Lista de corralones para el filtro: sale de los productos que traen proveedor_nombre
+  useEffect(() => {
+    obtenerProductos()
+      .then((datos) => {
+        const porId = new Map();
+        datos.forEach((p) => {
+          if (p.proveedor_id && p.proveedor_nombre) porId.set(p.proveedor_id, p.proveedor_nombre);
+        });
+        setCorralones(
+          [...porId].map(([id, nombre]) => ({ id, nombre })).sort((a, b) => a.id - b.id)
+        );
+      })
+      .catch((err) => console.error("No se pudieron cargar los corralones:", err));
   }, []);
 
   // Espera 300 ms después de dejar de escribir antes de buscar
@@ -29,7 +46,7 @@ export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCa
   // Cargar productos al inicio y cada vez que cambia la búsqueda o la categoría
   useEffect(() => {
     let cancelado = false;
-    obtenerProductos({ query: busquedaEspera, categoriaId })
+        obtenerProductos({ query: busquedaEspera, categoriaId, proveedorId })
       .then((datos) => {
         if (cancelado) return;
         setProductos(datos);
@@ -43,7 +60,7 @@ export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCa
     return () => {
       cancelado = true;
     };
-  }, [busquedaEspera, categoriaId]);
+  }, [busquedaEspera, categoriaId, proveedorId]);
 
   const activos = productos ? productos.filter((p) => p.activo) : [];
 
@@ -97,6 +114,19 @@ export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCa
       </div>
 
       <div id="productos">{contenido()}</div>
+
+              <select
+          id="corralon"
+          value={proveedorId}
+          onChange={(e) => setProveedorId(e.target.value)}
+        >
+          <option value="">Todos los corralones</option>
+          {corralones.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
+            </option>
+          ))}
+        </select>
 
       <ProductoDetalle
         producto={detalle}

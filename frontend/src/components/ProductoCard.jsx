@@ -38,6 +38,9 @@ export default function ProductoCard({ producto, esFavorito, onAlternarFavorito,
       />
       <h3>{producto.nombre}</h3>
       <p className="categoria">{producto.categoria.nombre}</p>
+            {producto.proveedor_nombre && (
+      <p className="corralon-nombre">🏬 {producto.proveedor_nombre}</p>
+      )}
       <p className="precio">{formatearPrecio(producto.precio)}</p>
       <p className="stock">Stock: {producto.stock}</p>
     </div>

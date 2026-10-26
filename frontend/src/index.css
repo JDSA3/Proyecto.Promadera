@@ -946,3 +946,5 @@ body {
 /* Cargando */
 .cr-esqueleto { height: 52px; border-radius: 10px; margin-bottom: 8px; background: linear-gradient(90deg, #e6dfd8 25%, #f1ece7 50%, #e6dfd8 75%); background-size: 200% 100%; animation: cr-brillo 1.2s infinite; }
 @keyframes cr-brillo { to { background-position: -200% 0; } }
+
+.corralon-nombre { margin: 2px 0 0; font-size: 0.85rem; color: var(--pm-navy-600); }
