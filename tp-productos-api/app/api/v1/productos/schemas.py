@@ -39,6 +39,7 @@ class ProductoResponse(ProductoBase):
     activo: bool
     categoria: CategoriaOut
     proveedor_id: Optional[int] = None
+    proveedor_nombre: Optional[str] = None
     nombre: str
     precio: float
     largo_cm: Optional[float] = None

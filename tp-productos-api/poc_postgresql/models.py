@@ -46,6 +46,7 @@ class ProductoDB(Base):
     espesor_mm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
     
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
+    proveedor: Mapped["UsuarioDB | None"] = relationship()
 
 
 class UsuarioDB(Base):
