@@ -63,6 +63,49 @@ CREATE TABLE IF NOT EXISTS producto_compatible (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_producto_compatible_pareja
     ON producto_compatible (LEAST(producto_id, compatible_id), GREATEST(producto_id, compatible_id));
 
+CREATE TABLE IF NOT EXISTS pedido_corralon (
+    id                SERIAL PRIMARY KEY,
+    pedido_id         INTEGER        NOT NULL REFERENCES pedidos (id) ON DELETE CASCADE,
+    proveedor_id      INTEGER        REFERENCES usuarios (id),
+    estado            VARCHAR(20)    NOT NULL DEFAULT 'pendiente',
+    total             NUMERIC(12, 2) NOT NULL,
+    motivo_devolucion VARCHAR(300),
+    CONSTRAINT uq_pedido_corralon UNIQUE NULLS NOT DISTINCT (pedido_id, proveedor_id),
+    CONSTRAINT ck_pedido_corralon_estado
+        CHECK (estado IN ('pendiente', 'confirmado', 'enviado', 'entregado', 'devuelto', 'cancelado')),
+    CONSTRAINT ck_pedido_corralon_total_positivo CHECK (total >= 0)
+);
+
+ALTER TABLE pedido_items
+    ADD COLUMN IF NOT EXISTS pedido_corralon_id INTEGER REFERENCES pedido_corralon (id) ON DELETE CASCADE;
+
+CREATE TABLE IF NOT EXISTS proveedores_insumo (
+    id          SERIAL PRIMARY KEY,
+    corralon_id INTEGER      NOT NULL REFERENCES usuarios (id),
+    nombre      VARCHAR(100) NOT NULL,
+    telefono    VARCHAR(50),
+    email       VARCHAR(255),
+    activo      BOOLEAN      NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS ordenes_compra (
+    id                  SERIAL PRIMARY KEY,
+    corralon_id         INTEGER     NOT NULL REFERENCES usuarios (id),
+    proveedor_insumo_id INTEGER     NOT NULL REFERENCES proveedores_insumo (id),
+    estado              VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    creado_en           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    recibida_en         TIMESTAMPTZ,
+    CONSTRAINT ck_ordenes_compra_estado CHECK (estado IN ('pendiente', 'recibida'))
+);
+
+CREATE TABLE IF NOT EXISTS orden_compra_items (
+    id              SERIAL PRIMARY KEY,
+    orden_compra_id INTEGER NOT NULL REFERENCES ordenes_compra (id) ON DELETE CASCADE,
+    producto_id     INTEGER NOT NULL REFERENCES productos (id),
+    cantidad        INTEGER NOT NULL,
+    CONSTRAINT ck_orden_compra_items_cantidad_positiva CHECK (cantidad > 0)
+);
+
 INSERT INTO categorias (id, nombre) VALUES
     (1, 'Maderas y Tableros'),
     (2, 'Herrajes'),
