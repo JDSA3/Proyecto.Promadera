@@ -2,7 +2,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from poc_postgresql.database import SessionLocal
-from poc_postgresql.models import PedidoDB, PedidoItemDB, ProductoDB, UsuarioDB
+from poc_postgresql.models import (
+    PedidoCorralonDB,
+    PedidoDB,
+    PedidoItemDB,
+    ProductoDB,
+    UsuarioDB,
+)
 
 
 class DatosInvalidos(Exception):
@@ -24,12 +30,25 @@ def _item_to_dict(item: PedidoItemDB):
     }
 
 
+def _corralon_to_dict(corralon: PedidoCorralonDB):
+    return {
+        "proveedor_id": corralon.proveedor_id,
+        "proveedor_nombre": corralon.proveedor.nombre if corralon.proveedor else None,
+        "estado": corralon.estado,
+        "total": float(corralon.total),
+        "motivo_devolucion": corralon.motivo_devolucion,
+        "items": [_item_to_dict(item) for item in corralon.items],
+    }
+
+
 def _to_dict(pedido: PedidoDB, proveedor_id: int | None = None):
     items = [_item_to_dict(item) for item in pedido.items]
+    corralones = [_corralon_to_dict(c) for c in pedido.corralones]
     total = float(pedido.total)
 
     if proveedor_id is not None:
         items = [item for item in items if item["proveedor_id"] == proveedor_id]
+        corralones = [c for c in corralones if c["proveedor_id"] == proveedor_id]
         total = sum(item["subtotal"] for item in items)
 
     return {
@@ -39,6 +58,7 @@ def _to_dict(pedido: PedidoDB, proveedor_id: int | None = None):
         "creado_en": pedido.creado_en,
         "cliente": {"id": pedido.cliente.id, "nombre": pedido.cliente.nombre},
         "items": items,
+        "corralones": corralones,
     }
 
 
@@ -46,6 +66,10 @@ def _consulta_pedidos():
     return select(PedidoDB).options(
         selectinload(PedidoDB.cliente),
         selectinload(PedidoDB.items).selectinload(PedidoItemDB.producto),
+        selectinload(PedidoDB.corralones).selectinload(PedidoCorralonDB.proveedor),
+        selectinload(PedidoDB.corralones)
+        .selectinload(PedidoCorralonDB.items)
+        .selectinload(PedidoItemDB.producto),
     )
 
 
@@ -110,6 +134,7 @@ def create(data):
 
         pedido = PedidoDB(cliente=cliente, estado="pendiente", total=0)
         total = 0
+        corralones: dict[int | None, PedidoCorralonDB] = {}
 
         for producto_id, cantidad in cantidades.items():
             producto = por_id.get(producto_id)
@@ -124,9 +149,16 @@ def create(data):
                 )
 
             producto.stock -= cantidad
-            pedido.items.append(
-                PedidoItemDB(producto=producto, cantidad=cantidad, precio_unitario=producto.precio)
-            )
+            corralon = corralones.get(producto.proveedor_id)
+            if corralon is None:
+                corralon = PedidoCorralonDB(proveedor_id=producto.proveedor_id, estado="pendiente", total=0)
+                corralones[producto.proveedor_id] = corralon
+                pedido.corralones.append(corralon)
+
+            item = PedidoItemDB(producto=producto, cantidad=cantidad, precio_unitario=producto.precio)
+            pedido.items.append(item)
+            corralon.items.append(item)
+            corralon.total += producto.precio * cantidad
             total += producto.precio * cantidad
 
         pedido.total = total

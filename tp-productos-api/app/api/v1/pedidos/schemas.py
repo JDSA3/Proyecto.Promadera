@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 Estado = Literal["pendiente", "pagado", "cancelado"]
+EstadoCorralon = Literal["pendiente", "confirmado", "enviado", "entregado", "devuelto", "cancelado"]
 
 
 class PedidoItemCreate(BaseModel):
@@ -30,6 +31,15 @@ class PedidoItemResponse(BaseModel):
     subtotal: float
 
 
+class CorralonPedidoResponse(BaseModel):
+    proveedor_id: int | None = None
+    proveedor_nombre: str | None = None
+    estado: EstadoCorralon
+    total: float
+    motivo_devolucion: str | None = None
+    items: list[PedidoItemResponse]
+
+
 class PedidoResponse(BaseModel):
     id: int
     estado: Estado
@@ -37,3 +47,4 @@ class PedidoResponse(BaseModel):
     creado_en: datetime
     cliente: ClienteOut
     items: list[PedidoItemResponse]
+    corralones: list[CorralonPedidoResponse]
