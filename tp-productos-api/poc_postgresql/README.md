@@ -14,6 +14,7 @@ No modifica la API actual: el router y el repository siguen usando las listas.
 | `schema.sql` | Lo mismo que `crear_tablas.py`, pero en SQL para pegar en el SQL Editor de Supabase. |
 | `migracion_proveedor_id.sql` | Agrega la columna `proveedor_id` a la tabla `productos` en una base que ya existe, sin borrar datos. |
 | `migracion_pedidos.sql` | Agrega las tablas `pedidos` y `pedido_items` a una base que ya existe, sin borrar datos. |
+| `migracion_pedido_corralon.sql` | Agrega `pedido_corralon` (una sub-orden por corralón) y reparte los pedidos que ya existen. |
 
 ## Tablas
 
@@ -92,6 +93,29 @@ Endpoints (`app/api/v1/pedidos/`):
 - `GET /api/v1/pedidos?cliente_id=1`: pedidos de un cliente.
 - `GET /api/v1/pedidos?proveedor_id=2`: pedidos con productos de ese proveedor (solo sus items, y el total de esos items).
 - `GET /api/v1/pedidos/{id}`: un pedido (404 si no existe).
+
+### Sub-órdenes por corralón
+
+Un pedido puede tener productos de varios corralones. `pedidos` sigue siendo la orden del carpintero (y lleva el
+pago), y `pedido_corralon` guarda la parte de cada corralón, con su propio estado:
+
+```
+pedido_corralon
+------------------------------------------------------------
+id                SERIAL PK
+pedido_id         INTEGER FK (pedidos)
+proveedor_id      INTEGER FK (usuarios)   un solo registro por pedido y corralón
+estado            VARCHAR(20)  pendiente, confirmado, enviado, entregado, devuelto, cancelado
+total             NUMERIC(12,2)
+motivo_devolucion VARCHAR(300)
+```
+
+Cada fila de `pedido_items` apunta a su sub-orden con `pedido_corralon_id`. Para agregarlo a Supabase:
+**SQL Editor** > pegar `migracion_pedido_corralon.sql` > **Run** (también reparte los pedidos que ya existen).
+
+`POST /api/v1/pedidos` crea una sub-orden por corralón, y todas las respuestas de pedidos traen
+`corralones: [{proveedor_id, proveedor_nombre, estado, total, motivo_devolucion, items}]`.
+Con `?proveedor_id=` solo aparece la sub-orden de ese corralón.
 
 ## Pagos
 

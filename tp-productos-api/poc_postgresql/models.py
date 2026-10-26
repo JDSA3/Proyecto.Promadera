@@ -8,6 +8,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    UniqueConstraint,
     func,
     true,
 )
@@ -46,6 +47,7 @@ class ProductoDB(Base):
     espesor_mm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
     
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
+    proveedor: Mapped["UsuarioDB | None"] = relationship()
 
 
 class UsuarioDB(Base):
@@ -77,6 +79,9 @@ class PedidoDB(Base):
 
     cliente: Mapped[UsuarioDB] = relationship()
     items: Mapped[list["PedidoItemDB"]] = relationship(back_populates="pedido", cascade="all, delete-orphan")
+    corralones: Mapped[list["PedidoCorralonDB"]] = relationship(
+        back_populates="pedido", cascade="all, delete-orphan", order_by="PedidoCorralonDB.id"
+    )
 
 
 class PedidoItemDB(Base):
@@ -91,9 +96,13 @@ class PedidoItemDB(Base):
     producto_id: Mapped[int] = mapped_column(ForeignKey("productos.id"), nullable=False)
     cantidad: Mapped[int] = mapped_column(Integer, nullable=False)
     precio_unitario: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    pedido_corralon_id: Mapped[int | None] = mapped_column(
+        ForeignKey("pedido_corralon.id", ondelete="CASCADE"), nullable=True
+    )
 
     pedido: Mapped[PedidoDB] = relationship(back_populates="items")
     producto: Mapped[ProductoDB] = relationship()
+    corralon: Mapped["PedidoCorralonDB | None"] = relationship(back_populates="items")
 
     
 class ProductoCompatibleDB(Base):
@@ -111,3 +120,30 @@ class ProductoCompatibleDB(Base):
         ForeignKey("productos.id", ondelete="CASCADE"), primary_key=True
     )
     motivo: Mapped[str] = mapped_column(String(150), nullable=False, default="", server_default="")
+
+
+class PedidoCorralonDB(Base):
+    """Parte de un pedido que le toca a un corralón (una fila por corralón del pedido)."""
+
+    __tablename__ = "pedido_corralon"
+    __table_args__ = (
+        UniqueConstraint(
+            "pedido_id", "proveedor_id", name="uq_pedido_corralon", postgresql_nulls_not_distinct=True
+        ),
+        CheckConstraint(
+            "estado IN ('pendiente', 'confirmado', 'enviado', 'entregado', 'devuelto', 'cancelado')",
+            name="ck_pedido_corralon_estado",
+        ),
+        CheckConstraint("total >= 0", name="ck_pedido_corralon_total_positivo"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    pedido_id: Mapped[int] = mapped_column(ForeignKey("pedidos.id", ondelete="CASCADE"), nullable=False)
+    proveedor_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
+    estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente", server_default="pendiente")
+    total: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    motivo_devolucion: Mapped[str | None] = mapped_column(String(300), nullable=True)
+
+    pedido: Mapped[PedidoDB] = relationship(back_populates="corralones")
+    proveedor: Mapped[UsuarioDB | None] = relationship()
+    items: Mapped[list[PedidoItemDB]] = relationship(back_populates="corralon")

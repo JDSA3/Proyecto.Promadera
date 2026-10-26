@@ -13,7 +13,7 @@ router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
     description=(
         "Devuelve los pedidos, del más nuevo al más viejo. Con cliente_id muestra los pedidos de ese cliente. "
         "Con proveedor_id muestra los pedidos que tienen productos de ese proveedor: solo aparecen sus items "
-        "y el total es la suma de esos items."
+        "y su parte en corralones, y el total es la suma de esos items."
     ),
 )
 def listar_pedidos(cliente_id: int | None = None, proveedor_id: int | None = None):
@@ -24,6 +24,10 @@ def listar_pedidos(cliente_id: int | None = None, proveedor_id: int | None = Non
     "/{pedido_id}",
     response_model=PedidoResponse,
     summary="Obtener un pedido por ID",
+    description=(
+        "Devuelve el pedido con sus items y, en corralones, una sub-orden por corralón con su estado, "
+        "total, motivo de devolución e items."
+    ),
     responses={404: {"description": "Pedido no encontrado"}},
 )
 def obtener_pedido(pedido_id: int):
@@ -44,7 +48,8 @@ def obtener_pedido(pedido_id: int):
     summary="Crear un pedido",
     description=(
         "Crea un pedido en estado pendiente para un cliente. Los precios se toman de la base, no del frontend. "
-        "Si hay stock de todos los productos, lo descuenta; si falta stock de alguno, no se guarda nada."
+        "Si hay stock de todos los productos, lo descuenta; si falta stock de alguno, no se guarda nada. "
+        "Genera una sub-orden (en corralones) por cada corralón de los productos, en estado pendiente."
     ),
     responses={
         400: {"description": "El cliente o algún producto no existe (o el usuario no es cliente)"},
