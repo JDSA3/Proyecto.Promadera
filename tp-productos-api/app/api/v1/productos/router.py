@@ -16,7 +16,7 @@ router = APIRouter(prefix="/productos", tags=["Productos"])
     "",
     response_model=list[ProductoResponse],
     summary="Listar productos",
-    description="Devuelve la lista de productos. Permite filtrar por texto en el nombre (query) y/o por categoria_id.",
+    description="Devuelve la lista de productos con el nombre de su corralón (proveedor_nombre). Permite filtrar por texto en el nombre (query), por categoria_id y/o por corralón (proveedor_id).",
 )
 def listar_productos(
     query: str | None = None,

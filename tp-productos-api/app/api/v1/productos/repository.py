@@ -1,4 +1,5 @@
 from sqlalchemy import or_, select
+from sqlalchemy.orm import selectinload
 
 from poc_postgresql.database import SessionLocal
 from poc_postgresql.models import (
@@ -19,6 +20,7 @@ def _to_dict(producto: ProductoDB):
         "stock": producto.stock,
         "activo": producto.activo,
         "proveedor_id": producto.proveedor_id,
+        "proveedor_nombre": producto.proveedor.nombre if producto.proveedor else None,
         "largo_cm": float(producto.largo_cm) if producto.largo_cm is not None else None,
         "ancho_cm": float(producto.ancho_cm) if producto.ancho_cm is not None else None,
         "espesor_mm": float(producto.espesor_mm) if producto.espesor_mm is not None else None,
@@ -36,6 +38,7 @@ def list_productos(
 ):
     consulta = (
         select(ProductoDB)
+        .options(selectinload(ProductoDB.categoria), selectinload(ProductoDB.proveedor))
         .where(ProductoDB.activo.is_(True))
         .order_by(ProductoDB.id)
     )
