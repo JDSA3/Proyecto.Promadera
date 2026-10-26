@@ -15,6 +15,7 @@ No modifica la API actual: el router y el repository siguen usando las listas.
 | `migracion_proveedor_id.sql` | Agrega la columna `proveedor_id` a la tabla `productos` en una base que ya existe, sin borrar datos. |
 | `migracion_pedidos.sql` | Agrega las tablas `pedidos` y `pedido_items` a una base que ya existe, sin borrar datos. |
 | `migracion_pedido_corralon.sql` | Agrega `pedido_corralon` (una sub-orden por corralón) y reparte los pedidos que ya existen. |
+| `migracion_compras.sql` | Agrega `proveedores_insumo`, `ordenes_compra` y `orden_compra_items` (las compras de cada corralón). |
 
 ## Tablas
 
@@ -127,6 +128,20 @@ No necesitan cambios en la base. Como todavía no hay login, el usuario que hace
   403 si `usuario_id` no es ese corralón, 409 si el cambio no corresponde al estado actual.
 - `POST /api/v1/pedidos/{id}/cancelar` con `{"usuario_id": 1}`: el cliente cancela su pedido mientras está
   `pendiente`. Devuelve el stock y pasa el pedido y todas sus partes a `cancelado`.
+
+## Compras del corralón
+
+Cada corralón tiene su lista de proveedores de insumos y les hace órdenes de compra para reponer stock.
+Para agregarlo a Supabase: **SQL Editor** > pegar `migracion_compras.sql` > **Run**.
+
+- `GET /api/v1/proveedores-insumo?corralon_id=2` y `POST /api/v1/proveedores-insumo`
+  con `{"corralon_id": 2, "nombre": "Maderera Sur", "telefono": "11 5555-5555"}`.
+- `POST /api/v1/ordenes-compra` con `{"corralon_id": 2, "proveedor_insumo_id": 1, "items": [{"producto_id": 1, "cantidad": 10}]}`:
+  queda `pendiente` y el stock todavía no cambia. Los productos tienen que ser de ese corralón.
+- `GET /api/v1/ordenes-compra?corralon_id=2&estado=pendiente`.
+- `PATCH /api/v1/ordenes-compra/{id}/recibir` con `{"usuario_id": 2}`: pasa a `recibida` y suma las cantidades
+  al stock. 403 si no es de ese corralón, 409 si ya estaba recibida.
+
 
 ## Pagos
 
