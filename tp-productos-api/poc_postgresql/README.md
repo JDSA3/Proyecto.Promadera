@@ -117,6 +117,17 @@ Cada fila de `pedido_items` apunta a su sub-orden con `pedido_corralon_id`. Para
 `corralones: [{proveedor_id, proveedor_nombre, estado, total, motivo_devolucion, items}]`.
 Con `?proveedor_id=` solo aparece la sub-orden de ese corralón.
 
+### Estados de cada corralón y cancelación
+
+No necesitan cambios en la base. Como todavía no hay login, el usuario que hace el cambio va en `usuario_id`.
+
+- `PATCH /api/v1/pedidos/{id}/corralones/{proveedor_id}` con `{"usuario_id": 2, "estado": "confirmado"}`:
+  el corralón avanza su parte `pendiente -> confirmado -> enviado -> entregado`. Para confirmar, el pedido tiene que
+  estar `pagado`. Desde `entregado` puede pasar a `devuelto` con `"motivo"` obligatorio (no repone stock).
+  403 si `usuario_id` no es ese corralón, 409 si el cambio no corresponde al estado actual.
+- `POST /api/v1/pedidos/{id}/cancelar` con `{"usuario_id": 1}`: el cliente cancela su pedido mientras está
+  `pendiente`. Devuelve el stock y pasa el pedido y todas sus partes a `cancelado`.
+
 ## Pagos
 
 Endpoints (`app/api/v1/pagos/`), los dos reciben `{"pedido_id": 1}` y solo aceptan pedidos en `pendiente`

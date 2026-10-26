@@ -17,6 +17,16 @@ class PedidoCreate(BaseModel):
     items: list[PedidoItemCreate] = Field(min_length=1)
 
 
+class CambioEstadoCorralon(BaseModel):
+    usuario_id: int = Field(ge=1, description="El corralón que hace el cambio (sin login todavía)")
+    estado: Literal["confirmado", "enviado", "entregado", "devuelto"]
+    motivo: str | None = Field(default=None, max_length=300, description="Obligatorio si el estado es devuelto")
+
+
+class CancelarPedido(BaseModel):
+    usuario_id: int = Field(ge=1, description="El cliente dueño del pedido (sin login todavía)")
+
+
 class ClienteOut(BaseModel):
     id: int
     nombre: str
