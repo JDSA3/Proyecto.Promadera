@@ -19,6 +19,26 @@ class StockInsuficiente(Exception):
     pass
 
 
+class NoEncontrado(Exception):
+    pass
+
+
+class SinPermiso(Exception):
+    pass
+
+
+class EstadoInvalido(Exception):
+    pass
+
+
+SIGUIENTE_ESTADO = {
+    "confirmado": "pendiente",
+    "enviado": "confirmado",
+    "entregado": "enviado",
+    "devuelto": "entregado",
+}
+
+
 def _item_to_dict(item: PedidoItemDB):
     return {
         "producto_id": item.producto_id,
@@ -165,5 +185,76 @@ def create(data):
         session.add(pedido)
         session.flush()
         session.refresh(pedido)
+
+        return _to_dict(pedido)
+
+
+def _pedido_bloqueado(session, pedido_id: int):
+    pedido = session.scalar(_consulta_pedidos().where(PedidoDB.id == pedido_id).with_for_update(of=PedidoDB))
+
+    if pedido is None:
+        raise NoEncontrado(f"Pedido {pedido_id} no encontrado")
+
+    return pedido
+
+
+def cambiar_estado_corralon(pedido_id: int, proveedor_id: int, data):
+    with SessionLocal() as session, session.begin():
+        usuario = session.get(UsuarioDB, data.usuario_id)
+
+        if usuario is None or not usuario.activo or usuario.rol != "proveedor" or usuario.id != proveedor_id:
+            raise SinPermiso(f"El usuario {data.usuario_id} no es el corralón {proveedor_id}")
+
+        pedido = _pedido_bloqueado(session, pedido_id)
+        corralon = next((c for c in pedido.corralones if c.proveedor_id == proveedor_id), None)
+
+        if corralon is None:
+            raise NoEncontrado(f"El pedido {pedido_id} no tiene productos del corralón {proveedor_id}")
+
+        if data.estado == "confirmado" and pedido.estado != "pagado":
+            raise EstadoInvalido(f"El pedido {pedido_id} está {pedido.estado}: solo se confirma un pedido pagado")
+
+        anterior = SIGUIENTE_ESTADO[data.estado]
+        if corralon.estado != anterior:
+            raise EstadoInvalido(
+                f"La parte del corralón está {corralon.estado}: para pasar a {data.estado} tiene que estar {anterior}"
+            )
+
+        if data.estado == "devuelto":
+            motivo = (data.motivo or "").strip()
+            if not motivo:
+                raise DatosInvalidos("Para marcar una devolución hay que indicar el motivo")
+            corralon.motivo_devolucion = motivo
+
+        corralon.estado = data.estado
+        session.flush()
+
+        return _to_dict(pedido)
+
+
+def cancelar(pedido_id: int, data):
+    with SessionLocal() as session, session.begin():
+        pedido = _pedido_bloqueado(session, pedido_id)
+
+        if pedido.cliente_id != data.usuario_id:
+            raise SinPermiso(f"El pedido {pedido_id} no es del usuario {data.usuario_id}")
+
+        if pedido.estado != "pendiente":
+            raise EstadoInvalido(f"El pedido {pedido_id} está {pedido.estado}: solo se cancela un pedido pendiente")
+
+        productos = session.scalars(
+            select(ProductoDB)
+            .where(ProductoDB.id.in_([item.producto_id for item in pedido.items]))
+            .with_for_update()
+        )
+        por_id = {producto.id: producto for producto in productos}
+
+        for item in pedido.items:
+            por_id[item.producto_id].stock += item.cantidad
+
+        pedido.estado = "cancelado"
+        for corralon in pedido.corralones:
+            corralon.estado = "cancelado"
+        session.flush()
 
         return _to_dict(pedido)
