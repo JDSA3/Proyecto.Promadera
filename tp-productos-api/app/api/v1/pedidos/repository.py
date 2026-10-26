@@ -1,3 +1,6 @@
+import math
+from decimal import ROUND_HALF_UP, Decimal
+
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -39,12 +42,21 @@ SIGUIENTE_ESTADO = {
 }
 
 
+def _piezas(cantidad: int, corte, largo_pieza) -> int:
+    if corte is None:
+        return cantidad
+
+    cortes_por_pieza = math.floor(Decimal(largo_pieza) / Decimal(corte))
+    return math.ceil(cantidad / cortes_por_pieza)
+
+
 def _item_to_dict(item: PedidoItemDB):
     return {
         "producto_id": item.producto_id,
         "nombre": item.producto.nombre,
         "proveedor_id": item.producto.proveedor_id,
         "cantidad": item.cantidad,
+        "largo_cm": float(item.largo_cm) if item.largo_cm is not None else None,
         "precio_unitario": float(item.precio_unitario),
         "subtotal": float(item.precio_unitario * item.cantidad),
     }
@@ -134,9 +146,11 @@ def marcar_pagado(pedido_id: int):
 
 
 def create(data):
-    cantidades: dict[int, int] = {}
+    lineas: dict[tuple[int, Decimal | None], int] = {}
     for item in data.items:
-        cantidades[item.producto_id] = cantidades.get(item.producto_id, 0) + item.cantidad
+        corte = Decimal(str(item.largo_cm)).quantize(Decimal("0.01")) if item.largo_cm is not None else None
+        clave = (item.producto_id, corte)
+        lineas[clave] = lineas.get(clave, 0) + item.cantidad
 
     with SessionLocal() as session, session.begin():
         cliente = session.get(UsuarioDB, data.cliente_id)
@@ -148,38 +162,61 @@ def create(data):
             raise DatosInvalidos(f"El usuario {data.cliente_id} no es un cliente")
 
         productos = session.scalars(
-            select(ProductoDB).where(ProductoDB.id.in_(cantidades)).with_for_update()
+            select(ProductoDB).where(ProductoDB.id.in_({producto_id for producto_id, _ in lineas})).with_for_update()
         )
         por_id = {producto.id: producto for producto in productos}
 
         pedido = PedidoDB(cliente=cliente, estado="pendiente", total=0)
         total = 0
         corralones: dict[int | None, PedidoCorralonDB] = {}
+        piezas_por_producto: dict[int, int] = {}
 
-        for producto_id, cantidad in cantidades.items():
+        for (producto_id, corte), cantidad in lineas.items():
             producto = por_id.get(producto_id)
 
             if producto is None or not producto.activo:
                 raise DatosInvalidos(f"El producto {producto_id} no existe")
 
-            if producto.stock < cantidad:
-                raise StockInsuficiente(
-                    f"No hay stock suficiente de '{producto.nombre}': "
-                    f"pediste {cantidad} y quedan {producto.stock}"
+            precio_unitario = producto.precio
+            if corte is not None:
+                if not producto.largo_cm:
+                    raise DatosInvalidos(f"'{producto.nombre}' no tiene largo cargado: no se puede vender por corte")
+
+                if corte > producto.largo_cm:
+                    raise DatosInvalidos(
+                        f"El corte de {corte} cm es más largo que '{producto.nombre}' ({producto.largo_cm} cm)"
+                    )
+
+                precio_unitario = (producto.precio * corte / producto.largo_cm).quantize(
+                    Decimal("0.01"), rounding=ROUND_HALF_UP
                 )
 
-            producto.stock -= cantidad
+            piezas_por_producto[producto_id] = piezas_por_producto.get(producto_id, 0) + _piezas(
+                cantidad, corte, producto.largo_cm
+            )
+
             corralon = corralones.get(producto.proveedor_id)
             if corralon is None:
                 corralon = PedidoCorralonDB(proveedor_id=producto.proveedor_id, estado="pendiente", total=0)
                 corralones[producto.proveedor_id] = corralon
                 pedido.corralones.append(corralon)
 
-            item = PedidoItemDB(producto=producto, cantidad=cantidad, precio_unitario=producto.precio)
+            item = PedidoItemDB(producto=producto, cantidad=cantidad, precio_unitario=precio_unitario, largo_cm=corte)
             pedido.items.append(item)
             corralon.items.append(item)
-            corralon.total += producto.precio * cantidad
-            total += producto.precio * cantidad
+            corralon.total += precio_unitario * cantidad
+            total += precio_unitario * cantidad
+
+        for producto_id, piezas in piezas_por_producto.items():
+            producto = por_id[producto_id]
+
+            if producto.stock < piezas:
+                raise StockInsuficiente(
+                    f"No hay stock suficiente de '{producto.nombre}': "
+                    f"hacen falta {piezas} y quedan {producto.stock}"
+                )
+
+            producto.stock -= piezas
 
         pedido.total = total
         session.add(pedido)
@@ -232,6 +269,34 @@ def cambiar_estado_corralon(pedido_id: int, proveedor_id: int, data):
         return _to_dict(pedido)
 
 
+def reportar_devolucion(pedido_id: int, proveedor_id: int, data):
+    with SessionLocal() as session, session.begin():
+        pedido = _pedido_bloqueado(session, pedido_id)
+
+        if pedido.cliente_id != data.usuario_id:
+            raise SinPermiso(f"El pedido {pedido_id} no es del usuario {data.usuario_id}")
+
+        corralon = next((c for c in pedido.corralones if c.proveedor_id == proveedor_id), None)
+
+        if corralon is None:
+            raise NoEncontrado(f"El pedido {pedido_id} no tiene productos del corralón {proveedor_id}")
+
+        if corralon.estado != "entregado":
+            raise EstadoInvalido(
+                f"La parte del corralón está {corralon.estado}: solo se reporta un problema cuando está entregado"
+            )
+
+        motivo = data.motivo.strip()
+        if not motivo:
+            raise DatosInvalidos("Contá cuál fue el problema con el material")
+
+        corralon.estado = "devuelto"
+        corralon.motivo_devolucion = motivo
+        session.flush()
+
+        return _to_dict(pedido)
+
+
 def cancelar(pedido_id: int, data):
     with SessionLocal() as session, session.begin():
         pedido = _pedido_bloqueado(session, pedido_id)
@@ -250,7 +315,8 @@ def cancelar(pedido_id: int, data):
         por_id = {producto.id: producto for producto in productos}
 
         for item in pedido.items:
-            por_id[item.producto_id].stock += item.cantidad
+            producto = por_id[item.producto_id]
+            producto.stock += _piezas(item.cantidad, item.largo_cm, producto.largo_cm)
 
         pedido.estado = "cancelado"
         for corralon in pedido.corralones:
