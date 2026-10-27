@@ -1,12 +1,13 @@
-import { Fragment, useEffect, useState } from "react";
+import { obtenerProductos } from "../../api.js";
 import {
+  borrarProveedorInsumo,
   crearOrdenCompra,
   crearProveedorInsumo,
+  editarProveedorInsumo,
   obtenerOrdenesCompra,
-  obtenerProductos,
   obtenerProveedoresInsumo,
   recibirOrdenCompra,
-} from "../../api.js";
+} from "../../apiCompras.js";
 import "./CorralonPedidos.css";
 import "./CorralonCompras.css";
 
