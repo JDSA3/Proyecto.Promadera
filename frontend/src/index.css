@@ -27,8 +27,6 @@ body {
 }
 
 
-
-
 /* Tus ids */
 #home p {
   line-height: 1.6;
@@ -550,7 +548,8 @@ body {
   margin: 0;
   padding: 8px 12px 12px;
   text-align: center;
-  font-style: italic;
+  font-family: var(--pm-font-display);
+  font-size: 1.05rem;
   color: var(--pm-tan-300);
 }
 
