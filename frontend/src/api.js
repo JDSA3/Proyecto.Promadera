@@ -132,3 +132,56 @@ export async function cancelarPedido({ pedidoId, usuarioId }) {
   });
   return manejarRespuesta(res);
 }
+
+
+export async function obtenerProveedoresInsumo({ corralonId } = {}) {
+  const params = new URLSearchParams();
+  if (corralonId) params.set("corralon_id", corralonId);
+  const url = `${API_BASE}/proveedores-insumo` + (params.toString() ? `?${params}` : "");
+  const res = await fetch(url);
+  return manejarRespuesta(res);
+}
+
+export async function crearProveedorInsumo({ corralonId, nombre, telefono, email }) {
+  const res = await fetch(`${API_BASE}/proveedores-insumo`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      corralon_id: corralonId,
+      nombre,
+      telefono: telefono || null,
+      email: email || null,
+    }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function obtenerOrdenesCompra({ corralonId } = {}) {
+  const params = new URLSearchParams();
+  if (corralonId) params.set("corralon_id", corralonId);
+  const url = `${API_BASE}/ordenes-compra` + (params.toString() ? `?${params}` : "");
+  const res = await fetch(url);
+  return manejarRespuesta(res);
+}
+
+export async function crearOrdenCompra({ corralonId, proveedorInsumoId, items }) {
+  const res = await fetch(`${API_BASE}/ordenes-compra`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      corralon_id: corralonId,
+      proveedor_insumo_id: proveedorInsumoId,
+      items,
+    }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function recibirOrdenCompra({ ordenId, usuarioId }) {
+  const res = await fetch(`${API_BASE}/ordenes-compra/${ordenId}/recibir`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuario_id: usuarioId }),
+  });
+  return manejarRespuesta(res);
+}
