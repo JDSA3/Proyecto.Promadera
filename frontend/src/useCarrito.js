@@ -47,6 +47,8 @@ export default function useCarrito(usuarioId) {
                   ...i,
                   stock: producto.stock,
                   cantidad: Math.min(i.cantidad + cantidad, producto.stock),
+                              proveedor_id: producto.proveedor_id ?? null,
+            proveedor_nombre: producto.proveedor_nombre || `Corralón #${producto.proveedor_id}`,
                 }
               : i,
           );
@@ -59,9 +61,6 @@ export default function useCarrito(usuarioId) {
             precio: producto.precio,
             stock: producto.stock,
             cantidad: Math.min(cantidad, producto.stock),
-            proveedor_id: producto.proveedor_id ?? null,
-            proveedor_nombre:
-              producto.proveedor_nombre || `Corralón #${producto.proveedor_id}`,
           },
         ];
       });
