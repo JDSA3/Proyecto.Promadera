@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[4] / ".env")
 
 URL_PREFERENCIAS = "https://api.mercadopago.com/checkout/preferences"
+URL_PAGOS = "https://api.mercadopago.com/v1/payments"
 
 
 class SinToken(Exception):
@@ -19,11 +20,17 @@ class ErrorMercadoPago(Exception):
     pass
 
 
-def crear_preferencia(pedido: dict) -> dict:
+def _token() -> str:
     token = os.getenv("MP_ACCESS_TOKEN")
 
     if not token:
         raise SinToken("Falta MP_ACCESS_TOKEN en el .env")
+
+    return token
+
+
+def crear_preferencia(pedido: dict) -> dict:
+    token = _token()
 
     datos = {
         "items": [
@@ -49,6 +56,11 @@ def crear_preferencia(pedido: dict) -> dict:
         }
         datos["auto_return"] = "approved"
 
+    url_webhook = os.getenv("MP_WEBHOOK_URL")
+
+    if url_webhook:
+        datos["notification_url"] = url_webhook
+
     pedido_http = urllib.request.Request(
         URL_PREFERENCIAS,
         data=json.dumps(datos).encode(),
@@ -59,6 +71,19 @@ def crear_preferencia(pedido: dict) -> dict:
         method="POST",
     )
 
+    return _enviar(pedido_http)
+
+
+def obtener_pago(pago_id: str) -> dict:
+    pedido_http = urllib.request.Request(
+        f"{URL_PAGOS}/{pago_id}",
+        headers={"Authorization": f"Bearer {_token()}"},
+    )
+
+    return _enviar(pedido_http)
+
+
+def _enviar(pedido_http: urllib.request.Request) -> dict:
     try:
         with urllib.request.urlopen(pedido_http, timeout=15) as respuesta:
             return json.load(respuesta)

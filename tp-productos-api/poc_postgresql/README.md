@@ -125,8 +125,10 @@ No necesitan cambios en la base. Como todavía no hay login, el usuario que hace
 
 - `PATCH /api/v1/pedidos/{id}/corralones/{proveedor_id}` con `{"usuario_id": 2, "estado": "confirmado"}`:
   el corralón avanza su parte `pendiente -> confirmado -> enviado -> entregado`. Para confirmar, el pedido tiene que
-  estar `pagado`. Desde `entregado` puede pasar a `devuelto` con `"motivo"` obligatorio (no repone stock).
-  403 si `usuario_id` no es ese corralón, 409 si el cambio no corresponde al estado actual.
+  estar `pagado`. 403 si `usuario_id` no es ese corralón, 409 si el cambio no corresponde al estado actual.
+- **Devolución ("Reportar problema")**: es el mismo `PATCH`, con `{"usuario_id": <carpintero>, "estado": "devuelto",
+  "motivo": "Llegó rota"}`. Lo hace el carpintero dueño del pedido (el corralón también puede), solo si esa parte está
+  `entregado`. El motivo es obligatorio (400 si falta) y no repone stock. Este es el camino que usa el frontend.
 - `POST /api/v1/pedidos/{id}/cancelar` con `{"usuario_id": 1}`: el cliente cancela su pedido mientras está
   `pendiente`. Devuelve el stock y pasa el pedido y todas sus partes a `cancelado`.
 
@@ -145,10 +147,10 @@ Para agregarlo a Supabase: **SQL Editor** > pegar `migracion_compras.sql` > **Ru
 - `PUT /api/v1/proveedores-insumo/{id}` con `{"usuario_id": 2, "nombre": "...", "telefono": "..."}` edita, y
   `DELETE /api/v1/proveedores-insumo/{id}?usuario_id=2` lo da de baja (baja lógica; las órdenes viejas quedan).
 
-## Devolución y corte a medida
+## Corte a medida
 
-- `POST /api/v1/pedidos/{id}/corralones/{proveedor_id}/devolucion` con `{"usuario_id": <cliente>, "motivo": "Llegó rota"}`:
-  el carpintero reporta que el material llegó mal. Solo si esa parte está `entregado` y el pedido es suyo. No repone stock.
+- La devolución se hace con el `PATCH` de arriba. (`POST /api/v1/pedidos/{id}/corralones/{proveedor_id}/devolucion`
+  quedó por compatibilidad y hace lo mismo, pero no hace falta usarlo.)
 - Corte a medida: en `POST /api/v1/pedidos` cada item acepta `largo_cm` (opcional). Precio unitario =
   `precio * largo_cm / largo_cm del producto`, y el stock baja `ceil(cantidad / floor(largo_pieza / corte))` piezas.
   Ej.: listón de 300 cm, 5 cortes de 70 cm -> salen 4 por pieza -> se descuentan 2 piezas. Sin `largo_cm`, como siempre.
@@ -164,3 +166,34 @@ Endpoints (`app/api/v1/pagos/`), los dos reciben `{"pedido_id": 1}` y solo acept
   el link `init_point`. Necesita `MP_ACCESS_TOKEN` en el `.env` (credenciales **de prueba**; nunca en el frontend).
   503 si falta el token, 502 si Mercado Pago devuelve un error. `MP_BACK_URL` es opcional y no puede ser `localhost`.
 - `POST /api/v1/pagos/simular`: plan B sin Mercado Pago, pasa el pedido a `pagado`.
+- `POST /api/v1/pagos/webhook`: la llama Mercado Pago cuando cambia un pago. El backend vuelve a consultar ese pago en
+  Mercado Pago con el token y, si está `approved` y el monto alcanza, pasa el pedido (`external_reference`) a `pagado`.
+  Necesita la URL pública del backend en `MP_WEBHOOK_URL` (por ejemplo
+  `https://promadera-api.onrender.com/api/v1/pagos/webhook`). Con localhost no funciona.
+
+## Panel del corralón
+
+- `GET /api/v1/corralones/{id}/resumen`: para la pantalla de inicio del corralón. Devuelve `ventas_mes` (suma de su
+  parte en pedidos pagados de este mes, sin cancelados ni devueltos), `pedidos_mes`, `pedidos_pendientes` (pagados que
+  todavía están `pendiente`, `confirmado` o `enviado`), `pedidos_por_estado`, `mas_vendidos` (top 5 del mes) y
+  `stock_bajo` (productos activos con stock <= 10). Se puede cambiar con `?stock_minimo=5&mas_vendidos=10`.
+  404 si el id no es un corralón. No necesita cambios en la base.
+
+## Deploy (URL pública)
+
+Backend en **Render** (Web Service gratis):
+
+- Root Directory: `tp-productos-api`
+- Build Command: `pip install -r requirements.txt -r requirements-postgresql.txt`
+- Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Environment: `PYTHON_VERSION=3.13` (con la 3.10 no se instala `requirements.txt`), `DATABASE_URL`, `MP_ACCESS_TOKEN`, `MP_BACK_URL` (URL del frontend) y `MP_WEBHOOK_URL`
+  (URL del backend + `/api/v1/pagos/webhook`). Los mismos valores del `.env`, que nunca se sube.
+
+Frontend en **Render** (Static Site gratis): Root Directory `frontend`, Build Command `npm install && npm run build`,
+Publish Directory `dist`, y la variable `VITE_API_URL` con la URL del backend + `/api/v1`. Sin esa variable, el
+frontend sigue usando `http://127.0.0.1:8000/api/v1`.
+
+Como el repo es público, los dos se crean con **Public Git Repository** y la URL del repo. Así no hace falta instalar
+nada en la cuenta de GitHub del dueño. Para que tome un push nuevo hay que tocar **Manual Deploy**.
+
+En el plan gratis, Render apaga el backend después de 15 minutos sin uso y la primera llamada tarda unos 50 segundos.
