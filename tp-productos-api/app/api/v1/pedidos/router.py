@@ -1,7 +1,13 @@
 from fastapi import APIRouter, HTTPException, status
 
 from . import repository
-from .schemas import CambioEstadoCorralon, CancelarPedido, PedidoCreate, PedidoResponse
+from .schemas import (
+    CambioEstadoCorralon,
+    CancelarPedido,
+    PedidoCreate,
+    PedidoResponse,
+    ReportarDevolucion,
+)
 
 router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 
@@ -49,6 +55,8 @@ def obtener_pedido(pedido_id: int):
     description=(
         "Crea un pedido en estado pendiente para un cliente. Los precios se toman de la base, no del frontend. "
         "Si hay stock de todos los productos, lo descuenta; si falta stock de alguno, no se guarda nada. "
+        "Con largo_cm en un item se pide un corte a medida: el precio es proporcional al largo y se descuentan "
+        "las piezas enteras que hacen falta para sacar esos cortes. "
         "Genera una sub-orden (en corralones) por cada corralón de los productos, en estado pendiente."
     ),
     responses={
@@ -85,17 +93,37 @@ def _errores(funcion, *args):
     description=(
         "El corralón avanza su parte del pedido: pendiente -> confirmado (el pedido tiene que estar pagado) "
         "-> enviado -> entregado. Desde entregado puede pasar a devuelto, con motivo obligatorio. "
-        "La devolución no repone stock. usuario_id tiene que ser el mismo corralón (proveedor_id)."
+        "La devolución no repone stock. usuario_id tiene que ser el mismo corralón (proveedor_id); "
+        "para devuelto también puede ser el cliente dueño del pedido (botón Reportar problema)."
     ),
     responses={
         400: {"description": "Falta el motivo de la devolución"},
-        403: {"description": "El usuario no es ese corralón"},
+        403: {"description": "El usuario no es ese corralón (ni el cliente, si es una devolución)"},
         404: {"description": "El pedido no existe o no tiene productos de ese corralón"},
         409: {"description": "El cambio no se puede hacer desde el estado actual"},
     },
 )
 def cambiar_estado_corralon(pedido_id: int, proveedor_id: int, datos: CambioEstadoCorralon):
     return _errores(repository.cambiar_estado_corralon, pedido_id, proveedor_id, datos)
+
+
+@router.post(
+    "/{pedido_id}/corralones/{proveedor_id}/devolucion",
+    response_model=PedidoResponse,
+    summary="Reportar un problema con el material",
+    description=(
+        "El cliente avisa que el material de un corralón llegó mal. Solo se puede si esa parte está entregada. "
+        "La parte pasa a devuelto con el motivo. No repone stock."
+    ),
+    responses={
+        400: {"description": "Falta el motivo"},
+        403: {"description": "El pedido no es de ese usuario"},
+        404: {"description": "El pedido no existe o no tiene productos de ese corralón"},
+        409: {"description": "La parte del corralón todavía no está entregada"},
+    },
+)
+def reportar_devolucion(pedido_id: int, proveedor_id: int, datos: ReportarDevolucion):
+    return _errores(repository.reportar_devolucion, pedido_id, proveedor_id, datos)
 
 
 @router.post(

@@ -95,6 +95,35 @@ def create_proveedor(data):
         return _proveedor_to_dict(proveedor)
 
 
+def _proveedor_del_corralon(session, proveedor_id: int, usuario_id: int):
+    proveedor = session.get(ProveedorInsumoDB, proveedor_id)
+
+    if proveedor is None or not proveedor.activo:
+        raise NoEncontrado(f"Proveedor {proveedor_id} no encontrado")
+
+    if proveedor.corralon_id != usuario_id:
+        raise SinPermiso(f"El proveedor {proveedor_id} no es del corralón {usuario_id}")
+
+    return proveedor
+
+
+def update_proveedor(proveedor_id: int, data):
+    with SessionLocal() as session, session.begin():
+        proveedor = _proveedor_del_corralon(session, proveedor_id, data.usuario_id)
+        proveedor.nombre = data.nombre
+        proveedor.telefono = data.telefono
+        proveedor.email = data.email
+        session.flush()
+
+        return _proveedor_to_dict(proveedor)
+
+
+def delete_proveedor(proveedor_id: int, usuario_id: int):
+    with SessionLocal() as session, session.begin():
+        proveedor = _proveedor_del_corralon(session, proveedor_id, usuario_id)
+        proveedor.activo = False
+
+
 def list_ordenes(corralon_id: int | None = None, estado: str | None = None):
     consulta = _consulta_ordenes().order_by(OrdenCompraDB.id.desc())
 

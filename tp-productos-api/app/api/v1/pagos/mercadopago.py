@@ -29,7 +29,7 @@ def crear_preferencia(pedido: dict) -> dict:
         "items": [
             {
                 "id": str(item["producto_id"]),
-                "title": item["nombre"],
+                "title": f"{item['nombre']} (corte {item['largo_cm']:g} cm)" if item.get("largo_cm") else item["nombre"],
                 "quantity": item["cantidad"],
                 "unit_price": item["precio_unitario"],
                 "currency_id": "ARS",

@@ -11,6 +11,13 @@ class ProveedorInsumoCreate(BaseModel):
     email: str | None = Field(default=None, max_length=255)
 
 
+class ProveedorInsumoUpdate(BaseModel):
+    usuario_id: int = Field(ge=1, description="El corralón dueño del proveedor (sin login todavía)")
+    nombre: str = Field(min_length=1, max_length=100)
+    telefono: str | None = Field(default=None, max_length=50)
+    email: str | None = Field(default=None, max_length=255)
+
+
 class ProveedorInsumoResponse(BaseModel):
     id: int
     corralon_id: int

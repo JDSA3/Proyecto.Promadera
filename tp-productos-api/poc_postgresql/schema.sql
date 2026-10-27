@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS pedido_items (
     producto_id     INTEGER        NOT NULL REFERENCES productos (id),
     cantidad        INTEGER        NOT NULL,
     precio_unitario NUMERIC(12, 2) NOT NULL,
+    largo_cm        NUMERIC(8, 2),
     CONSTRAINT ck_pedido_items_cantidad_positiva CHECK (cantidad > 0),
     CONSTRAINT ck_pedido_items_precio_positivo CHECK (precio_unitario >= 0)
 );

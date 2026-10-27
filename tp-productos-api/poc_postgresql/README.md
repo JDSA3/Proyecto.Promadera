@@ -16,6 +16,7 @@ No modifica la API actual: el router y el repository siguen usando las listas.
 | `migracion_pedidos.sql` | Agrega las tablas `pedidos` y `pedido_items` a una base que ya existe, sin borrar datos. |
 | `migracion_pedido_corralon.sql` | Agrega `pedido_corralon` (una sub-orden por corralón) y reparte los pedidos que ya existen. |
 | `migracion_compras.sql` | Agrega `proveedores_insumo`, `ordenes_compra` y `orden_compra_items` (las compras de cada corralón). |
+| `migracion_corte_medida.sql` | Agrega `pedido_items.largo_cm` (el largo del corte cuando se pide a medida). |
 
 ## Tablas
 
@@ -141,6 +142,17 @@ Para agregarlo a Supabase: **SQL Editor** > pegar `migracion_compras.sql` > **Ru
 - `GET /api/v1/ordenes-compra?corralon_id=2&estado=pendiente`.
 - `PATCH /api/v1/ordenes-compra/{id}/recibir` con `{"usuario_id": 2}`: pasa a `recibida` y suma las cantidades
   al stock. 403 si no es de ese corralón, 409 si ya estaba recibida.
+- `PUT /api/v1/proveedores-insumo/{id}` con `{"usuario_id": 2, "nombre": "...", "telefono": "..."}` edita, y
+  `DELETE /api/v1/proveedores-insumo/{id}?usuario_id=2` lo da de baja (baja lógica; las órdenes viejas quedan).
+
+## Devolución y corte a medida
+
+- `POST /api/v1/pedidos/{id}/corralones/{proveedor_id}/devolucion` con `{"usuario_id": <cliente>, "motivo": "Llegó rota"}`:
+  el carpintero reporta que el material llegó mal. Solo si esa parte está `entregado` y el pedido es suyo. No repone stock.
+- Corte a medida: en `POST /api/v1/pedidos` cada item acepta `largo_cm` (opcional). Precio unitario =
+  `precio * largo_cm / largo_cm del producto`, y el stock baja `ceil(cantidad / floor(largo_pieza / corte))` piezas.
+  Ej.: listón de 300 cm, 5 cortes de 70 cm -> salen 4 por pieza -> se descuentan 2 piezas. Sin `largo_cm`, como siempre.
+  Para Supabase: **SQL Editor** > pegar `migracion_corte_medida.sql` > **Run**.
 
 
 ## Pagos
