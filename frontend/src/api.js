@@ -113,3 +113,22 @@ export async function simularPago(pedidoId) {
   });
   return manejarRespuesta(res);
 }
+
+
+export async function cambiarEstadoCorralon({ pedidoId, proveedorId, usuarioId, estado, motivo }) {
+  const res = await fetch(`${API_BASE}/pedidos/${pedidoId}/corralones/${proveedorId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuario_id: usuarioId, estado, motivo: motivo || null }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function cancelarPedido({ pedidoId, usuarioId }) {
+  const res = await fetch(`${API_BASE}/pedidos/${pedidoId}/cancelar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuario_id: usuarioId }),
+  });
+  return manejarRespuesta(res);
+}
