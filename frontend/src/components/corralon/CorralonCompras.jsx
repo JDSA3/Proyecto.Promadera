@@ -34,6 +34,7 @@ export default function CorralonCompras({ usuario, productoInicial }) {
   const [aviso, setAviso] = useState({ tipo: "", texto: "" });
   const [trabajando, setTrabajando] = useState(false);
   const [abierta, setAbierta] = useState(null); // id de la orden con el detalle desplegado
+  const [editandoId, setEditandoId] = useState(null); // proveedor que se está editando
 
   const [formProveedor, setFormProveedor] = useState({ nombre: "", telefono: "", email: "" });
   const [formOrden, setFormOrden] = useState(() =>
@@ -83,16 +84,45 @@ export default function CorralonCompras({ usuario, productoInicial }) {
     ejecutar(async () => {
       const nombre = formProveedor.nombre.trim();
       if (!nombre) throw new Error("Escribí el nombre del proveedor.");
-      await crearProveedorInsumo({
-        corralonId: usuario.id,
+      const datos = {
         nombre,
         telefono: formProveedor.telefono.trim(),
         email: formProveedor.email.trim(),
-      });
-      setFormProveedor({ nombre: "", telefono: "", email: "" });
-      setAviso({ tipo: "ok", texto: `Proveedor "${nombre}" agregado.` });
+      };
+      if (editandoId) {
+        await editarProveedorInsumo({ proveedorId: editandoId, usuarioId: usuario.id, ...datos });
+        setAviso({ tipo: "ok", texto: `Proveedor "${nombre}" actualizado.` });
+      } else {
+        await crearProveedorInsumo({ corralonId: usuario.id, ...datos });
+        setAviso({ tipo: "ok", texto: `Proveedor "${nombre}" agregado.` });
+      }
+      cancelarEdicion();
       setRecarga((n) => n + 1);
     });
+
+  function editarProveedor(p) {
+    setAviso({ tipo: "", texto: "" });
+    setEditandoId(p.id);
+    setFormProveedor({ nombre: p.nombre, telefono: p.telefono || "", email: p.email || "" });
+  }
+
+  function cancelarEdicion() {
+    setEditandoId(null);
+    setFormProveedor({ nombre: "", telefono: "", email: "" });
+  }
+
+  function borrarProveedor(p) {
+    const seguro = window.confirm(
+      `¿Borrar a "${p.nombre}"? Sus órdenes viejas se conservan, pero no vas a poder hacerle órdenes nuevas.`
+    );
+    if (!seguro) return;
+    ejecutar(async () => {
+      await borrarProveedorInsumo({ proveedorId: p.id, usuarioId: usuario.id });
+      if (editandoId === p.id) cancelarEdicion();
+      setAviso({ tipo: "ok", texto: `Proveedor "${p.nombre}" borrado.` });
+      setRecarga((n) => n + 1);
+    });
+  }
 
   // ---------- Órdenes de compra ----------
   function abrirFormOrden() {
@@ -303,7 +333,7 @@ export default function CorralonCompras({ usuario, productoInicial }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="3" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="4" className="cr-vacio">No se pudo conectar con el servidor.</td>
         </tr>
       );
     }
@@ -311,15 +341,23 @@ export default function CorralonCompras({ usuario, productoInicial }) {
     if (proveedores.length === 0) {
       return (
         <tr>
-          <td colSpan="3" className="cr-vacio">Todavía no cargaste proveedores.</td>
+          <td colSpan="4" className="cr-vacio">Todavía no cargaste proveedores.</td>
         </tr>
       );
     }
-    return proveedores.map((p) => (
+        return proveedores.map((p) => (
       <tr key={p.id}>
         <td>{p.nombre}</td>
         <td>{p.telefono || "—"}</td>
         <td>{p.email || "—"}</td>
+        <td className="cr-acciones">
+          <button type="button" className="cr-btn-icono" disabled={trabajando} onClick={() => editarProveedor(p)}>
+            Editar
+          </button>
+          <button type="button" className="cr-btn-icono peligro" disabled={trabajando} onClick={() => borrarProveedor(p)}>
+            Borrar
+          </button>
+        </td>
       </tr>
     ));
   }
@@ -400,7 +438,7 @@ export default function CorralonCompras({ usuario, productoInicial }) {
       {pestana === "proveedores" && (
         <>
           <div className="cc-formulario">
-            <h3>Agregar proveedor</h3>
+            <h3>{editandoId ? "Editar proveedor" : "Agregar proveedor"}</h3>
             <div className="cc-campos">
               <label className="cc-campo">
                 Nombre
@@ -431,9 +469,14 @@ export default function CorralonCompras({ usuario, productoInicial }) {
               </label>
             </div>
             <div className="cc-formulario-acciones">
+              {editandoId && (
+                <button type="button" className="btn-secundario" disabled={trabajando} onClick={cancelarEdicion}>
+                  Cancelar
+                </button>
+              )}
               <button type="button" className="btn-tan" disabled={trabajando} onClick={guardarProveedor}>
-                {trabajando ? "Guardando..." : "Agregar proveedor"}
-              </button>
+                {trabajando ? "Guardando..." : editandoId ? "Guardar cambios" : "Agregar proveedor"}
+              </button> 
             </div>
           </div>
 
@@ -444,6 +487,7 @@ export default function CorralonCompras({ usuario, productoInicial }) {
                   <th>Nombre</th>
                   <th>Teléfono</th>
                   <th>Email</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>{tablaProveedores()}</tbody>
