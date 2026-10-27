@@ -86,7 +86,7 @@ function CeldaStock({ producto, deshabilitado, onGuardar }) {
 }
 
 // Pantalla "Stock" del Corralón: ver y ajustar el stock de sus productos.
-export default function Stock({ usuario }) {
+export default function Stock({ usuario, onPedirReposicion }) {
   const [productos, setProductos] = useState(null); // null = todavía no cargó
   const [error, setError] = useState(false);
   const [errorEdicion, setErrorEdicion] = useState("");
@@ -153,7 +153,7 @@ export default function Stock({ usuario }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="4" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="5" className="cr-vacio">No se pudo conectar con el servidor.</td>
         </tr>
       );
     }
@@ -161,7 +161,7 @@ export default function Stock({ usuario }) {
     if (filtrados.length === 0) {
       return (
         <tr>
-          <td colSpan="4" className="cr-vacio">
+          <td colSpan="5" className="cr-vacio">
             {lista.length === 0
               ? "Todavía no tenés productos. Cargalos desde \"Mis Productos\"."
               : "No hay productos que coincidan con la búsqueda."}
@@ -195,7 +195,14 @@ export default function Stock({ usuario }) {
               onGuardar={guardarStock}
             />
           </td>
-          <td className={`cr-estado ${estado.id}`}>{estado.texto}</td>
+                    <td className={`cr-estado ${estado.id}`}>{estado.texto}</td>
+          <td className="cr-acciones">
+            {onPedirReposicion && estado.id !== "ok" && (
+              <button type="button" className="cr-btn-icono" onClick={() => onPedirReposicion(p)}>
+                Pedir al proveedor
+              </button>
+            )}
+          </td>
         </tr>
       );
     });
@@ -273,6 +280,7 @@ export default function Stock({ usuario }) {
               <th>Categoría</th>
               <th>Stock</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>{cuerpoTabla()}</tbody>
