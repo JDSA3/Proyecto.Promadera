@@ -8,6 +8,7 @@ from .schemas import (
     OrdenCompraResponse,
     ProveedorInsumoCreate,
     ProveedorInsumoResponse,
+    ProveedorInsumoUpdate,
     RecibirOrden,
 )
 
@@ -48,6 +49,31 @@ def listar_proveedores(corralon_id: int | None = None):
 )
 def crear_proveedor(datos: ProveedorInsumoCreate):
     return _errores(repository.create_proveedor, datos)
+
+
+@proveedores_router.put(
+    "/{proveedor_id}",
+    response_model=ProveedorInsumoResponse,
+    summary="Editar un proveedor de insumos",
+    description="Cambia el nombre, teléfono y email. Solo lo puede editar el corralón dueño.",
+    responses={403: {"description": "El proveedor no es de ese corralón"}, 404: {"description": "Proveedor no encontrado"}},
+)
+def editar_proveedor(proveedor_id: int, datos: ProveedorInsumoUpdate):
+    return _errores(repository.update_proveedor, proveedor_id, datos)
+
+
+@proveedores_router.delete(
+    "/{proveedor_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Borrar un proveedor de insumos",
+    description=(
+        "Baja lógica: el proveedor deja de aparecer y no se le pueden hacer órdenes nuevas, "
+        "pero sus órdenes viejas se conservan. usuario_id es el corralón dueño."
+    ),
+    responses={403: {"description": "El proveedor no es de ese corralón"}, 404: {"description": "Proveedor no encontrado"}},
+)
+def borrar_proveedor(proveedor_id: int, usuario_id: int):
+    _errores(repository.delete_proveedor, proveedor_id, usuario_id)
 
 
 @ordenes_router.get(

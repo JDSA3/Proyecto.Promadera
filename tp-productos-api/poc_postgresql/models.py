@@ -96,6 +96,7 @@ class PedidoItemDB(Base):
     producto_id: Mapped[int] = mapped_column(ForeignKey("productos.id"), nullable=False)
     cantidad: Mapped[int] = mapped_column(Integer, nullable=False)
     precio_unitario: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    largo_cm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
     pedido_corralon_id: Mapped[int | None] = mapped_column(
         ForeignKey("pedido_corralon.id", ondelete="CASCADE"), nullable=True
     )
