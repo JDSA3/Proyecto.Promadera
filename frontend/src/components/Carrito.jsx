@@ -2,7 +2,8 @@
 import { crearPedido, crearPreferenciaPago, simularPago } from "../api.js";
 import "./Carrito.css";
 
-const dinero = (n) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
+const dinero = (n) =>
+  n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 const limpiar = (msg) => String(msg).replace(/^"|"$/g, "");
 
 // Agrupa los items del carrito por corralón. El de id más bajo es c1, el siguiente c2, etc.
@@ -15,7 +16,9 @@ function agruparPorCorralon(items) {
       grupos.set(clave, {
         clave,
         proveedorId: i.proveedor_id ?? null,
-        nombre: i.proveedor_id ? i.proveedor_nombre || `Corralón #${i.proveedor_id}` : "Sin corralón",
+        nombre: i.proveedor_id
+          ? i.proveedor_nombre || `Corralón #${i.proveedor_id}`
+          : "Sin corralón",
         items: [],
         subtotal: 0,
       });
@@ -42,7 +45,12 @@ function EncabezadoCorralon({ numero, nombre, total, estado }) {
   );
 }
 
-export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedidos }) {
+export default function Carrito({
+  usuario,
+  carrito,
+  onSeguirComprando,
+  onVerPedidos,
+}) {
   const { items, cambiarCantidad, quitar, vaciar, total } = carrito;
   const [pedido, setPedido] = useState(null); // pedido ya creado, pendiente de pago
   const [pagado, setPagado] = useState(false);
@@ -86,12 +94,16 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
       <section className="carrito-pagina">
         <h2>Carrito</h2>
         <p className="mensaje-exito" role="status">
-          ¡Pago confirmado! Tu pedido #{pedido.id} por {dinero(pedido.total)} quedó pagado.
-          Cada corralón va a confirmar y enviar su parte.
+          ¡Pago confirmado! Tu pedido #{pedido.id} por {dinero(pedido.total)}{" "}
+          quedó pagado. Cada corralón va a confirmar y enviar su parte.
         </p>
         <div className="carrito-acciones">
           {onVerPedidos && (
-            <button type="button" className="btn-secundario" onClick={onVerPedidos}>
+            <button
+              type="button"
+              className="btn-secundario"
+              onClick={onVerPedidos}
+            >
               Ver mis pedidos
             </button>
           )}
@@ -111,7 +123,8 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
       <section className="carrito-pagina">
         <h2>Pedido #{pedido.id}</h2>
         <p className="mensaje-exito" role="status">
-          ¡Pedido confirmado! Está pendiente de pago. Si no pagás ahora, lo encontrás en "Mis Pedidos".
+          ¡Pedido confirmado! Está pendiente de pago. Si no pagás ahora, lo
+          encontrás en "Mis Pedidos".
         </p>
 
         {corralones.length > 0 ? (
@@ -126,7 +139,11 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
               <div className="cr-tabla-wrap">
                 <table className="cr-tabla">
                   <thead>
-                    <tr><th>Producto</th><th>Cantidad</th><th>Subtotal</th></tr>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Subtotal</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {c.items.map((i) => (
@@ -145,7 +162,11 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
           <div className="cr-tabla-wrap">
             <table className="cr-tabla">
               <thead>
-                <tr><th>Producto</th><th>Cantidad</th><th>Subtotal</th></tr>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                </tr>
               </thead>
               <tbody>
                 {pedido.items.map((i) => (
@@ -164,19 +185,38 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
           <span className="carrito-total">Total: {dinero(pedido.total)}</span>
           <div className="carrito-acciones">
             {onVerPedidos && (
-              <button type="button" className="btn-secundario" disabled={trabajando} onClick={onVerPedidos}>
+              <button
+                type="button"
+                className="btn-secundario"
+                disabled={trabajando}
+                onClick={onVerPedidos}
+              >
                 Pagar más tarde
               </button>
             )}
-            <button type="button" className="btn-tan" disabled={trabajando} onClick={pagarConMercadoPago}>
+            <button
+              type="button"
+              className="btn-tan"
+              disabled={trabajando}
+              onClick={pagarConMercadoPago}
+            >
               Pagar con Mercado Pago
             </button>
-            <button type="button" className="btn-secundario" disabled={trabajando} onClick={pagarSimulado}>
+            <button
+              type="button"
+              className="btn-secundario"
+              disabled={trabajando}
+              onClick={pagarSimulado}
+            >
               Simular pago
             </button>
           </div>
         </div>
-        {error && <p className="error-campo" role="alert">{error}</p>}
+        {error && (
+          <p className="error-campo" role="alert">
+            {error}
+          </p>
+        )}
       </section>
     );
   }
@@ -202,13 +242,18 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
       <h2>Carrito</h2>
       {grupos.length > 1 && (
         <p className="cr-sub">
-          Tu compra es de {grupos.length} corralones. Cada uno prepara y envía su parte por separado.
+          Tu compra es de {grupos.length} corralones. Cada uno prepara y envía
+          su parte por separado.
         </p>
       )}
 
       {grupos.map((g, idx) => (
         <section className="cr-grupo" key={g.clave}>
-          <EncabezadoCorralon numero={idx + 1} nombre={g.nombre} total={g.subtotal} />
+          <EncabezadoCorralon
+            numero={idx + 1}
+            nombre={g.nombre}
+            total={g.subtotal}
+          />
           <div className="cr-tabla-wrap">
             <table className="cr-tabla">
               <thead>
@@ -231,7 +276,9 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
                           type="button"
                           aria-label={`Quitar una unidad de ${i.nombre}`}
                           disabled={i.cantidad <= 1}
-                          onClick={() => cambiarCantidad(i.producto_id, i.cantidad - 1)}
+                          onClick={() =>
+                            cambiarCantidad(i.producto_id, i.cantidad - 1)
+                          }
                         >
                           −
                         </button>
@@ -240,7 +287,9 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
                           type="button"
                           aria-label={`Agregar una unidad de ${i.nombre}`}
                           disabled={i.cantidad >= i.stock}
-                          onClick={() => cambiarCantidad(i.producto_id, i.cantidad + 1)}
+                          onClick={() =>
+                            cambiarCantidad(i.producto_id, i.cantidad + 1)
+                          }
                         >
                           +
                         </button>
@@ -268,15 +317,28 @@ export default function Carrito({ usuario, carrito, onSeguirComprando, onVerPedi
       <div className="carrito-resumen">
         <span className="carrito-total">Total: {dinero(total)}</span>
         <div className="carrito-acciones">
-          <button type="button" className="btn-secundario" onClick={onSeguirComprando}>
+          <button
+            type="button"
+            className="btn-secundario"
+            onClick={onSeguirComprando}
+          >
             Seguir comprando
           </button>
-          <button type="button" className="btn-tan" disabled={trabajando} onClick={confirmarPedido}>
+          <button
+            type="button"
+            className="btn-tan"
+            disabled={trabajando}
+            onClick={confirmarPedido}
+          >
             {trabajando ? "Creando pedido..." : "Confirmar pedido"}
           </button>
         </div>
       </div>
-      {error && <p className="error-campo" role="alert">{error}</p>}
+      {error && (
+        <p className="error-campo" role="alert">
+          {error}
+        </p>
+      )}
     </section>
   );
 }
