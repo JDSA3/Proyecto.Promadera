@@ -113,3 +113,22 @@ export async function simularPago(pedidoId) {
   });
   return manejarRespuesta(res);
 }
+
+export async function obtenerCombos() {
+  const res = await fetch(`${API_BASE}/combos`);
+  return manejarRespuesta(res);
+}
+
+export async function crearCombo({ autorId, titulo, descripcion, imagen, items }) {
+  const res = await fetch(`${API_BASE}/combos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ autor_id: autorId, titulo, descripcion, imagen, items }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function borrarCombo({ id, usuarioId }) {
+  const res = await fetch(`${API_BASE}/combos/${id}?usuario_id=${usuarioId}`, { method: "DELETE" });
+  return manejarRespuesta(res);
+}

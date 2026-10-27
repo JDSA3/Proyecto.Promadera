@@ -17,10 +17,12 @@ import Stock from "./components/Stock.jsx";
 import CorralonInicio from "./components/corralon/CorralonInicio.jsx";
 import CorralonPedidos from "./components/corralon/CorralonPedidos.jsx";
 import CorralonPerfil from "./components/corralon/CorralonPerfil.jsx";
+import Comunidad from "./components/Comunidad.jsx";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
   { id: "proyectos", label: "Mis Proyectos" },
+  { id: "comunidad", label: "Comunidad" },
   { id: "insumos", label: "Insumos" },
   { id: "favoritos", label: "Favoritos" },
   { id: "localizacion", label: "Localización" },
@@ -94,7 +96,9 @@ export default function App() {
             onAlternarFavorito={alternarFavorito}
             onAgregarAlCarrito={carrito.agregar}
           />
-        );
+        );     
+      case "comunidad":
+        return <Comunidad usuario={usuario} carrito={carrito} onIrAlCarrito={() => setVista("carrito")} />;
       case "favoritos":
         return <Favoritos favoritos={favoritos} onAlternarFavorito={alternarFavorito} />;
       case "localizacion":
@@ -130,5 +134,3 @@ export default function App() {
     </Layout>
   );
 }
-
-
