@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from app.api.v1.pedidos import repository as pedidos
 from app.api.v1.pedidos.schemas import PedidoResponse
@@ -89,3 +89,60 @@ def simular_pago(datos: PagoRequest):
         )
 
     return pedido
+
+
+@router.post(
+    "/webhook",
+    summary="Aviso de Mercado Pago (webhook)",
+    description=(
+        "Mercado Pago llama a esta URL cuando cambia un pago. El backend vuelve a consultar el pago en Mercado Pago "
+        "con el token (no confía en lo que llega en el aviso) y, si está aprobado y el monto alcanza, pasa el pedido "
+        "de external_reference a pagado. Los avisos que no son de pagos se ignoran. Necesita una URL pública: se "
+        "configura en MP_WEBHOOK_URL o en el panel de Mercado Pago."
+    ),
+    responses={
+        502: {"description": "No se pudo consultar el pago en Mercado Pago (Mercado Pago reintenta)"},
+        503: {"description": "Falta MP_ACCESS_TOKEN"},
+    },
+)
+async def webhook_mercado_pago(request: Request):
+    try:
+        cuerpo = await request.json()
+    except ValueError:
+        cuerpo = {}
+
+    if not isinstance(cuerpo, dict):
+        cuerpo = {}
+
+    parametros = request.query_params
+    tipo = cuerpo.get("type") or parametros.get("type") or parametros.get("topic")
+    pago_id = (cuerpo.get("data") or {}).get("id") or parametros.get("data.id") or parametros.get("id")
+
+    if tipo != "payment" or not pago_id:
+        return {"procesado": False, "motivo": "El aviso no es de un pago"}
+
+    try:
+        pago = mercadopago.obtener_pago(str(pago_id))
+    except mercadopago.SinToken as error:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error))
+    except mercadopago.ErrorMercadoPago as error:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error))
+
+    referencia = str(pago.get("external_reference") or "")
+
+    if pago.get("status") != "approved" or not referencia.isdigit():
+        return {"procesado": False, "motivo": f"Pago {pago.get('status')}"}
+
+    pedido = pedidos.get_by_id(int(referencia))
+
+    if pedido is None:
+        return {"procesado": False, "motivo": f"Pedido {referencia} no encontrado"}
+
+    if float(pago.get("transaction_amount") or 0) < pedido["total"]:
+        return {"procesado": False, "motivo": "El monto pagado no alcanza el total del pedido"}
+
+    if pedido["estado"] != "pendiente":
+        return {"procesado": False, "motivo": f"El pedido ya estaba {pedido['estado']}"}
+
+    pedidos.marcar_pagado(pedido["id"])
+    return {"procesado": True, "pedido_id": pedido["id"]}

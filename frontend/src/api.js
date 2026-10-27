@@ -1,4 +1,4 @@
-export const API_BASE = "http://127.0.0.1:8000/api/v1";
+export const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/v1";
 
 export async function obtenerCategorias() {
   const res = await fetch(`${API_BASE}/categorias`);
@@ -111,5 +111,42 @@ export async function simularPago(pedidoId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pedido_id: pedidoId }),
   });
+  return manejarRespuesta(res);
+}
+
+export async function cambiarEstadoCorralon({ pedidoId, proveedorId, usuarioId, estado, motivo }) {
+  const res = await fetch(`${API_BASE}/pedidos/${pedidoId}/corralones/${proveedorId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuario_id: usuarioId, estado, motivo: motivo || null }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function cancelarPedido({ pedidoId, usuarioId }) {
+  const res = await fetch(`${API_BASE}/pedidos/${pedidoId}/cancelar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuario_id: usuarioId }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function obtenerCombos() {
+  const res = await fetch(`${API_BASE}/combos`);
+  return manejarRespuesta(res);
+}
+
+export async function crearCombo({ autorId, titulo, descripcion, imagen, items }) {
+  const res = await fetch(`${API_BASE}/combos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ autor_id: autorId, titulo, descripcion, imagen, items }),
+  });
+  return manejarRespuesta(res);
+}
+
+export async function borrarCombo({ id, usuarioId }) {
+  const res = await fetch(`${API_BASE}/combos/${id}?usuario_id=${usuarioId}`, { method: "DELETE" });
   return manejarRespuesta(res);
 }

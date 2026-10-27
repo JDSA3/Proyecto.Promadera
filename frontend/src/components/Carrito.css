@@ -11,3 +11,12 @@
 .carrito-acciones { display: flex; gap: 12px; flex-wrap: wrap; }
 .btn-secundario { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--pm-navy-800); background: var(--pm-white); color: var(--pm-navy-800); font-family: var(--pm-font-display); font-size: 1rem; cursor: pointer; }
 .btn-secundario:disabled, .btn-tan:disabled { opacity: 0.5; cursor: not-allowed; }
+
+
+/* ===== CARRITO AGRUPADO POR CORRALÓN ===== */
+.cr-grupo { margin-top: 16px; padding: 16px 20px; background: var(--pm-white); border: 1px solid var(--pm-line); border-radius: 14px; }
+.cr-grupo-encabezado { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.cr-grupo-etiqueta { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--pm-navy-800); color: var(--pm-white); font-family: var(--pm-font-display); font-size: 0.9rem; letter-spacing: 0.04em; }
+.cr-grupo-nombre { margin: 0; font-family: var(--pm-font-display); font-size: 1.2rem; color: var(--pm-navy-900); }
+.cr-grupo-total { margin-left: auto; font-family: var(--pm-font-display); font-size: 1.2rem; color: var(--pm-navy-900); }
+.cr-grupo-estado { padding: 4px 10px; border-radius: 999px; background: var(--pm-beige-100); color: var(--pm-navy-800); font-size: 0.8rem; text-transform: capitalize; }
