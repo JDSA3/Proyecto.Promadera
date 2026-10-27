@@ -93,11 +93,12 @@ def _errores(funcion, *args):
     description=(
         "El corralón avanza su parte del pedido: pendiente -> confirmado (el pedido tiene que estar pagado) "
         "-> enviado -> entregado. Desde entregado puede pasar a devuelto, con motivo obligatorio. "
-        "La devolución no repone stock. usuario_id tiene que ser el mismo corralón (proveedor_id)."
+        "La devolución no repone stock. usuario_id tiene que ser el mismo corralón (proveedor_id); "
+        "para devuelto también puede ser el cliente dueño del pedido (botón Reportar problema)."
     ),
     responses={
         400: {"description": "Falta el motivo de la devolución"},
-        403: {"description": "El usuario no es ese corralón"},
+        403: {"description": "El usuario no es ese corralón (ni el cliente, si es una devolución)"},
         404: {"description": "El pedido no existe o no tiene productos de ese corralón"},
         409: {"description": "El cambio no se puede hacer desde el estado actual"},
     },

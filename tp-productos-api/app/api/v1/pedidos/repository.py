@@ -238,11 +238,14 @@ def _pedido_bloqueado(session, pedido_id: int):
 def cambiar_estado_corralon(pedido_id: int, proveedor_id: int, data):
     with SessionLocal() as session, session.begin():
         usuario = session.get(UsuarioDB, data.usuario_id)
-
-        if usuario is None or not usuario.activo or usuario.rol != "proveedor" or usuario.id != proveedor_id:
-            raise SinPermiso(f"El usuario {data.usuario_id} no es el corralón {proveedor_id}")
-
         pedido = _pedido_bloqueado(session, pedido_id)
+
+        activo = usuario is not None and usuario.activo
+        es_corralon = activo and usuario.rol == "proveedor" and usuario.id == proveedor_id
+        es_cliente_que_devuelve = activo and data.estado == "devuelto" and usuario.id == pedido.cliente_id
+
+        if not (es_corralon or es_cliente_que_devuelve):
+            raise SinPermiso(f"El usuario {data.usuario_id} no es el corralón {proveedor_id}")
         corralon = next((c for c in pedido.corralones if c.proveedor_id == proveedor_id), None)
 
         if corralon is None:
