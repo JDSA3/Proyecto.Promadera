@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { crearPedido, crearPreferenciaPago, simularPago } from "../api.js";
+import { nombreItem } from "../cortes.js";
 import "./Carrito.css";
 
 const dinero = (n) =>
@@ -147,8 +148,8 @@ export default function Carrito({
                   </thead>
                   <tbody>
                     {c.items.map((i) => (
-                      <tr key={i.producto_id}>
-                        <td>{i.nombre}</td>
+                      <tr key={`${i.producto_id}-${i.largo_cm ?? "entera"}`}>
+                        <td>{nombreItem(i)}</td>
                         <td>{i.cantidad}</td>
                         <td>{dinero(i.subtotal)}</td>
                       </tr>
@@ -170,8 +171,8 @@ export default function Carrito({
               </thead>
               <tbody>
                 {pedido.items.map((i) => (
-                  <tr key={i.producto_id}>
-                    <td>{i.nombre}</td>
+                  <tr key={`${i.producto_id}-${i.largo_cm ?? "entera"}`}>
+                    <td>{nombreItem(i)}</td>
                     <td>{i.cantidad}</td>
                     <td>{dinero(i.subtotal)}</td>
                   </tr>
@@ -267,17 +268,17 @@ export default function Carrito({
               </thead>
               <tbody>
                 {g.items.map((i) => (
-                  <tr key={i.producto_id}>
-                    <td>{i.nombre}</td>
+                  <tr key={`${i.producto_id}-${i.largo_cm ?? "entera"}`}>
+                    <td>{nombreItem(i)}</td>
                     <td>{dinero(i.precio)}</td>
                     <td>
                       <span className="carrito-cantidad">
                         <button
                           type="button"
-                          aria-label={`Quitar una unidad de ${i.nombre}`}
+                          aria-label={`Quitar una unidad de ${nombreItem(i)}`}
                           disabled={i.cantidad <= 1}
                           onClick={() =>
-                            cambiarCantidad(i.producto_id, i.cantidad - 1)
+                            cambiarCantidad(i.clave, i.cantidad - 1)
                           }
                         >
                           −
@@ -285,10 +286,10 @@ export default function Carrito({
                         {i.cantidad}
                         <button
                           type="button"
-                          aria-label={`Agregar una unidad de ${i.nombre}`}
+                          aria-label={`Agregar una unidad de ${nombreItem(i)}`}
                           disabled={i.cantidad >= i.stock}
                           onClick={() =>
-                            cambiarCantidad(i.producto_id, i.cantidad + 1)
+                            cambiarCantidad(i.clave, i.cantidad + 1)
                           }
                         >
                           +
@@ -300,8 +301,8 @@ export default function Carrito({
                       <button
                         type="button"
                         className="cr-btn-icono peligro"
-                        aria-label={`Quitar ${i.nombre} del carrito`}
-                        onClick={() => quitar(i.producto_id)}
+                        aria-label={`Quitar ${nombreItem(i)} del carrito`}
+                        onClick={() => quitar(i.clave)}
                       >
                         🗑
                       </button>

@@ -1,0 +1,29 @@
+/* ===== CORTE A MEDIDA (slider de Insumos) ===== */
+.cm { display: flex; flex-direction: column; gap: 12px; margin: 12px 0; }
+.cm-modos { display: flex; gap: 8px; flex-wrap: wrap; }
+.cm-modo, .cm-unidad {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--pm-tan-500);
+  background: var(--pm-white);
+  color: var(--pm-tan-500);
+  font-family: var(--pm-font-display);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.cm-modo.activo, .cm-unidad.activo { background: var(--pm-tan-500); color: var(--pm-white); }
+
+.cm-panel { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border: 1px solid var(--pm-line); border-radius: 12px; background: var(--pm-beige-50); }
+.cm-unidades { display: flex; gap: 6px; }
+.cm-unidad { padding: 4px 14px; }
+
+.cm-campo { display: flex; flex-direction: column; gap: 6px; font-family: var(--pm-font-display); color: var(--pm-navy-900); font-size: 0.95rem; }
+.cm-slider { width: 100%; accent-color: var(--pm-tan-500); }
+.cm-fila { display: flex; gap: 16px; flex-wrap: wrap; }
+.cm-numero { flex: 1; min-width: 140px; }
+.cm-numero input { padding: 8px 10px; border: 1px solid var(--pm-line); border-radius: 8px; font-size: 1rem; }
+
+.cm-detalle { margin: 0; color: #5c5c5c; font-size: 0.95rem; }
+.cm-total { margin: 0; font-family: var(--pm-font-display); font-size: 1.25rem; color: var(--pm-navy-900); }
+.cm-total span { font-size: 0.9rem; color: #5c5c5c; }
+.cm-sin-stock { color: #c0392b; font-weight: 600; }

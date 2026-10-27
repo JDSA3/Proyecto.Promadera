@@ -90,7 +90,11 @@ export async function crearPedido({ clienteId, items }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       cliente_id: clienteId,
-      items: items.map((i) => ({ producto_id: i.producto_id, cantidad: i.cantidad })),
+      items: items.map((i) => ({
+        producto_id: i.producto_id,
+        cantidad: i.cantidad,
+        ...(i.largo_cm ? { largo_cm: i.largo_cm } : {}),
+      })),
     }),
   });
   return manejarRespuesta(res);

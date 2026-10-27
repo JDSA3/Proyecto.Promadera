@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { cambiarEstadoCorralon, obtenerPedidos } from "../../api.js";
 import "./CorralonPedidos.css";
+import { nombreItem } from "../../cortes.js";
 
 // Filtros por el estado de la parte de este corralón.
 const FILTROS = [
@@ -206,8 +207,8 @@ export default function CorralonPedidos({ usuario }) {
             </thead>
             <tbody>
               {parte.items.map((item) => (
-                <tr key={item.producto_id}>
-                  <td>{item.nombre}</td>
+                  <tr key={`${item.producto_id}-${item.largo_cm ?? "entera"}`}>
+                  <td>{nombreItem(item)}</td>
                   <td>{item.cantidad}</td>
                   <td>{dinero(item.precio_unitario)}</td>
                   <td>{dinero(item.subtotal)}</td>

@@ -1,5 +1,7 @@
 import ProductosRecomendados from "./ProductosRecomendados";
 import BotonCarrito from "./BotonCarrito.jsx";
+import CorteMedida from "./CorteMedida.jsx";
+import { esCortable } from "../cortes.js";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
@@ -39,7 +41,11 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
             </p>
 
                           {onAgregarAlCarrito && (
-              <BotonCarrito key={producto.id} producto={producto} onAgregar={onAgregarAlCarrito} />
+              esCortable(producto) ? (
+                <CorteMedida key={producto.id} producto={producto} onAgregar={onAgregarAlCarrito} />
+              ) : (
+                <BotonCarrito key={producto.id} producto={producto} onAgregar={onAgregarAlCarrito} />
+              )
             )}
 
             <button

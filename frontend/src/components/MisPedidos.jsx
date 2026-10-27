@@ -9,6 +9,7 @@ import {
 import "./Carrito.css";
 import "./corralon/CorralonPedidos.css"; // detalle desplegable de un pedido
 import "./MisPedidos.css";
+import { nombreItem } from "../cortes.js";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -155,7 +156,7 @@ export default function MisPedidos({ usuario }) {
             <tbody>
               {c.items.map((item) => (
                 <tr key={item.producto_id}>
-                  <td>{item.nombre}</td>
+                  <td>{nombreItem(item)}</td>
                   <td>{item.cantidad}</td>
                   <td>{dinero(item.precio_unitario)}</td>
                   <td>{dinero(item.subtotal)}</td>
