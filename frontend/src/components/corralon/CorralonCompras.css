@@ -1,0 +1,13 @@
+/* ===== COMPRAS DEL CORRALÓN: proveedores y órdenes de compra ===== */
+.cc-formulario { margin-bottom: 20px; padding: 16px 20px; background: var(--pm-white); border: 1px solid var(--pm-line); border-radius: 14px; }
+.cc-formulario h3 { margin: 0 0 12px; font-family: var(--pm-font-display); font-size: 1.2rem; color: var(--pm-navy-900); }
+.cc-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.cc-campo { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--pm-navy-800); }
+.cc-campo input, .cc-campo select, .cc-linea input, .cc-linea select { padding: 10px 12px; border: 1px solid var(--pm-line); border-radius: 10px; font-family: var(--pm-font-body); font-size: 1rem; background: var(--pm-white); }
+.cc-linea { display: grid; grid-template-columns: 1fr 120px auto; gap: 12px; align-items: center; margin-top: 10px; }
+.cc-formulario-acciones { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.cc-aviso-vacio { margin: 0 0 12px; padding: 12px 16px; border-radius: 12px; background: var(--pm-beige-50); border: 1px solid var(--pm-tan-300); color: var(--pm-navy-900); }
+
+@media (max-width: 600px) {
+  .cc-linea { grid-template-columns: 1fr; }
+}
