@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import Layout from "./components/Layout.jsx";
 import Auth from "./components/Auth.jsx";
 import Diseno from "./components/Diseno.jsx";
@@ -17,6 +17,7 @@ import Stock from "./components/Stock.jsx";
 import CorralonInicio from "./components/corralon/CorralonInicio.jsx";
 import CorralonPedidos from "./components/corralon/CorralonPedidos.jsx";
 import CorralonPerfil from "./components/corralon/CorralonPerfil.jsx";
+import CorralonCompras from "./components/corralon/CorralonCompras.jsx";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
@@ -31,6 +32,7 @@ const MENU_CORRALON = [
   { id: "productos", label: "Mis Productos" },
   { id: "stock", label: "Stock" },
   { id: "pedidos", label: "Pedidos" },
+  { id: "compras", label: "Compras" },
   { id: "perfil", label: "Perfil" },
 ];
 
@@ -45,7 +47,12 @@ export default function App() {
   const [vista, setVista] = useState(() => vistaInicial(usuario));
   const misProyectos = useProyectos(usuario?.id);
   const [proyectoAbierto, setProyectoAbierto] = useState(null);
-  const cambiarVista = (id) => { setProyectoAbierto(null); setVista(id); };
+  const [compraInicial, setCompraInicial] = useState(null); // producto elegido desde Stock
+  const cambiarVista = (id) => {
+    setProyectoAbierto(null);
+    setCompraInicial(null);
+    setVista(id);
+  };
 
   function handleLogin(datos, recordar) {
     guardarSesion(datos, recordar);
@@ -60,9 +67,25 @@ export default function App() {
         case "productos":
           return <MisProductos usuario={usuario} />;
         case "stock":
-          return <Stock usuario={usuario} />;
+          return (
+            <Stock
+              usuario={usuario}
+              onPedirReposicion={(p) => {
+                setCompraInicial(p);
+                setVista("compras");
+              }}
+            />
+          );
         case "pedidos":
           return <CorralonPedidos usuario={usuario} />;
+        case "compras":
+          return (
+            <CorralonCompras
+              key={compraInicial?.id ?? "compras"}
+              usuario={usuario}
+              productoInicial={compraInicial}
+            />
+          );
         case "perfil":
           return <CorralonPerfil usuario={usuario} />;
         default:
@@ -86,7 +109,17 @@ export default function App() {
   function contenido() {
     switch (vista) {
       case "proyectos":
-        return <Proyectos proyectos={misProyectos.proyectos} onAbrir={(p) => { setProyectoAbierto(p); setVista("diseno"); }} onEliminar={misProyectos.eliminar} onIrADiseno={() => cambiarVista("diseno")} />;
+        return (
+          <Proyectos
+            proyectos={misProyectos.proyectos}
+            onAbrir={(p) => {
+              setProyectoAbierto(p);
+              setVista("diseno");
+            }}
+            onEliminar={misProyectos.eliminar}
+            onIrADiseno={() => cambiarVista("diseno")}
+          />
+        );
       case "insumos":
         return (
           <Productos
@@ -111,7 +144,15 @@ export default function App() {
       case "mispedidos":
         return <MisPedidos usuario={usuario} />;
       default:
-        return <Diseno key={proyectoAbierto?.id ?? "nuevo"} carrito={carrito} onIrAlCarrito={() => setVista("carrito")} proyectoInicial={proyectoAbierto} onGuardarProyecto={misProyectos.guardar} />;
+        return (
+          <Diseno
+            key={proyectoAbierto?.id ?? "nuevo"}
+            carrito={carrito}
+            onIrAlCarrito={() => setVista("carrito")}
+            proyectoInicial={proyectoAbierto}
+            onGuardarProyecto={misProyectos.guardar}
+          />
+        );
     }
   }
 
@@ -119,7 +160,10 @@ export default function App() {
     <Layout
       menu={[
         ...MENU_CARPINTERO,
-        { id: "carrito", label: carrito.cantidadTotal > 0 ? `Carrito (${carrito.cantidadTotal})` : "Carrito" },
+        {
+          id: "carrito",
+          label: carrito.cantidadTotal > 0 ? `Carrito (${carrito.cantidadTotal})` : "Carrito",
+        },
         { id: "mispedidos", label: "Mis Pedidos" },
       ]}
       vista={vista}
@@ -130,5 +174,3 @@ export default function App() {
     </Layout>
   );
 }
-
-
