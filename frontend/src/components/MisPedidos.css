@@ -1,0 +1,74 @@
+/* ===== MIS PEDIDOS: detalle por corralón y modal de reporte ===== */
+.mp-acciones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.mp-motivo {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--pm-beige-50);
+  border: 1px solid var(--pm-line);
+  color: var(--pm-navy-800);
+}
+.mp-btn-peligro {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid #c0392b;
+  background: var(--pm-white);
+  color: #c0392b;
+  font-family: var(--pm-font-display);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.mp-btn-peligro:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mp-modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(22, 35, 61, 0.55);
+}
+.mp-modal {
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--pm-white);
+}
+.mp-modal h3 {
+  margin: 0 0 8px;
+  font-family: var(--pm-font-display);
+  font-size: 1.3rem;
+  color: var(--pm-navy-900);
+}
+.mp-modal p {
+  margin: 0 0 12px;
+  color: #5c5c5c;
+  line-height: 1.5;
+}
+.mp-modal textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid var(--pm-line);
+  border-radius: 10px;
+  font-family: var(--pm-font-body);
+  font-size: 1rem;
+  resize: vertical;
+}
+.mp-modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
