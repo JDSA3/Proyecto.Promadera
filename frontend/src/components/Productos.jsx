@@ -111,11 +111,8 @@ export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCa
             </option>
           ))}
         </select>
-      </div>
 
-      <div id="productos">{contenido()}</div>
-
-              <select
+        <select
           id="corralon"
           value={proveedorId}
           onChange={(e) => setProveedorId(e.target.value)}
@@ -127,7 +124,11 @@ export default function Productos({ favoritos, onAlternarFavorito, onAgregarAlCa
             </option>
           ))}
         </select>
+      </div>
 
+      <div id="productos">{contenido()}</div>
+      
+      
       <ProductoDetalle
         producto={detalle}
         esFavorito={detalle ? favoritos.includes(detalle.id) : false}

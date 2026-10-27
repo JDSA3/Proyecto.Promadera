@@ -36,7 +36,7 @@ function EncabezadoCorralon({ numero, nombre, total, estado }) {
     <header className="cr-grupo-encabezado">
       <span className="cr-grupo-etiqueta">c{numero}</span>
       <h3 className="cr-grupo-nombre">{nombre}</h3>
-      {estado && <span className={`cr-estado cr-estado-${estado}`}>{estado}</span>}
+      {estado && <span className="cr-grupo-estado">{estado}</span>}
       <span className="cr-grupo-total">{dinero(total)}</span>
     </header>
   );
