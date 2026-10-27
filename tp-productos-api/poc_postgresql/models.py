@@ -197,3 +197,38 @@ class OrdenCompraItemDB(Base):
 
     orden: Mapped[OrdenCompraDB] = relationship(back_populates="items")
     producto: Mapped[ProductoDB] = relationship()
+
+
+class ComboDB(Base):
+    """Combo de productos de la comunidad (autor_id vacío = combo de ProMadera)."""
+
+    __tablename__ = "combos"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    autor_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
+    titulo: Mapped[str] = mapped_column(String(100), nullable=False)
+    descripcion: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    imagen: Mapped[str | None] = mapped_column(String, nullable=True)
+    activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    autor: Mapped[UsuarioDB | None] = relationship()
+    items: Mapped[list["ComboItemDB"]] = relationship(
+        back_populates="combo", cascade="all, delete-orphan", order_by="ComboItemDB.id"
+    )
+
+
+class ComboItemDB(Base):
+    __tablename__ = "combo_items"
+    __table_args__ = (
+        UniqueConstraint("combo_id", "producto_id", name="uq_combo_item"),
+        CheckConstraint("cantidad > 0", name="ck_combo_items_cantidad_positiva"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    combo_id: Mapped[int] = mapped_column(ForeignKey("combos.id", ondelete="CASCADE"), nullable=False)
+    producto_id: Mapped[int] = mapped_column(ForeignKey("productos.id"), nullable=False)
+    cantidad: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    combo: Mapped[ComboDB] = relationship(back_populates="items")
+    producto: Mapped[ProductoDB] = relationship()
