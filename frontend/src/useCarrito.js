@@ -24,15 +24,14 @@ export default function useCarrito(usuarioId) {
       setItems((anteriores) => {
         const nuevos = cambio(anteriores);
         try {
-          if (usuarioId)
-            localStorage.setItem(clave(usuarioId), JSON.stringify(nuevos));
+          if (usuarioId) localStorage.setItem(clave(usuarioId), JSON.stringify(nuevos));
         } catch {
           // si falla el storage, el carrito sigue en memoria
         }
         return nuevos;
       });
     },
-    [usuarioId],
+    [usuarioId]
   );
 
   const agregar = useCallback(
@@ -43,14 +42,8 @@ export default function useCarrito(usuarioId) {
         if (existente) {
           return prev.map((i) =>
             i.producto_id === producto.id
-              ? {
-                  ...i,
-                  stock: producto.stock,
-                  cantidad: Math.min(i.cantidad + cantidad, producto.stock),
-                              proveedor_id: producto.proveedor_id ?? null,
-            proveedor_nombre: producto.proveedor_nombre || `Corralón #${producto.proveedor_id}`,
-                }
-              : i,
+              ? { ...i, stock: producto.stock, cantidad: Math.min(i.cantidad + cantidad, producto.stock) }
+              : i
           );
         }
         return [
@@ -61,11 +54,13 @@ export default function useCarrito(usuarioId) {
             precio: producto.precio,
             stock: producto.stock,
             cantidad: Math.min(cantidad, producto.stock),
+            proveedor_id: producto.proveedor_id ?? null,
+            proveedor_nombre: producto.proveedor_nombre || `Corralón #${producto.proveedor_id}`,
           },
         ];
       });
     },
-    [actualizar],
+    [actualizar]
   );
 
   const cambiarCantidad = useCallback(
@@ -73,19 +68,16 @@ export default function useCarrito(usuarioId) {
       const n = Number(cantidad) || 1;
       actualizar((prev) =>
         prev.map((i) =>
-          i.producto_id === productoId
-            ? { ...i, cantidad: Math.max(1, Math.min(n, i.stock)) }
-            : i,
-        ),
+          i.producto_id === productoId ? { ...i, cantidad: Math.max(1, Math.min(n, i.stock)) } : i
+        )
       );
     },
-    [actualizar],
+    [actualizar]
   );
 
   const quitar = useCallback(
-    (productoId) =>
-      actualizar((prev) => prev.filter((i) => i.producto_id !== productoId)),
-    [actualizar],
+    (productoId) => actualizar((prev) => prev.filter((i) => i.producto_id !== productoId)),
+    [actualizar]
   );
 
   const vaciar = useCallback(() => actualizar(() => []), [actualizar]);
@@ -93,13 +85,5 @@ export default function useCarrito(usuarioId) {
   const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
   const cantidadTotal = items.reduce((s, i) => s + i.cantidad, 0);
 
-  return {
-    items,
-    agregar,
-    cambiarCantidad,
-    quitar,
-    vaciar,
-    total,
-    cantidadTotal,
-  };
+  return { items, agregar, cambiarCantidad, quitar, vaciar, total, cantidadTotal };
 }
