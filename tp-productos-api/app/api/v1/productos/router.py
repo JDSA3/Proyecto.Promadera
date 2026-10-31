@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from . import repository
 
@@ -16,14 +16,21 @@ router = APIRouter(prefix="/productos", tags=["Productos"])
     "",
     response_model=list[ProductoResponse],
     summary="Listar productos",
-    description="Devuelve la lista de productos con el nombre de su corralón (proveedor_nombre). Permite filtrar por texto en el nombre (query), por categoria_id y/o por corralón (proveedor_id).",
+    description="Devuelve la lista de productos con el nombre de su corralón (proveedor_nombre). Permite filtrar por texto en el nombre (query), por categoria_id y/o por corralón (proveedor_id). Paginación opcional con limit y offset; el header X-Total-Count trae el total de productos que cumplen los filtros. Sin limit devuelve la lista completa.",
 )
 def listar_productos(
+    response: Response,
     query: str | None = None,
     categoria_id: int | None = None,
-    proveedor_id: int | None = None
+    proveedor_id: int | None = None,
+    limit: int | None = Query(default=None, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
 ):
-    return repository.list_productos(query, categoria_id, proveedor_id)
+    productos, total = repository.list_productos(
+        query, categoria_id, proveedor_id, limit, offset
+    )
+    response.headers["X-Total-Count"] = str(total)
+    return productos
 
 
 @router.get(

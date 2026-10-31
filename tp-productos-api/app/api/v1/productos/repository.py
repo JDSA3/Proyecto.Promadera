@@ -1,4 +1,4 @@
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import selectinload
 
 from poc_postgresql.database import SessionLocal
@@ -35,13 +35,11 @@ def list_productos(
     query: str | None = None,
     categoria_id: int | None = None,
     proveedor_id: int | None = None,
+    limit: int | None = None,
+    offset: int = 0,
 ):
-    consulta = (
-        select(ProductoDB)
-        .options(selectinload(ProductoDB.categoria), selectinload(ProductoDB.proveedor))
-        .where(ProductoDB.activo.is_(True))
-        .order_by(ProductoDB.id)
-    )
+    """Devuelve (productos, total). total cuenta todos los que cumplen los filtros, sin paginar."""
+    consulta = select(ProductoDB).where(ProductoDB.activo.is_(True))
 
     if query is not None:
         consulta = consulta.where(ProductoDB.nombre.ilike(f"%{query}%"))
@@ -52,8 +50,20 @@ def list_productos(
     if proveedor_id is not None:
         consulta = consulta.where(ProductoDB.proveedor_id == proveedor_id)
 
+    total_consulta = select(func.count()).select_from(consulta.subquery())
+
+    consulta = (
+        consulta
+        .options(selectinload(ProductoDB.categoria), selectinload(ProductoDB.proveedor))
+        .order_by(ProductoDB.id)
+        .offset(offset)
+    )
+    if limit is not None:
+        consulta = consulta.limit(limit)
+
     with SessionLocal() as session:
-        return [_to_dict(p) for p in session.scalars(consulta)]
+        total = session.scalar(total_consulta)
+        return [_to_dict(p) for p in session.scalars(consulta)], total
     
 def get_by_id(producto_id: int):
     with SessionLocal() as session:
