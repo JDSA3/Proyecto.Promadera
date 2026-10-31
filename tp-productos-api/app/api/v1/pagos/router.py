@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 
+from app.api.v1.pedidos import correos
 from app.api.v1.pedidos import repository as pedidos
 from app.api.v1.pedidos.schemas import PedidoResponse
 
@@ -72,13 +73,16 @@ def crear_preferencia(datos: PagoRequest):
     "/simular",
     response_model=PedidoResponse,
     summary="Simular el pago (plan B)",
-    description="Marca un pedido pendiente como pagado, sin Mercado Pago.",
+    description=(
+        "Marca un pedido pendiente como pagado, sin Mercado Pago. Después de responder, manda al cliente el "
+        "correo con el comprobante y avisa a cada corralón del pedido (si falla el correo, el pago igual queda)."
+    ),
     responses={
         404: {"description": "Pedido no encontrado"},
         409: {"description": "El pedido no está pendiente"},
     },
 )
-def simular_pago(datos: PagoRequest):
+def simular_pago(datos: PagoRequest, tareas: BackgroundTasks):
     _pedido_pendiente(datos.pedido_id)
     pedido = pedidos.marcar_pagado(datos.pedido_id)
 
@@ -88,6 +92,7 @@ def simular_pago(datos: PagoRequest):
             detail=f"El pedido {datos.pedido_id} ya no está pendiente",
         )
 
+    tareas.add_task(correos.enviar_pago_confirmado, pedido)
     return pedido
 
 
@@ -97,7 +102,7 @@ def simular_pago(datos: PagoRequest):
     description=(
         "Mercado Pago llama a esta URL cuando cambia un pago. El backend vuelve a consultar el pago en Mercado Pago "
         "con el token (no confía en lo que llega en el aviso) y, si está aprobado y el monto alcanza, pasa el pedido "
-        "de external_reference a pagado. Los avisos que no son de pagos se ignoran. Necesita una URL pública: se "
+        "de external_reference a pagado y manda los correos (comprobante al cliente y aviso a los corralones). Los avisos que no son de pagos se ignoran. Necesita una URL pública: se "
         "configura en MP_WEBHOOK_URL o en el panel de Mercado Pago."
     ),
     responses={
@@ -105,7 +110,7 @@ def simular_pago(datos: PagoRequest):
         503: {"description": "Falta MP_ACCESS_TOKEN"},
     },
 )
-async def webhook_mercado_pago(request: Request):
+async def webhook_mercado_pago(request: Request, tareas: BackgroundTasks):
     try:
         cuerpo = await request.json()
     except ValueError:
@@ -144,5 +149,10 @@ async def webhook_mercado_pago(request: Request):
     if pedido["estado"] != "pendiente":
         return {"procesado": False, "motivo": f"El pedido ya estaba {pedido['estado']}"}
 
-    pedidos.marcar_pagado(pedido["id"])
+    pagado = pedidos.marcar_pagado(pedido["id"])
+
+    if pagado is None:
+        return {"procesado": False, "motivo": "El pedido ya no estaba pendiente"}
+
+    tareas.add_task(correos.enviar_pago_confirmado, pagado)
     return {"procesado": True, "pedido_id": pedido["id"]}
