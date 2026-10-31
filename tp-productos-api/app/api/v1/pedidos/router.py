@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
-from . import repository
+from . import correos, repository
 from .schemas import (
     CambioEstadoCorralon,
     CancelarPedido,
@@ -57,20 +57,24 @@ def obtener_pedido(pedido_id: int):
         "Si hay stock de todos los productos, lo descuenta; si falta stock de alguno, no se guarda nada. "
         "Con largo_cm en un item se pide un corte a medida: el precio es proporcional al largo y se descuentan "
         "las piezas enteras que hacen falta para sacar esos cortes. "
-        "Genera una sub-orden (en corralones) por cada corralón de los productos, en estado pendiente."
+        "Genera una sub-orden (en corralones) por cada corralón de los productos, en estado pendiente. "
+        "Después de responder, manda al cliente el correo \"Pedido recibido\" (si falla, el pedido igual queda guardado)."
     ),
     responses={
         400: {"description": "El cliente o algún producto no existe (o el usuario no es cliente)"},
         409: {"description": "No hay stock suficiente de algún producto"},
     },
 )
-def crear_pedido(datos: PedidoCreate):
+def crear_pedido(datos: PedidoCreate, tareas: BackgroundTasks):
     try:
-        return repository.create(datos)
+        pedido = repository.create(datos)
     except repository.DatosInvalidos as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except repository.StockInsuficiente as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
+
+    tareas.add_task(correos.enviar_pedido_recibido, pedido)
+    return pedido
 
 
 def _errores(funcion, *args):
