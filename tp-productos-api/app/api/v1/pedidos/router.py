@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Response, status
 
-from . import repository
+from . import comprobante, correos, repository
 from .schemas import (
     CambioEstadoCorralon,
     CancelarPedido,
@@ -57,20 +57,24 @@ def obtener_pedido(pedido_id: int):
         "Si hay stock de todos los productos, lo descuenta; si falta stock de alguno, no se guarda nada. "
         "Con largo_cm en un item se pide un corte a medida: el precio es proporcional al largo y se descuentan "
         "las piezas enteras que hacen falta para sacar esos cortes. "
-        "Genera una sub-orden (en corralones) por cada corralón de los productos, en estado pendiente."
+        "Genera una sub-orden (en corralones) por cada corralón de los productos, en estado pendiente. "
+        "Después de responder, manda al cliente el correo \"Pedido recibido\" (si falla, el pedido igual queda guardado)."
     ),
     responses={
         400: {"description": "El cliente o algún producto no existe (o el usuario no es cliente)"},
         409: {"description": "No hay stock suficiente de algún producto"},
     },
 )
-def crear_pedido(datos: PedidoCreate):
+def crear_pedido(datos: PedidoCreate, tareas: BackgroundTasks):
     try:
-        return repository.create(datos)
+        pedido = repository.create(datos)
     except repository.DatosInvalidos as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     except repository.StockInsuficiente as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
+
+    tareas.add_task(correos.enviar_pedido_recibido, pedido)
+    return pedido
 
 
 def _errores(funcion, *args):
@@ -84,6 +88,36 @@ def _errores(funcion, *args):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
     except repository.DatosInvalidos as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
+
+
+@router.get(
+    "/{pedido_id}/comprobante",
+    response_class=Response,
+    summary="Descargar el comprobante de compra (PDF)",
+    description=(
+        "Devuelve el comprobante de compra en PDF: número 0001-000000NN, fecha, cliente, productos agrupados por "
+        "corralón y total. Es un comprobante propio, no una factura fiscal de ARCA/AFIP. Solo está cuando el pedido "
+        "está pagado. usuario_id tiene que ser el cliente dueño (ve todo el pedido) o un corralón del pedido "
+        "(ve solo su parte). No hay login todavía: el usuario se pasa como parámetro."
+    ),
+    responses={
+        200: {"content": {"application/pdf": {}}, "description": "El PDF del comprobante"},
+        403: {"description": "El usuario no es el cliente ni un corralón del pedido"},
+        404: {"description": "Pedido no encontrado"},
+        409: {"description": "El pedido todavía no está pagado (o está cancelado)"},
+    },
+)
+def descargar_comprobante(
+    pedido_id: int,
+    usuario_id: int = Query(ge=1, description="El cliente dueño o un corralón del pedido (sin login todavía)"),
+):
+    pedido, cliente_email = _errores(repository.comprobante, pedido_id, usuario_id)
+    pdf = comprobante.generar_pdf(pedido, cliente_email)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{comprobante.nombre_archivo(pedido_id)}"'},
+    )
 
 
 @router.patch(
