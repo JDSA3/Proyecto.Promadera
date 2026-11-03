@@ -1331,6 +1331,7 @@ body {
 
 /* ===== CELULAR: corralón, carrito y Mis Pedidos ===== */
 @media (max-width: 760px) {
+  .app-header { position: sticky; top: 0; z-index: 60; }
   .app-contenido { padding: 16px 12px; }
 
   /* Cabeceras y tarjetas del corralón */
