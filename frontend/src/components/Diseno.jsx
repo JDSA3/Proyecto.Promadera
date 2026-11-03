@@ -8,6 +8,7 @@ import GuardarProyecto from "./GuardarProyecto.jsx";
 
 const dinero = (n) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 const cm = (n) => `${Number(n).toFixed(1).replace(/\.0$/, "")} cm`;
+const hoy = () => new Date().toLocaleDateString("es-AR");
 
 export default function Diseno({ carrito, onIrAlCarrito, proyectoInicial, onGuardarProyecto }) {
   const [productos, setProductos] = useState(null); // null = cargando
@@ -177,6 +178,14 @@ export default function Diseno({ carrito, onIrAlCarrito, proyectoInicial, onGuar
                 )}
                 <button
                   type="button"
+                  className="btn-secundario"
+                  disabled={resultado.items.length === 0}
+                  onClick={() => window.print()}
+                >
+                  🖨 Imprimir presupuesto
+                </button>
+                <button
+                  type="button"
                   className="btn-tan"
                   disabled={resultado.items.length === 0}
                   onClick={agregarAlCarrito}
@@ -188,9 +197,40 @@ export default function Diseno({ carrito, onIrAlCarrito, proyectoInicial, onGuar
             {aviso && <p className="mensaje-exito" role="status">{aviso}</p>}
             {onGuardarProyecto && <GuardarProyecto nombreInicial={proyectoInicial?.nombre} ambienteInicial={proyectoInicial?.ambiente} onGuardar={(nombre, ambiente) => onGuardarProyecto({ nombre, ambiente, disenoId, medidas: resultado.medidas, acabado })} />}
           </div>
+
+          {/* Solo se ve al imprimir (ver Diseno.css) */}
+          <div className="presupuesto-impreso">
+            <img src="/logo.png" alt="ProMadera" className="pi-logo" />
+            <h1>Presupuesto: {diseno.nombre}</h1>
+            <p className="pi-fecha">Fecha: {hoy()}</p>
+            <p>
+              {diseno.medidas
+                .map((m) => `${m.etiqueta}: ${resultado.medidas[m.clave]}${m.entero ? "" : " cm"}`)
+                .join(" · ")}
+              {" · "}Acabado: {ACABADOS.find((a) => a.id === acabado)?.etiqueta}
+            </p>
+            <table>
+              <thead>
+                <tr><th>Material</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr>
+              </thead>
+              <tbody>
+                {resultado.items.map((i) => (
+                  <tr key={i.producto.id}>
+                    <td>{i.producto.nombre}</td>
+                    <td>{i.cantidad}</td>
+                    <td>{dinero(i.producto.precio)}</td>
+                    <td>{dinero(i.subtotal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="pi-total">Total: {dinero(resultado.total)}</p>
+            <p className="pi-nota">
+              Presupuesto estimativo con los precios del catálogo a la fecha. No es una factura.
+            </p>
+          </div>
         </>
       )}
     </section>
   );
 }
-
