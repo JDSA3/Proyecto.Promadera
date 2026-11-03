@@ -10,6 +10,7 @@ import "./Carrito.css";
 import "./corralon/CorralonPedidos.css"; // detalle desplegable de un pedido
 import "./MisPedidos.css";
 import { nombreItem } from "../cortes.js";
+import { urlComprobante } from "../apiComprobante.js";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -131,6 +132,19 @@ export default function MisPedidos({ usuario }) {
     });
 
   function detalleCorralones(p) {
+                    {p.estado === "pagado" && (
+                  <div className="mp-acciones">
+                    <button
+                      type="button"
+                      className="btn-secundario"
+                      onClick={() =>
+                        window.open(urlComprobante(p.id, usuario.id), "_blank", "noopener")
+                      }
+                    >
+                      Descargar comprobante
+                    </button>
+                  </div>
+                )}
     return (p.corralones ?? []).map((c, idx) => {
       const est = ESTADOS_CORRALON[c.estado] ?? { texto: c.estado, clase: "" };
       return (
