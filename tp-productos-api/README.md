@@ -91,6 +91,26 @@ Está planificada pero todavía **no está implementada**. El único cambio ser�
 | DELETE | `/api/v1/productos/{id}` | Eliminar (baja) | 204 | 404 |
 | GET | `/api/v1/categorias` | Listar categorías | 200 | — |
 
+## Seguridad y limitaciones
+
+**Todavía no hay login con token (JWT).** La API recibe el id del usuario (`usuario_id`) como parámetro o en el cuerpo del pedido, y no hay forma de comprobar que quien hace la llamada sea realmente ese usuario. Alguien malicioso podría mandar un id ajeno. Es una limitación conocida de la demo; JWT y OAuth quedan en el roadmap.
+
+Lo que sí se valida en el servidor, con el `usuario_id` recibido:
+
+| Endpoint | Quién puede | Error si no corresponde |
+|---|---|---|
+| `POST /api/v1/pedidos` | un usuario activo con rol cliente | 400 |
+| `GET /api/v1/pedidos/{id}/comprobante` | el cliente dueño (ve todo) o un corralón del pedido (ve solo su parte); el pedido tiene que estar pagado | 403 / 409 |
+| `PATCH /api/v1/pedidos/{id}/corralones/{proveedor_id}` | el mismo corralón (o el cliente dueño, solo para devolver) | 403 |
+| `POST /api/v1/pedidos/{id}/corralones/{proveedor_id}/devolucion` | el cliente dueño | 403 |
+| `POST /api/v1/pedidos/{id}/cancelar` | el cliente dueño | 403 |
+| `POST /api/v1/pagos/preferencia` y `POST /api/v1/pagos/simular` | el cliente dueño del pedido | 403 |
+| Compras (proveedores y órdenes) | el corralón dueño | 403 |
+
+Lo que **no** se valida todavía: la lectura de pedidos (`GET /api/v1/pedidos` y `GET /api/v1/pedidos/{id}`) y la creación, edición y baja de productos (`POST`, `PUT` y `DELETE /api/v1/productos`) no piden usuario. El webhook de Mercado Pago no recibe usuario: vuelve a consultar el pago en Mercado Pago con el token del servidor y no confía en lo que llega en el aviso.
+
+Los correos (pedido recibido y pago confirmado con comprobante) se mandan en segundo plano desde una cuenta de Gmail con contraseña de aplicación. Si el envío falla, el pedido y el pago igual quedan guardados y no hay reenvío automático. El comprobante es propio del sistema: no es una factura fiscal de ARCA/AFIP.
+
 ## Main: montar todo
 
 Se instanció `FastAPI` con `title` y `description`, se agregó un `GET /` con mensaje de bienvenida, y se montó el router de productos con `app.include_router`. El servidor se levantó con `fastapi dev app/main.py` (alternativamente `uvicorn app.main:app --reload`).

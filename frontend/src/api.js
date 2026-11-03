@@ -100,20 +100,20 @@ export async function crearPedido({ clienteId, items }) {
   return manejarRespuesta(res);
 }
 
-export async function crearPreferenciaPago(pedidoId) {
+export async function crearPreferenciaPago(pedidoId, usuarioId) {
   const res = await fetch(`${API_BASE}/pagos/preferencia`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pedido_id: pedidoId }),
+    body: JSON.stringify({ pedido_id: pedidoId, usuario_id: usuarioId }),
   });
   return manejarRespuesta(res);
 }
 
-export async function simularPago(pedidoId) {
+export async function simularPago(pedidoId, usuarioId) {
   const res = await fetch(`${API_BASE}/pagos/simular`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pedido_id: pedidoId }),
+    body: JSON.stringify({ pedido_id: pedidoId, usuario_id: usuarioId }),
   });
   return manejarRespuesta(res);
 }
