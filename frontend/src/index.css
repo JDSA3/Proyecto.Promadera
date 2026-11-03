@@ -1326,40 +1326,122 @@ body {
   }
 }
 /* ===== INICIO DEL CORRALÓN: RESUMEN (estilos que faltaban) ===== */
-.cr-resumen-estados { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 24px; }
-.cr-resumen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 28px; }
+.cr-resumen-estados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 24px;
+}
+.cr-resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
 
 /* ===== CELULAR: corralón, carrito y Mis Pedidos ===== */
 @media (max-width: 760px) {
-  .app-header { position: sticky; top: 0; z-index: 60; }
-  .app-contenido { padding: 16px 12px; }
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+  }
+  .app-contenido {
+    padding: 16px 12px;
+  }
 
   /* Cabeceras y tarjetas del corralón */
-  .cr-cabecera h2 { font-size: 1.7rem; }
-  .cr-kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .cr-kpi { padding: 14px; }
-  .cr-kpi-num { font-size: 1.8rem; }
-  .cr-accesos { grid-template-columns: 1fr; }
-  .cr-resumen-grid { grid-template-columns: 1fr; }
+  .cr-cabecera h2 {
+    font-size: 1.7rem;
+  }
+  .cr-kpis {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .cr-kpi {
+    padding: 14px;
+  }
+  .cr-kpi-num {
+    font-size: 1.8rem;
+  }
+  .cr-accesos {
+    grid-template-columns: 1fr;
+  }
+  .cr-resumen-grid {
+    grid-template-columns: 1fr;
+  }
 
   /* Filtros en una fila que se desliza, en vez de ocupar 3 líneas */
-  .cr-pills { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; }
-  .cr-pill { flex: 0 0 auto; padding: 6px 14px; font-size: .9rem; }
-  .cr-filtros input { min-width: 0; width: 100%; }
+  .cr-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .cr-pill {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+  }
+  .cr-filtros input {
+    min-width: 0;
+    width: 100%;
+  }
 
   /* Tablas: más compactas (ya se deslizan de costado dentro de .cr-tabla-wrap) */
-  .cr-tabla th, .cr-tabla td { padding: 10px 10px; font-size: .9rem; }
-  .cr-miniatura { width: 36px; height: 36px; }
+  .cr-tabla th,
+  .cr-tabla td {
+    padding: 10px 10px;
+    font-size: 0.9rem;
+  }
+  .cr-miniatura {
+    width: 36px;
+    height: 36px;
+  }
 
   /* Carrito */
-  .carrito-resumen { flex-direction: column; align-items: stretch; }
-  .carrito-acciones { flex-direction: column; }
-  .carrito-acciones button { width: 100%; }
-  .cr-grupo { padding: 12px 14px; }
-  .cr-grupo-total { margin-left: 0; width: 100%; }
+  .carrito-resumen {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .carrito-acciones {
+    flex-direction: column;
+  }
+  .carrito-acciones button {
+    width: 100%;
+  }
+  .cr-grupo {
+    padding: 12px 14px;
+  }
+  .cr-grupo-total {
+    margin-left: 0;
+    width: 100%;
+  }
 
   /* Ventanas emergentes (Mis Pedidos y pedidos del corralón) */
-  .mp-modal, .cp-modal { max-height: 92vh; overflow-y: auto; padding: 18px; }
-  .mp-modal-acciones, .cp-modal-acciones { flex-direction: column-reverse; }
-  .mp-modal-acciones button, .cp-modal-acciones button { width: 100%; }
+  .mp-modal,
+  .cp-modal {
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 18px;
+  }
+  .mp-modal-acciones,
+  .cp-modal-acciones {
+    flex-direction: column-reverse;
+  }
+  .mp-modal-acciones button,
+  .cp-modal-acciones button {
+    width: 100%;
+  }
+}
+
+/* ===== DETALLE DE PRODUCTO: corralón ===== */
+.detalle-corralon {
+  margin: 4px 0 12px;
+  color: var(--pm-navy-600);
+  font-size: 0.95rem;
+}
+.detalle-corralon strong {
+  color: var(--pm-navy-900);
+  font-family: var(--pm-font-display);
+  font-weight: 500;
 }
