@@ -1445,14 +1445,26 @@ body {
   font-family: var(--pm-font-display);
   font-weight: 500;
 }
-/* ===== DETALLE DE PRODUCTO: corralón ===== */
-.detalle-corralon {
-  margin: 4px 0 12px;
-  color: var(--pm-navy-600);
-  font-size: 0.95rem;
-}
-.detalle-corralon strong {
-  color: var(--pm-navy-900);
-  font-family: var(--pm-font-display);
-  font-weight: 500;
+/* ===== PRESUPUESTO IMPRIMIBLE ===== */
+.presupuesto-impreso { display: none; }
+
+@page { margin: 16mm; }
+
+@media print {
+  body { background: #fff; }
+  .app-header, .app-menu, .app-footer { display: none !important; }
+  .app-cuerpo { display: block; }
+  .app-contenido { padding: 0; }
+  .diseno-pagina { max-width: none; }
+  .diseno-pagina > *:not(.presupuesto-impreso) { display: none !important; }
+
+  .presupuesto-impreso { display: block; color: #000; }
+  .presupuesto-impreso h1 { font-family: var(--pm-font-display); font-weight: 500; color: var(--pm-navy-900); margin: 8px 0; }
+  .pi-logo { height: 56px; }
+  .pi-fecha { color: #444; margin: 0 0 8px; }
+  .presupuesto-impreso table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .presupuesto-impreso th, .presupuesto-impreso td { border-bottom: 1px solid #999; padding: 6px 8px; text-align: left; }
+  .presupuesto-impreso th { font-family: var(--pm-font-display); font-weight: 500; }
+  .pi-total { text-align: right; font-family: var(--pm-font-display); font-size: 1.4rem; }
+  .pi-nota { color: #555; font-size: 0.85rem; }
 }
