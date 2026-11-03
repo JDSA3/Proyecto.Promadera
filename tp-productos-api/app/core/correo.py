@@ -4,6 +4,7 @@ Nunca levanta errores: si faltan las credenciales o Gmail falla, lo deja
 en el log y devuelve False, así el pedido o el pago no se rompen.
 """
 import logging
+import mimetypes
 import os
 import smtplib
 from email.message import EmailMessage
@@ -14,7 +15,14 @@ SMTP_PORT = 587
 logger = logging.getLogger("uvicorn.error")
 
 
-def enviar_correo(destinatario: str, asunto: str, texto: str, html: str | None = None) -> bool:
+def enviar_correo(
+    destinatario: str,
+    asunto: str,
+    texto: str,
+    html: str | None = None,
+    adjuntos: list[tuple[str, bytes]] | None = None,
+) -> bool:
+    """adjuntos: lista de (nombre del archivo, contenido), por ejemplo [("comprobante.pdf", pdf)]."""
     usuario = os.getenv("GMAIL_USER")
     password = os.getenv("GMAIL_APP_PASSWORD")
 
@@ -29,6 +37,10 @@ def enviar_correo(destinatario: str, asunto: str, texto: str, html: str | None =
     mensaje.set_content(texto)
     if html:
         mensaje.add_alternative(html, subtype="html")
+    for nombre, contenido in adjuntos or []:
+        tipo = mimetypes.guess_type(nombre)[0] or "application/octet-stream"
+        principal, secundario = tipo.split("/")
+        mensaje.add_attachment(contenido, maintype=principal, subtype=secundario, filename=nombre)
 
     try:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as servidor:

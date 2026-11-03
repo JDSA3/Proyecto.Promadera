@@ -1,23 +1,12 @@
 """Correos que se mandan por los pedidos."""
-from datetime import datetime, timedelta, timezone
 from html import escape
 
 from app.core.correo import enviar_correo, logger
 from poc_postgresql.database import SessionLocal
 from poc_postgresql.models import UsuarioDB
 
-
-HORA_ARGENTINA = timezone(timedelta(hours=-3))
-
-
-def _fecha(fecha: datetime) -> str:
-    if fecha.tzinfo is None:
-        fecha = fecha.replace(tzinfo=timezone.utc)
-    return fecha.astimezone(HORA_ARGENTINA).strftime("%d/%m/%Y %H:%M")
-
-
-def _pesos(monto: float) -> str:
-    return "$" + f"{monto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+from . import comprobante
+from .comprobante import fecha_argentina as _fecha, pesos as _pesos
 
 
 def _email_de(usuario_id: int) -> str | None:
@@ -75,3 +64,74 @@ def enviar_pedido_recibido(pedido: dict) -> bool:
         "<p>Cuando se confirme el pago te mandamos el comprobante.</p><p>ProMadera</p>"
     )
     return enviar_correo(destinatario, asunto, texto, html)
+
+
+def _comprobante_al_cliente(pedido: dict) -> bool:
+    destinatario = _email_de(pedido["cliente"]["id"])
+    if not destinatario:
+        return False
+
+    try:
+        pdf = comprobante.generar_pdf(pedido, destinatario)
+    except Exception:
+        logger.exception("No se pudo generar el comprobante del pedido %s", pedido["id"])
+        return False
+
+    numero = pedido["id"]
+    nombre = pedido["cliente"]["nombre"]
+    total = _pesos(pedido["total"])
+    corralones = ", ".join(c["proveedor_nombre"] or "Sin corralón" for c in pedido["corralones"])
+    asunto = f"ProMadera: pago confirmado del pedido #{numero}"
+    texto = (
+        f"Hola {nombre}:\n\n"
+        f"Confirmamos el pago de tu pedido #{numero} por {total}.\n"
+        f"Te adjuntamos el comprobante de compra N.º {comprobante.numero(numero)}.\n\n"
+        f"Ya les avisamos a los corralones para que lo preparen: {corralones}.\n\nProMadera"
+    )
+    html = (
+        f"<p>Hola {escape(nombre)}:</p>"
+        f"<p>Confirmamos el pago de tu pedido <b>#{numero}</b> por <b>{total}</b>.</p>"
+        f"<p>Te adjuntamos el comprobante de compra N.º {comprobante.numero(numero)}.</p>"
+        f"<p>Ya les avisamos a los corralones para que lo preparen: {escape(corralones)}.</p><p>ProMadera</p>"
+    )
+    return enviar_correo(
+        destinatario, asunto, texto, html, adjuntos=[(comprobante.nombre_archivo(numero), pdf)]
+    )
+
+
+def _aviso_al_corralon(pedido: dict, corralon: dict) -> bool:
+    if corralon["proveedor_id"] is None:
+        return False
+
+    destinatario = _email_de(corralon["proveedor_id"])
+    if not destinatario:
+        return False
+
+    numero = pedido["id"]
+    titulo = corralon["proveedor_nombre"] or "corralón"
+    cliente = pedido["cliente"]["nombre"]
+    items = [_detalle_item(item) for item in corralon["items"]]
+    subtotal = _pesos(corralon["total"])
+    asunto = f"ProMadera: pedido #{numero} pagado para preparar"
+    texto = (
+        f"Hola {titulo}:\n\n"
+        f"{cliente} pagó el pedido #{numero}. Estos son tus productos para preparar:\n"
+        + "\n".join(f"  - {item}" for item in items)
+        + f"\n\nSubtotal: {subtotal}\n\n"
+        "Entrá a Pedidos en ProMadera para confirmarlo.\n\nProMadera"
+    )
+    html = (
+        f"<p>Hola {escape(titulo)}:</p>"
+        f"<p>{escape(cliente)} pagó el pedido <b>#{numero}</b>. Estos son tus productos para preparar:</p><ul>"
+        + "".join(f"<li>{escape(item)}</li>" for item in items)
+        + f"</ul><p><b>Subtotal: {subtotal}</b></p>"
+        "<p>Entrá a Pedidos en ProMadera para confirmarlo.</p><p>ProMadera</p>"
+    )
+    return enviar_correo(destinatario, asunto, texto, html)
+
+
+def enviar_pago_confirmado(pedido: dict) -> None:
+    """Cuando el pedido pasa a pagado: comprobante al carpintero y aviso a cada corralón del pedido."""
+    _comprobante_al_cliente(pedido)
+    for corralon in pedido["corralones"]:
+        _aviso_al_corralon(pedido, corralon)
