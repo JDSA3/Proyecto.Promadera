@@ -240,7 +240,20 @@ export default function MisPedidos({ usuario }) {
           {desplegado && (
             <tr className="cr-pedido-detalle">
               <td colSpan="5">
-                {detalleCorralones(p)}
+                                {detalleCorralones(p)}
+                {p.estado === "pagado" && (
+                  <div className="mp-acciones">
+                    <button
+                      type="button"
+                      className="btn-secundario"
+                      onClick={() =>
+                        window.open(urlComprobante(p.id, usuario.id), "_blank", "noopener")
+                      }
+                    >
+                      Descargar comprobante
+                    </button>
+                  </div>
+                )}
                 {p.estado === "pendiente" && (
                   <div className="carrito-resumen">
                     <span className="carrito-total">Total: {dinero(p.total)}</span>
