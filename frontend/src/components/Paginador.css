@@ -1,0 +1,8 @@
+/* ===== PAGINADOR ===== */
+.paginador { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
+.paginador-btn { min-width: 40px; padding: 8px 14px; border: 1px solid var(--pm-tan-500); border-radius: 999px; background: transparent; color: var(--pm-tan-500); font-family: var(--pm-font-display); font-size: 1rem; cursor: pointer; }
+.paginador-btn:hover:not(:disabled) { background: var(--pm-beige-50); }
+.paginador-btn.activo { background: var(--pm-tan-500); color: var(--pm-white); }
+.paginador-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.paginador-puntos { padding: 0 4px; color: var(--pm-navy-600); }
+.paginador-resumen { margin: 16px 0 0; text-align: center; color: #5c5c5c; font-size: 0.9rem; }
