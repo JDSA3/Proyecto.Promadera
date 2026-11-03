@@ -96,7 +96,8 @@ export default function Carrito({
         <h2>Carrito</h2>
         <p className="mensaje-exito" role="status">
           ¡Pago confirmado! Tu pedido #{pedido.id} por {dinero(pedido.total)}{" "}
-          quedó pagado. Cada corralón va a confirmar y enviar su parte.
+          quedó pagado. Cada corralón va a confirmar y enviar su parte. Te enviamos el
+          comprobante a tu correo y también podés descargarlo desde Mis Pedidos.
         </p>
         <div className="carrito-acciones">
           {onVerPedidos && (
