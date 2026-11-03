@@ -1,3 +1,6 @@
+import { STOCK_BAJO } from "../stock.js"; // mismo límite que la pantalla de Stock
+import "./ProductoCard.css";
+
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
@@ -10,7 +13,7 @@ export default function ProductoCard({
 }) {
   return (
     <div
-      className="producto"
+      className={`producto${producto.stock <= 0 ? " producto-agotado" : ""}`}
       onClick={() => onVerDetalle?.(producto)}
       role="button"
       tabIndex={0}
@@ -47,7 +50,13 @@ export default function ProductoCard({
         <p className="corralon-nombre">🏬 {producto.proveedor_nombre}</p>
       )}
       <p className="precio">{formatearPrecio(producto.precio)}</p>
-      <p className="stock">Stock: {producto.stock}</p>
+      {producto.stock <= 0 ? (
+        <p className="stock pc-etiqueta pc-agotado">Sin stock</p>
+      ) : producto.stock <= STOCK_BAJO ? (
+        <p className="stock pc-etiqueta pc-ultimas">Últimas unidades ({producto.stock})</p>
+      ) : (
+        <p className="stock">Stock: {producto.stock}</p>
+      )}
     </div>
   );
 }
