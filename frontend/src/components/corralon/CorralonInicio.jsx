@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useProductosCorralon, { STOCK_MINIMO } from "./useProductosCorralon.js";
 import { obtenerResumenCorralon } from "../../apiResumen.js";
+import ErrorServidor from "./ErrorServidor.jsx";
 
 const ACCESOS = [
   { id: "productos", titulo: "Subir productos", texto: "Agregá nuevos productos a tu catálogo." },
@@ -58,7 +59,11 @@ export default function CorralonInicio({ usuario, onIr }) {
           ↻ Actualizar
         </button>
       </div>
-      {(error || errorResumen) && <p className="mensaje">No se pudo conectar con el servidor.</p>}
+      {(error || errorResumen) && (
+  <p className="mensaje">
+    <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+  </p>
+)}
 
       <div className="cr-kpis">
         <div className="cr-kpi">

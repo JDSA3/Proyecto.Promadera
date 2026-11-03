@@ -11,6 +11,7 @@ import {
 } from "../../apiCompras.js";
 import "./CorralonPedidos.css";
 import "./CorralonCompras.css";
+import ErrorServidor from "./ErrorServidor.jsx";
 
 // "clase" reutiliza los colores de .cr-estado (ok = verde, bajo = ámbar).
 const ESTADOS_ORDEN = {
@@ -262,7 +263,9 @@ export default function CorralonCompras({ usuario, productoInicial }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="5" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="5" className="cr-vacio">
+            <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+          </td>
         </tr>
       );
     }
@@ -334,7 +337,9 @@ export default function CorralonCompras({ usuario, productoInicial }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="4" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="4" className="cr-vacio">
+            <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+</td>   
         </tr>
       );
     }
