@@ -3,6 +3,7 @@ import { obtenerCategorias, obtenerProductos } from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
 import ProductoDetalle from "./ProductoDetalle.jsx";
 import Paginador from "./Paginador.jsx";
+import { estadoDe } from "../stock.js";
 
 const POR_PAGINA = 12;
 
@@ -22,6 +23,7 @@ export default function Productos({
   const [proveedorId, setProveedorId] = useState("");
   const [corralones, setCorralones] = useState([]);
   const [pagina, setPagina] = useState(1);
+  const [disponibilidad, setDisponibilidad] = useState("");
 
 
   // Cargar categorías una sola vez, al montar el componente
@@ -85,9 +87,16 @@ export default function Productos({
   // Al cambiar la búsqueda o los filtros se vuelve a la primera página
   useEffect(() => {
     setPagina(1);
-  }, [busquedaEspera, categoriaId, proveedorId]);
+  }, [busquedaEspera, categoriaId, proveedorId, disponibilidad]);
 
-  const activos = productos ? productos.filter((p) => p.activo) : [];
+  const activos = productos
+  ? productos.filter((p) => {
+    if (!p.activo) return false;
+    if (disponibilidad === "") return true;
+    if (disponibilidad === "disponible") return p.stock > 0;
+      return estadoDe(p.stock).id === disponibilidad; // "bajo" o "agotado"
+    })
+    : [];
   const totalPaginas = Math.max(1, Math.ceil(activos.length / POR_PAGINA));
   const paginaActual = Math.min(pagina, totalPaginas);
   const desde = (paginaActual - 1) * POR_PAGINA;
@@ -160,11 +169,24 @@ export default function Productos({
             <option key={c.id} value={c.id}>
               {c.nombre}
             </option>
-          ))}
+                      ))}
+        </select>
+
+        <select
+          id="disponibilidad"
+          value={disponibilidad}
+          onChange={(e) => setDisponibilidad(e.target.value)}
+          aria-label="Filtrar por disponibilidad"
+        >
+          <option value="">Toda la disponibilidad</option>
+          <option value="disponible">Con stock</option>
+          <option value="bajo">Últimas unidades</option>
+          <option value="agotado">Sin stock</option>
         </select>
       </div>
 
       <div id="productos">{contenido()}</div>
+          
       
       {activos.length > 0 && (
         <p className="paginador-resumen">
