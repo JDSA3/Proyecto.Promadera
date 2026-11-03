@@ -1445,3 +1445,14 @@ body {
   font-family: var(--pm-font-display);
   font-weight: 500;
 }
+/* ===== DETALLE DE PRODUCTO: corralón ===== */
+.detalle-corralon {
+  margin: 4px 0 12px;
+  color: var(--pm-navy-600);
+  font-size: 0.95rem;
+}
+.detalle-corralon strong {
+  color: var(--pm-navy-900);
+  font-family: var(--pm-font-display);
+  font-weight: 500;
+}
