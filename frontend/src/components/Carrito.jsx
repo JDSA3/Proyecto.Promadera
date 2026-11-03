@@ -79,13 +79,13 @@ export default function Carrito({
 
   const pagarConMercadoPago = () =>
     ejecutar(async () => {
-      const pref = await crearPreferenciaPago(pedido.id);
+      const pref = await crearPreferenciaPago(pedido.id, usuario.id);
       window.location.href = pref.init_point;
     });
 
   const pagarSimulado = () =>
     ejecutar(async () => {
-      await simularPago(pedido.id);
+      await simularPago(pedido.id, usuario.id);
       setPagado(true);
     });
 
