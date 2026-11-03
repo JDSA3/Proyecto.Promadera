@@ -4,6 +4,7 @@ import ProductoCard from "./ProductoCard.jsx";
 import ProductoDetalle from "./ProductoDetalle.jsx";
 import Paginador from "./Paginador.jsx";
 import { estadoDe } from "../stock.js";
+import ErrorServidor from "./corralon/ErrorServidor.jsx";
 
 const POR_PAGINA = 12;
 
@@ -24,6 +25,7 @@ export default function Productos({
   const [corralones, setCorralones] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [disponibilidad, setDisponibilidad] = useState("");
+  const [recarga, setRecarga] = useState(0);
 
 
   // Cargar categorías una sola vez, al montar el componente
@@ -53,7 +55,7 @@ export default function Productos({
       .catch((err) =>
         console.error("No se pudieron cargar los corralones:", err),
       );
-  }, []);
+  }, [recarga]);
 
   // Espera 300 ms después de dejar de escribir antes de buscar
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function Productos({
     return () => {
       cancelado = true;
     };
-  }, [busquedaEspera, categoriaId, proveedorId]);
+  }, [busquedaEspera, categoriaId, proveedorId, recarga]);
 
   
   // Al cambiar la búsqueda o los filtros se vuelve a la primera página
@@ -111,8 +113,7 @@ export default function Productos({
     if (error) {
       return (
         <p className="mensaje">
-          No se pudo conectar con el servidor. Verifica que la API esté
-          encendida.
+          <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
         </p>
       );
     }
