@@ -145,6 +145,36 @@ def marcar_pagado(pedido_id: int):
         return _to_dict(pedido)
 
 
+def comprobante(pedido_id: int, usuario_id: int):
+    """Devuelve (pedido, email del cliente) para armar el comprobante.
+
+    El cliente dueño ve el pedido completo; un corralón del pedido ve solo su parte.
+    """
+    with SessionLocal() as session:
+        pedido = session.scalar(_consulta_pedidos().where(PedidoDB.id == pedido_id))
+
+        if pedido is None:
+            raise NoEncontrado(f"Pedido {pedido_id} no encontrado")
+
+        usuario = session.get(UsuarioDB, usuario_id)
+        activo = usuario is not None and usuario.activo
+        es_corralon = activo and usuario.rol == "proveedor" and any(
+            c.proveedor_id == usuario.id for c in pedido.corralones
+        )
+
+        if activo and usuario.id == pedido.cliente_id:
+            proveedor_id = None
+        elif es_corralon:
+            proveedor_id = usuario.id
+        else:
+            raise SinPermiso(f"El usuario {usuario_id} no es el cliente ni un corralón del pedido {pedido_id}")
+
+        if pedido.estado in ("pendiente", "cancelado"):
+            raise EstadoInvalido(f"El pedido {pedido_id} está {pedido.estado}: el comprobante sale cuando está pagado")
+
+        return _to_dict(pedido, proveedor_id), pedido.cliente.email
+
+
 def create(data):
     lineas: dict[tuple[int, Decimal | None], int] = {}
     for item in data.items:
