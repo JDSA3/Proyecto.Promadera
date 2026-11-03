@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { editarProducto, obtenerProductos } from "../api.js";
 import { STOCK_BAJO, estadoDe } from "../stock.js";
 import "./Stock.css";
+import ErrorServidor from "./corralon/ErrorServidor.jsx";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
@@ -89,6 +90,7 @@ function CeldaStock({ producto, deshabilitado, onGuardar }) {
 export default function Stock({ usuario, onPedirReposicion }) {
   const [productos, setProductos] = useState(null); // null = todavía no cargó
   const [error, setError] = useState(false);
+  const [recarga, setRecarga] = useState(0);
   const [errorEdicion, setErrorEdicion] = useState("");
   const [guardando, setGuardando] = useState([]); // ids que se están guardando
 
@@ -111,7 +113,7 @@ export default function Stock({ usuario, onPedirReposicion }) {
     return () => {
       cancelado = true;
     };
-  }, [usuario.id]);
+  }, [usuario.id, recarga]);
 
   function cambiarStockLocal(id, stock) {
     setProductos((lista) => lista.map((p) => (p.id === id ? { ...p, stock } : p)));
@@ -153,7 +155,9 @@ export default function Stock({ usuario, onPedirReposicion }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="5" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="5" className="cr-vacio">
+            <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+          </td>
         </tr>
       );
     }
