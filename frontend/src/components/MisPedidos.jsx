@@ -11,6 +11,7 @@ import "./corralon/CorralonPedidos.css"; // detalle desplegable de un pedido
 import "./MisPedidos.css";
 import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
+import ErrorServidor from "./corralon/ErrorServidor.jsx";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -204,7 +205,9 @@ export default function MisPedidos({ usuario }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="5" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="5" className="cr-vacio">
+            <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+          </td>
         </tr>
       );
     }
