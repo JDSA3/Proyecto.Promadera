@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { obtenerCategorias, obtenerProductos } from "../api.js";
 import ProductoCard from "./ProductoCard.jsx";
 import ProductoDetalle from "./ProductoDetalle.jsx";
+import Paginador from "./Paginador.jsx";
+
+const POR_PAGINA = 12;
 
 export default function Productos({
   favoritos,
@@ -18,6 +21,8 @@ export default function Productos({
   const [detalle, setDetalle] = useState(null);
   const [proveedorId, setProveedorId] = useState("");
   const [corralones, setCorralones] = useState([]);
+  const [pagina, setPagina] = useState(1);
+
 
   // Cargar categorías una sola vez, al montar el componente
   useEffect(() => {
@@ -76,7 +81,22 @@ export default function Productos({
     };
   }, [busquedaEspera, categoriaId, proveedorId]);
 
+  
+  // Al cambiar la búsqueda o los filtros se vuelve a la primera página
+  useEffect(() => {
+    setPagina(1);
+  }, [busquedaEspera, categoriaId, proveedorId]);
+
   const activos = productos ? productos.filter((p) => p.activo) : [];
+  const totalPaginas = Math.max(1, Math.ceil(activos.length / POR_PAGINA));
+  const paginaActual = Math.min(pagina, totalPaginas);
+  const desde = (paginaActual - 1) * POR_PAGINA;
+  const visibles = activos.slice(desde, desde + POR_PAGINA);
+
+  function irAPagina(n) {
+    setPagina(n);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   function contenido() {
     if (error) {
@@ -93,7 +113,8 @@ export default function Productos({
         <p className="mensaje">No se encontraron productos con esa búsqueda.</p>
       );
     }
-    return activos.map((p) => (
+    return visibles.map((p) => (
+
       <ProductoCard
         key={p.id}
         producto={p}
@@ -144,6 +165,17 @@ export default function Productos({
       </div>
 
       <div id="productos">{contenido()}</div>
+      
+      {activos.length > 0 && (
+        <p className="paginador-resumen">
+          Mostrando {desde + 1} a {desde + visibles.length} de {activos.length} productos
+        </p>
+      )}
+      <Paginador
+        pagina={paginaActual}
+        totalPaginas={totalPaginas}
+        onCambiar={irAPagina}
+      />
 
       <ProductoDetalle
         producto={detalle}
