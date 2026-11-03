@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email         VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     rol           VARCHAR(20)  NOT NULL,
+    telefono      VARCHAR(50),
     activo        BOOLEAN      NOT NULL DEFAULT TRUE,
     CONSTRAINT ck_usuarios_rol CHECK (rol IN ('cliente', 'proveedor'))
 );
