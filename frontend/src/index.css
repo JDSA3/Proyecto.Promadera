@@ -949,3 +949,20 @@ body {
 
 .corralon-nombre { margin: 2px 0 0; font-size: 0.85rem; color: var(--pm-navy-600); }
 
+
+/* ===== SIDEBAR FIJO AL HACER SCROLL (escritorio) ===== */
+@media (min-width: 761px) {
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .app-menu {
+    position: sticky;
+    top: 64px;
+    align-self: flex-start;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+}
