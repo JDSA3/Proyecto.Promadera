@@ -66,16 +66,16 @@ Usuarios: `carpintero@promadera.com`, `corralon.pino@promadera.com`, `corralon.c
 - [ ] El stock baja en piezas enteras
 
 ## Correos y comprobante
-- [ ] Al crear un pedido llega "Pedido recibido" al correo del carpintero (revisar también spam)
-- [ ] Al pagar (Simular pago o Mercado Pago) llega "Pago confirmado" con el comprobante PDF adjunto
-- [ ] El PDF muestra número 0001-000000NN, fecha, cliente, ítems por corralón (con el largo si es un corte) y total
-- [ ] Cada corralón del pedido recibe el aviso "pedido pagado para preparar"
+- [x] Al crear un pedido llega "Pedido recibido" al correo del carpintero (revisar también spam)
+- [x] Al pagar (Simular pago o Mercado Pago) llega "Pago confirmado" con el comprobante PDF adjunto
+- [x] El PDF muestra número 0001-000000NN, fecha, cliente, ítems por corralón (con el largo si es un corte) y total
+- [x] Cada corralón del pedido recibe el aviso "pedido pagado para preparar"
 - [ ] Con GMAIL_USER vacío en el .env, el pedido y el pago funcionan igual (solo no sale el correo)
-- [ ] `GET /pedidos/{id}/comprobante?usuario_id=` devuelve 409 con el pedido pendiente y 403 con un usuario ajeno
+- [x] `GET /pedidos/{id}/comprobante?usuario_id=` devuelve 409 con el pedido pendiente y 403 con un usuario ajeno
 
 ## Paginación de productos
-- [ ] `GET /productos?limit=12&offset=0` devuelve 12 y el header `X-Total-Count` trae el total
-- [ ] Sin `limit` la lista sale completa (Stock y Compras siguen funcionando)
+- [x] `GET /productos?limit=12&offset=0` devuelve 12 y el header `X-Total-Count` trae el total
+- [x] Sin `limit` la lista sale completa (Stock y Compras siguen funcionando)
 
 ## General
 - [ ] Con la API apagada, cada pantalla muestra un mensaje y no se rompe
