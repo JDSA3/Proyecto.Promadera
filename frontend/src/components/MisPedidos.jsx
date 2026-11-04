@@ -85,13 +85,11 @@ export default function MisPedidos({ usuario }) {
 
   const pagarSimulado = (pedido) =>
     ejecutar(async () => {
-      await simularPago(pedido.id);
+      await simularPago(pedido.id, usuario.id);
       setAviso({
         tipo: "ok",
         texto: `¡Pago confirmado! El pedido #${pedido.id} quedó pagado. Te enviamos el comprobante a tu correo y también podés descargarlo desde "Ver detalle".`,
       });
-      await simularPago(pedido.id, usuario.id);
-      setAviso({ tipo: "ok", texto: `¡Pago confirmado! El pedido #${pedido.id} quedó pagado.` });
       setRecarga((n) => n + 1);
     });
 
@@ -137,10 +135,6 @@ export default function MisPedidos({ usuario }) {
       cerrarReporte();
       setRecarga((n) => n + 1);
     });
-    
-    <p className="mp-entrega">
-      <strong>Entrega:</strong> {etiquetaEntrega(p.entrega)}
-    </p>
 
   function detalleCorralones(p) {
     return (p.corralones ?? []).map((c, idx) => {
@@ -240,6 +234,9 @@ export default function MisPedidos({ usuario }) {
           {desplegado && (
             <tr className="cr-pedido-detalle">
               <td colSpan="5">
+                <p className="mp-entrega">
+                  <strong>Entrega:</strong> {etiquetaEntrega(p.entrega)}
+                </p>
                 {detalleCorralones(p)}
                 {p.estado === "pagado" && (
                   <div className="mp-acciones">
