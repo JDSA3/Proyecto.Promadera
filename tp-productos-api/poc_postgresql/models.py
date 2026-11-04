@@ -54,6 +54,7 @@ class UsuarioDB(Base):
     __tablename__ = "usuarios"
     __table_args__ = (
         CheckConstraint("rol IN ('cliente', 'proveedor')", name="ck_usuarios_rol"),
+        CheckConstraint("telefono IS NULL OR telefono ~ '^[0-9]{8,15}$'", name="ck_usuarios_telefono"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -62,6 +63,7 @@ class UsuarioDB(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     rol: Mapped[str] = mapped_column(String(20), nullable=False)
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
+    telefono: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
 
 class PedidoDB(Base):
@@ -69,11 +71,13 @@ class PedidoDB(Base):
     __table_args__ = (
         CheckConstraint("estado IN ('pendiente', 'pagado', 'cancelado')", name="ck_pedidos_estado"),
         CheckConstraint("total >= 0", name="ck_pedidos_total_positivo"),
+        CheckConstraint("entrega IN ('retiro', 'envio')", name="ck_pedidos_entrega"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     cliente_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
     estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente", server_default="pendiente")
+    entrega: Mapped[str] = mapped_column(String(10), nullable=False, default="retiro", server_default="retiro")
     total: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 

@@ -13,7 +13,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     password_hash VARCHAR(255) NOT NULL,
     rol           VARCHAR(20)  NOT NULL,
     activo        BOOLEAN      NOT NULL DEFAULT TRUE,
-    CONSTRAINT ck_usuarios_rol CHECK (rol IN ('cliente', 'proveedor'))
+    telefono      VARCHAR(20),
+    CONSTRAINT ck_usuarios_rol CHECK (rol IN ('cliente', 'proveedor')),
+    CONSTRAINT ck_usuarios_telefono CHECK (telefono IS NULL OR telefono ~ '^[0-9]{8,15}$')
 );
 
 CREATE TABLE IF NOT EXISTS productos (
@@ -35,9 +37,11 @@ CREATE TABLE IF NOT EXISTS pedidos (
     id         SERIAL PRIMARY KEY,
     cliente_id INTEGER        NOT NULL REFERENCES usuarios (id),
     estado     VARCHAR(20)    NOT NULL DEFAULT 'pendiente',
+    entrega    VARCHAR(10)    NOT NULL DEFAULT 'retiro',
     total      NUMERIC(12, 2) NOT NULL,
     creado_en  TIMESTAMPTZ    NOT NULL DEFAULT now(),
     CONSTRAINT ck_pedidos_estado CHECK (estado IN ('pendiente', 'pagado', 'cancelado')),
+    CONSTRAINT ck_pedidos_entrega CHECK (entrega IN ('retiro', 'envio')),
     CONSTRAINT ck_pedidos_total_positivo CHECK (total >= 0)
 );
 
