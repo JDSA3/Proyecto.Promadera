@@ -66,6 +66,7 @@ def _corralon_to_dict(corralon: PedidoCorralonDB):
     return {
         "proveedor_id": corralon.proveedor_id,
         "proveedor_nombre": corralon.proveedor.nombre if corralon.proveedor else None,
+        "proveedor_telefono": corralon.proveedor.telefono if corralon.proveedor else None,
         "estado": corralon.estado,
         "total": float(corralon.total),
         "motivo_devolucion": corralon.motivo_devolucion,
@@ -86,6 +87,7 @@ def _to_dict(pedido: PedidoDB, proveedor_id: int | None = None):
     return {
         "id": pedido.id,
         "estado": pedido.estado,
+        "entrega": pedido.entrega,
         "total": total,
         "creado_en": pedido.creado_en,
         "cliente": {"id": pedido.cliente.id, "nombre": pedido.cliente.nombre},
@@ -196,7 +198,7 @@ def create(data):
         )
         por_id = {producto.id: producto for producto in productos}
 
-        pedido = PedidoDB(cliente=cliente, estado="pendiente", total=0)
+        pedido = PedidoDB(cliente=cliente, estado="pendiente", entrega=data.entrega, total=0)
         total = 0
         corralones: dict[int | None, PedidoCorralonDB] = {}
         piezas_por_producto: dict[int, int] = {}

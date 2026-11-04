@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 Estado = Literal["pendiente", "pagado", "cancelado"]
 EstadoCorralon = Literal["pendiente", "confirmado", "enviado", "entregado", "devuelto", "cancelado"]
+Entrega = Literal["retiro", "envio"]
 
 
 class PedidoItemCreate(BaseModel):
@@ -20,6 +21,7 @@ class PedidoItemCreate(BaseModel):
 class PedidoCreate(BaseModel):
     cliente_id: int = Field(ge=1)
     items: list[PedidoItemCreate] = Field(min_length=1)
+    entrega: Entrega = Field(default="retiro", description="retiro (lo busca en el corralón) o envio. Por defecto retiro.")
 
 
 class CambioEstadoCorralon(BaseModel):
@@ -55,6 +57,7 @@ class PedidoItemResponse(BaseModel):
 class CorralonPedidoResponse(BaseModel):
     proveedor_id: int | None = None
     proveedor_nombre: str | None = None
+    proveedor_telefono: str | None = None
     estado: EstadoCorralon
     total: float
     motivo_devolucion: str | None = None
@@ -64,6 +67,7 @@ class CorralonPedidoResponse(BaseModel):
 class PedidoResponse(BaseModel):
     id: int
     estado: Estado
+    entrega: Entrega
     total: float
     creado_en: datetime
     cliente: ClienteOut

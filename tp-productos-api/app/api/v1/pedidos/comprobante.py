@@ -58,6 +58,7 @@ def generar_pdf(pedido: dict, cliente_email: str | None) -> bytes:
         Paragraph(f"<b>Emitido:</b> {fecha_argentina(datetime.now(timezone.utc))}", normal),
         Paragraph(f"<b>Cliente:</b> {cliente}", normal),
         Paragraph(f"<b>Estado:</b> {escape(pedido['estado'])}", normal),
+        Paragraph(f"<b>Entrega:</b> {'Envío' if pedido.get('entrega') == 'envio' else 'Retiro en el corralón'}", normal),
         Spacer(1, 0.6 * cm),
     ]
 
