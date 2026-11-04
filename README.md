@@ -17,7 +17,7 @@ Proyecto de la materia **Prácticas Profesionalizantes II** (IES N° 6.001 Gral.
 - **Favoritos y Localización.**
 
 ### Corralón
-- **Inicio:** indicadores y accesos rápidos (el backend ya calcula ventas del mes, más vendidos, pendientes y stock bajo en `GET /corralones/{id}/resumen`).
+- **Inicio:** indicadores (ventas del mes, más vendidos, pendientes y stock bajo, desde `GET /corralones/{id}/resumen`) y accesos rápidos.
 - **Mis Productos:** alta, edición y baja de productos.
 - **Stock:** estado por producto (ok, bajo, agotado) con edición por fila.
 - **Pedidos:** órdenes recibidas, con el detalle de lo que pidió cada carpintero.
@@ -31,7 +31,7 @@ Proyecto de la materia **Prácticas Profesionalizantes II** (IES N° 6.001 Gral.
 | Base de datos | PostgreSQL en Supabase |
 | Frontend | React 19 y Vite |
 | Pagos | Mercado Pago (Checkout Pro, credenciales de prueba) |
-| Correos y comprobante | Gmail (SMTP con contraseña de aplicación) y PDF con ReportLab |
+| Correos y comprobante | Gmail (SMTP con contraseña de aplicación) o Brevo (API, para el servidor publicado) y PDF con ReportLab |
 
 ## Estructura
 
@@ -86,6 +86,8 @@ Variables del `.env` (el archivo no se sube a GitHub):
 | `MP_WEBHOOK_URL` | Opcional: URL pública del backend + `/api/v1/pagos/webhook`. Sin ella el pago real no se marca solo |
 | `GMAIL_USER` | Cuenta de Gmail del proyecto que manda los correos |
 | `GMAIL_APP_PASSWORD` | **Contraseña de aplicación** de 16 letras (Cuenta de Google > Seguridad > Verificación en 2 pasos > Contraseñas de aplicaciones). No es la contraseña normal. Si falta, la API funciona igual pero no manda correos |
+| `BREVO_API_KEY` | Clave de la API de Brevo. Es la que se usa en el servidor publicado, porque Render bloquea el SMTP de Gmail. Si falta, la API funciona igual pero no manda correos |
+| `MAIL_REMITENTE` | Dirección que figura como remitente de los correos enviados con Brevo (tiene que estar verificada en Brevo) |
 
 ### 3. Frontend
 
@@ -172,13 +174,12 @@ La documentación completa está en Swagger (`/docs`). Resumen por módulo:
 - **Sin sesión con token (JWT):** el login devuelve el usuario y el frontend manda su id en cada acción. La API valida el rol y que el corralón o el cliente sean los dueños del pedido, pero alguien malicioso podría mandar un id ajeno. Es la mejora de seguridad más importante y queda en el roadmap.
 - **Mercado Pago:** el webhook ya está programado (vuelve a consultar el pago en Mercado Pago antes de marcarlo como pagado), pero necesita una URL pública. Sin deploy se usa "Simular pago".
 - **Comprobante:** es un comprobante de compra propio del sistema (número, fecha, ítems por corralón y total). **No es una factura fiscal de ARCA/AFIP.**
-- **Correos:** salen desde una cuenta de Gmail con contraseña de aplicación. Si el envío falla, el pedido y el pago igual se guardan, pero no hay reenvío automático.
+- **Correos:** salen desde Gmail (contraseña de aplicación) o, en el servidor publicado, desde Brevo. Si el envío falla, el pedido y el pago igual se guardan, pero no hay reenvío automático.
 - **Pedidos pendientes retienen stock** hasta que se pagan o se cancelan.
 - **La devolución no repone stock:** el corralón decide qué hacer con el material. No hay fotos ni reembolso.
 - **El estado del pedido no se actualiza solo:** hay que apretar "Actualizar".
 - **Compras:** una orden de compra no se edita ni se cancela, solo pasa de pendiente a recibida (siempre completa) y no lleva precios.
 - **Mockups:** usamos los colores y las tipografías del proyecto, pero no las medidas exactas de los mockups.
-- **Imágenes:** los productos sin foto muestran el logo de ProMadera.
 - **Roadmap:** filtros por cercanía y envío, promociones, reputación, vista 3D, JWT y OAuth.
 
 ## Equipo
