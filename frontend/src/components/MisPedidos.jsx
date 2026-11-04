@@ -12,6 +12,7 @@ import "./MisPedidos.css";
 import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
 import ErrorServidor from "./corralon/ErrorServidor.jsx";
+import { etiquetaEntrega } from "../entrega.js";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -136,6 +137,10 @@ export default function MisPedidos({ usuario }) {
       cerrarReporte();
       setRecarga((n) => n + 1);
     });
+    
+    <p className="mp-entrega">
+      <strong>Entrega:</strong> {etiquetaEntrega(p.entrega)}
+    </p>
 
   function detalleCorralones(p) {
     return (p.corralones ?? []).map((c, idx) => {
