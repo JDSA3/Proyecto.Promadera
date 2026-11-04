@@ -2,6 +2,7 @@
 import { crearPedido, crearPreferenciaPago, simularPago } from "../api.js";
 import { nombreItem } from "../cortes.js";
 import "./Carrito.css";
+import { etiquetaEntrega } from "../entrega.js";
 
 const dinero = (n) =>
   n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
@@ -57,6 +58,7 @@ export default function Carrito({
   const [pagado, setPagado] = useState(false);
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState("");
+  const [entrega, setEntrega] = useState("retiro");
 
   async function ejecutar(accion) {
     setTrabajando(true);
@@ -72,7 +74,7 @@ export default function Carrito({
 
   const confirmarPedido = () =>
     ejecutar(async () => {
-      const nuevo = await crearPedido({ clienteId: usuario.id, items });
+      const nuevo = await crearPedido({ clienteId: usuario.id, items, entrega });
       setPedido(nuevo);
       vaciar();
     });
@@ -99,6 +101,11 @@ export default function Carrito({
           quedó pagado. Cada corralón va a confirmar y enviar su parte. Te enviamos el
           comprobante a tu correo y también podés descargarlo desde Mis Pedidos.
         </p>
+
+        <p className="mp-entrega">
+          <strong>Entrega:</strong> {etiquetaEntrega(pedido.entrega)}
+        </p>
+        
         <div className="carrito-acciones">
           {onVerPedidos && (
             <button
@@ -315,6 +322,30 @@ export default function Carrito({
           </div>
         </section>
       ))}
+
+        <fieldset className="carrito-entrega">
+    <legend>¿Cómo recibís el pedido?</legend>
+    <label>
+      <input
+        type="radio"
+        name="entrega"
+        value="retiro"
+        checked={entrega === "retiro"}
+        onChange={() => setEntrega("retiro")}
+      />
+      Retiro en el corralón
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="entrega"
+        value="envio"
+        checked={entrega === "envio"}
+        onChange={() => setEntrega("envio")}
+      />
+      Envío
+    </label>
+  </fieldset>
 
       <div className="carrito-resumen">
         <span className="carrito-total">Total: {dinero(total)}</span>

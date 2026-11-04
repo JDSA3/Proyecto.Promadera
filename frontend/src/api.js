@@ -84,12 +84,14 @@ export async function registrarUsuario({ nombre, email, password, rol }) {
   });
   return manejarRespuesta(res);
 }
-export async function crearPedido({ clienteId, items }) {
+
+export async function crearPedido({ clienteId, items, entrega = "retiro" }) {
   const res = await fetch(`${API_BASE}/pedidos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       cliente_id: clienteId,
+      entrega,
       items: items.map((i) => ({
         producto_id: i.producto_id,
         cantidad: i.cantidad,

@@ -20,3 +20,35 @@
 .cr-grupo-nombre { margin: 0; font-family: var(--pm-font-display); font-size: 1.2rem; color: var(--pm-navy-900); }
 .cr-grupo-total { margin-left: auto; font-family: var(--pm-font-display); font-size: 1.2rem; color: var(--pm-navy-900); }
 .cr-grupo-estado { padding: 4px 10px; border-radius: 999px; background: var(--pm-beige-100); color: var(--pm-navy-800); font-size: 0.8rem; text-transform: capitalize; }
+
+/* ===== FORMA DE ENTREGA ===== */
+.carrito-entrega {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--pm-line);
+  border-radius: 12px;
+  background: var(--pm-white);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.carrito-entrega legend {
+  padding: 0 6px;
+  font-family: var(--pm-font-display);
+  color: var(--pm-navy-900);
+}
+.carrito-entrega label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.mp-entrega {
+  margin: 0 0 12px;
+  color: var(--pm-navy-600);
+}
+.mp-entrega strong {
+  font-family: var(--pm-font-display);
+  font-weight: 500;
+  color: var(--pm-navy-900);
+}
