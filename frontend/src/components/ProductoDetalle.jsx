@@ -2,6 +2,7 @@ import ProductosRecomendados from "./ProductosRecomendados";
 import BotonCarrito from "./BotonCarrito.jsx";
 import CorteMedida from "./CorteMedida.jsx";
 import { esCortable } from "../cortes.js";
+import { urlWhatsApp } from "../whatsapp.js";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
@@ -13,6 +14,11 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
   const caracteristicas = producto.caracteristicas
     ? Object.entries(producto.caracteristicas)
     : [];
+
+  const linkWhatsApp = urlWhatsApp(
+    producto.proveedor_telefono,
+    `Hola, consulto por "${producto.nombre}" en ProMadera.`
+  );
 
   return (
     <div className="modal-fondo" onClick={onCerrar}>
@@ -40,6 +46,12 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
               🏬 Vendido por <strong>{producto.proveedor_nombre}</strong>
               </p>
 )}
+
+            {linkWhatsApp && (
+              <a className="btn-whatsapp" href={linkWhatsApp} target="_blank" rel="noopener noreferrer">
+                💬 Consultar por WhatsApp
+              </a>
+            )}
 
             <p className={producto.stock > 0 ? "stock-disponible" : "stock-agotado"}>
               {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}
