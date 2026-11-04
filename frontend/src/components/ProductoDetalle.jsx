@@ -2,7 +2,7 @@ import ProductosRecomendados from "./ProductosRecomendados";
 import BotonCarrito from "./BotonCarrito.jsx";
 import CorteMedida from "./CorteMedida.jsx";
 import { esCortable } from "../cortes.js";
-import { urlWhatsApp } from "../whatsapp.js";
+import { urlWhatsAppProMadera } from "../whatsapp.js";
 
 function formatearPrecio(precio) {
   return precio.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
@@ -15,10 +15,10 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
     ? Object.entries(producto.caracteristicas)
     : [];
 
-  const linkWhatsApp = urlWhatsApp(
-    producto.proveedor_telefono,
+  const linkWhatsApp = urlWhatsAppProMadera(
     `Hola, consulto por "${producto.nombre}" en ProMadera.`
   );
+
 
   return (
     <div className="modal-fondo" onClick={onCerrar}>

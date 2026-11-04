@@ -1489,3 +1489,14 @@ body {
     text-align: center;
   }
 }
+/* ===== PAGAR POR WHATSAPP (botón) ===== */
+button.btn-whatsapp {
+  margin-top: 0;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+button.btn-whatsapp:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

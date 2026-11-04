@@ -13,7 +13,7 @@ import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
 import ErrorServidor from "./corralon/ErrorServidor.jsx";
 import { etiquetaEntrega } from "../entrega.js";
-import { urlWhatsApp } from "../whatsapp.js";
+import { urlWhatsAppProMadera } from "../whatsapp.js";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -84,6 +84,33 @@ export default function MisPedidos({ usuario }) {
       window.location.href = pref.init_point;
     });
 
+  const pagarPorWhatsApp = (pedido) => {
+    // Se abre la pestaña en el click para que el navegador no la bloquee.
+    const ventana = window.open("", "_blank");
+    return ejecutar(async () => {
+      try {
+        const pref = await crearPreferenciaPago(pedido.id, usuario.id);
+        const link = urlWhatsAppProMadera(
+          `Hola, quiero pagar el pedido #${pedido.id} de ProMadera por ${dinero(pedido.total)}. Link de pago de Mercado Pago: ${pref.init_point}`
+        );
+        if (!link) throw new Error("Falta configurar VITE_WHATSAPP_NUMERO en frontend/.env");
+        if (ventana) {
+          ventana.opener = null;
+          ventana.location.href = link;
+        } else {
+          window.location.href = link;
+        }
+        setAviso({
+          tipo: "ok",
+          texto: 'Abrimos WhatsApp con el pedido y el link de pago. Cuando se pague, apretá "Actualizar" para ver el pedido pagado.',
+        });
+      } catch (err) {
+        if (ventana) ventana.close();
+        throw err;
+      }
+    });
+  };
+
   const pagarSimulado = (pedido) =>
     ejecutar(async () => {
       await simularPago(pedido.id, usuario.id);
@@ -140,8 +167,7 @@ export default function MisPedidos({ usuario }) {
   function detalleCorralones(p) {
     return (p.corralones ?? []).map((c, idx) => {
       const est = ESTADOS_CORRALON[c.estado] ?? { texto: c.estado, clase: "" };
-      const linkWhatsApp = urlWhatsApp(
-        c.proveedor_telefono,
+      const linkWhatsApp = urlWhatsAppProMadera(
         `Hola, te escribo por el pedido #${p.id} de ProMadera.`
       );
       return (
@@ -283,6 +309,14 @@ export default function MisPedidos({ usuario }) {
                         onClick={() => pagarConMercadoPago(p)}
                       >
                         Pagar con Mercado Pago
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-whatsapp"
+                        disabled={trabajando}
+                        onClick={() => pagarPorWhatsApp(p)}
+                      >
+                        💬 Pagar por WhatsApp
                       </button>
                       <button
                         type="button"
