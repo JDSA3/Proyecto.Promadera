@@ -10,13 +10,19 @@ from .schemas import PagoRequest, PreferenciaResponse
 router = APIRouter(prefix="/pagos", tags=["Pagos"])
 
 
-def _pedido_pendiente(pedido_id: int):
+def _pedido_pendiente(pedido_id: int, usuario_id: int):
     pedido = pedidos.get_by_id(pedido_id)
 
     if pedido is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Pedido {pedido_id} no encontrado",
+        )
+
+    if pedido["cliente"]["id"] != usuario_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"El pedido {pedido_id} no es del usuario {usuario_id}",
         )
 
     if pedido["estado"] != "pendiente":
@@ -36,9 +42,11 @@ def _pedido_pendiente(pedido_id: int):
     description=(
         "Crea una preferencia de Checkout Pro con los items del pedido "
         "y devuelve el link de pago (init_point). El token se lee del "
-        ".env (MP_ACCESS_TOKEN)."
+        ".env (MP_ACCESS_TOKEN). usuario_id tiene que ser el cliente dueño del pedido "
+        "(no hay login con token todavía)."
     ),
     responses={
+        403: {"description": "El pedido no es de ese usuario"},
         404: {"description": "Pedido no encontrado"},
         409: {"description": "El pedido no está pendiente"},
         502: {"description": "Mercado Pago devolvió un error"},
@@ -46,7 +54,7 @@ def _pedido_pendiente(pedido_id: int):
     },
 )
 def crear_preferencia(datos: PagoRequest):
-    pedido = _pedido_pendiente(datos.pedido_id)
+    pedido = _pedido_pendiente(datos.pedido_id, datos.usuario_id)
 
     try:
         preferencia = mercadopago.crear_preferencia(pedido)
@@ -75,15 +83,17 @@ def crear_preferencia(datos: PagoRequest):
     summary="Simular el pago (plan B)",
     description=(
         "Marca un pedido pendiente como pagado, sin Mercado Pago. Después de responder, manda al cliente el "
-        "correo con el comprobante y avisa a cada corralón del pedido (si falla el correo, el pago igual queda)."
+        "correo con el comprobante y avisa a cada corralón del pedido (si falla el correo, el pago igual queda). "
+        "usuario_id tiene que ser el cliente dueño del pedido (no hay login con token todavía)."
     ),
     responses={
+        403: {"description": "El pedido no es de ese usuario"},
         404: {"description": "Pedido no encontrado"},
         409: {"description": "El pedido no está pendiente"},
     },
 )
 def simular_pago(datos: PagoRequest, tareas: BackgroundTasks):
-    _pedido_pendiente(datos.pedido_id)
+    _pedido_pendiente(datos.pedido_id, datos.usuario_id)
     pedido = pedidos.marcar_pagado(datos.pedido_id)
 
     if pedido is None:

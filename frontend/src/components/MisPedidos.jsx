@@ -11,6 +11,7 @@ import "./corralon/CorralonPedidos.css"; // detalle desplegable de un pedido
 import "./MisPedidos.css";
 import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
+import ErrorServidor from "./corralon/ErrorServidor.jsx";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -77,7 +78,7 @@ export default function MisPedidos({ usuario }) {
 
   const pagarConMercadoPago = (pedido) =>
     ejecutar(async () => {
-      const pref = await crearPreferenciaPago(pedido.id);
+      const pref = await crearPreferenciaPago(pedido.id, usuario.id);
       window.location.href = pref.init_point;
     });
 
@@ -88,6 +89,8 @@ export default function MisPedidos({ usuario }) {
         tipo: "ok",
         texto: `¡Pago confirmado! El pedido #${pedido.id} quedó pagado. Te enviamos el comprobante a tu correo y también podés descargarlo desde "Ver detalle".`,
       });
+      await simularPago(pedido.id, usuario.id);
+      setAviso({ tipo: "ok", texto: `¡Pago confirmado! El pedido #${pedido.id} quedó pagado.` });
       setRecarga((n) => n + 1);
     });
 
@@ -194,7 +197,9 @@ export default function MisPedidos({ usuario }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="5" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="5" className="cr-vacio">
+            <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+          </td>
         </tr>
       );
     }

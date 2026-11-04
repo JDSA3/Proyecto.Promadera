@@ -12,7 +12,12 @@ from app.api.v1.combos.router import router as combos_router
 
 app = FastAPI(
     title="ProMadera - API de Productos",
-    description="API REST para la gestion de productos y categorias de ProMadera.",
+    description=(
+        "API REST para la gestion de productos y categorias de ProMadera. "
+        "Todavia no hay login con token (JWT): la API recibe el id del usuario y valida el rol y que sea el "
+        "dueño en pedidos, pagos, comprobante y compras, pero no puede comprobar que quien llama sea realmente "
+        "ese usuario. Es una limitacion conocida de la demo."
+    ),
 )
 app.add_middleware(
     CORSMiddleware,
