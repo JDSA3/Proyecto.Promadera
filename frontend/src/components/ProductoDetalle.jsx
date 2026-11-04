@@ -35,6 +35,11 @@ export default function ProductoDetalle({ producto, esFavorito, onAlternarFavori
             <p className="categoria">{producto.categoria.nombre}</p>
             <h2>{producto.nombre}</h2>
             <p className="precio-detalle">{formatearPrecio(producto.precio)}</p>
+            {producto.proveedor_nombre && (
+              <p className="detalle-corralon">
+              🏬 Vendido por <strong>{producto.proveedor_nombre}</strong>
+              </p>
+)}
 
             <p className={producto.stock > 0 ? "stock-disponible" : "stock-agotado"}>
               {producto.stock > 0 ? `${producto.stock} unidades disponibles` : "Sin stock"}

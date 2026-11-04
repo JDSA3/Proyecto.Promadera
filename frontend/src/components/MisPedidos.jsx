@@ -11,6 +11,7 @@ import "./corralon/CorralonPedidos.css"; // detalle desplegable de un pedido
 import "./MisPedidos.css";
 import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
+import ErrorServidor from "./corralon/ErrorServidor.jsx";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -83,6 +84,11 @@ export default function MisPedidos({ usuario }) {
 
   const pagarSimulado = (pedido) =>
     ejecutar(async () => {
+      await simularPago(pedido.id);
+      setAviso({
+        tipo: "ok",
+        texto: `¡Pago confirmado! El pedido #${pedido.id} quedó pagado. Te enviamos el comprobante a tu correo y también podés descargarlo desde "Ver detalle".`,
+      });
       await simularPago(pedido.id, usuario.id);
       setAviso({ tipo: "ok", texto: `¡Pago confirmado! El pedido #${pedido.id} quedó pagado.` });
       setRecarga((n) => n + 1);
@@ -132,19 +138,6 @@ export default function MisPedidos({ usuario }) {
     });
 
   function detalleCorralones(p) {
-                    {p.estado === "pagado" && (
-                  <div className="mp-acciones">
-                    <button
-                      type="button"
-                      className="btn-secundario"
-                      onClick={() =>
-                        window.open(urlComprobante(p.id, usuario.id), "_blank", "noopener")
-                      }
-                    >
-                      Descargar comprobante
-                    </button>
-                  </div>
-                )}
     return (p.corralones ?? []).map((c, idx) => {
       const est = ESTADOS_CORRALON[c.estado] ?? { texto: c.estado, clase: "" };
       return (
@@ -204,7 +197,9 @@ export default function MisPedidos({ usuario }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="5" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="5" className="cr-vacio">
+            <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+          </td>
         </tr>
       );
     }
@@ -240,7 +235,7 @@ export default function MisPedidos({ usuario }) {
           {desplegado && (
             <tr className="cr-pedido-detalle">
               <td colSpan="5">
-                                {detalleCorralones(p)}
+                {detalleCorralones(p)}
                 {p.estado === "pagado" && (
                   <div className="mp-acciones">
                     <button

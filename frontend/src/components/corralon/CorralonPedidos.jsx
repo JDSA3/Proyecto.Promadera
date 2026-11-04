@@ -2,6 +2,8 @@
 import { cambiarEstadoCorralon, obtenerPedidos } from "../../api.js";
 import "./CorralonPedidos.css";
 import { nombreItem } from "../../cortes.js";
+import ErrorServidor from "./ErrorServidor.jsx";
+
 
 // Filtros por el estado de la parte de este corralón.
 const FILTROS = [
@@ -104,6 +106,11 @@ export default function CorralonPedidos({ usuario }) {
   }
 
   async function avanzar(pedido, siguiente) {
+        const seguro = window.confirm(
+      `¿${siguiente.texto} el pedido #${pedido.id}? Después no se puede volver al paso anterior.`
+    );
+    if (!seguro) return;
+
     setTrabajando(true);
     setAviso({ tipo: "", texto: "" });
     try {
@@ -138,7 +145,9 @@ export default function CorralonPedidos({ usuario }) {
     if (error) {
       return (
         <tr>
-          <td colSpan="6" className="cr-vacio">No se pudo conectar con el servidor.</td>
+          <td colSpan="6" className="cr-vacio">
+  <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+          </td>
         </tr>
       );
     }
