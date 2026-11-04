@@ -141,6 +141,31 @@ Reglas del flujo:
 - Cancelar solo se puede en pedidos pendientes de pago; devuelve el stock.
 - Reposición: el corralón crea una orden de compra a un proveedor de insumos y, al recibirla, el stock sube.
 
+## Flujo de trabajo del equipo
+
+Así trabajamos las tres personas del equipo. Cada tarea se hace en su propia rama y entra a `main` por pull request.
+
+```mermaid
+flowchart LR
+    A[Tarea asignada] --> B[git checkout main<br/>git pull origin main]
+    B --> C[git checkout -b feature/nombre]
+    C --> D[Commits chicos<br/>feat, fix, style, docs]
+    D --> E[git merge origin/main]
+    E --> F[git push -u origin feature/nombre]
+    F --> G[Pull request a main]
+    G --> H{Revisión y QA<br/>del scrum}
+    H -- Cambios pedidos --> D
+    H -- Aprobado --> I[Merge a main]
+    I --> J[Deploy]
+```
+
+Reglas:
+- Una rama por tarea y commits chicos; nadie sube a la rama de otro.
+- No se formatean archivos que no se tocaron.
+- Antes de abrir el pull request: `git merge origin/main`.
+- El `.env` nunca va al repositorio; las credenciales se comparten por un canal privado.
+- Si falla el correo, el pedido y el pago deben seguir funcionando.
+
 ## Guion de demo (unos 8 minutos)
 
 1. **Diseño:** como carpintero, elegir un mueble, cambiar una medida y mostrar cómo se actualiza el presupuesto. Guardarlo como proyecto.
