@@ -1468,3 +1468,24 @@ body {
   .pi-total { text-align: right; font-family: var(--pm-font-display); font-size: 1.4rem; }
   .pi-nota { color: #555; font-size: 0.85rem; }
 }
+
+/* ===== BOTÓN DE WHATSAPP ===== */
+.btn-whatsapp {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #1f8a3a;
+  color: var(--pm-white);
+  font-family: var(--pm-font-display);
+  text-decoration: none;
+}
+.btn-whatsapp:hover {
+  background: #17692c;
+}
+@media (max-width: 760px) {
+  .btn-whatsapp {
+    display: block;
+    text-align: center;
+  }
+}

@@ -13,6 +13,7 @@ import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
 import ErrorServidor from "./corralon/ErrorServidor.jsx";
 import { etiquetaEntrega } from "../entrega.js";
+import { urlWhatsApp } from "../whatsapp.js";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -139,6 +140,10 @@ export default function MisPedidos({ usuario }) {
   function detalleCorralones(p) {
     return (p.corralones ?? []).map((c, idx) => {
       const est = ESTADOS_CORRALON[c.estado] ?? { texto: c.estado, clase: "" };
+      const linkWhatsApp = urlWhatsApp(
+        c.proveedor_telefono,
+        `Hola, te escribo por el pedido #${p.id} de ProMadera.`
+      );
       return (
         <section className="cr-grupo" key={c.proveedor_id ?? idx}>
           <header className="cr-grupo-encabezado">
@@ -170,6 +175,14 @@ export default function MisPedidos({ usuario }) {
               ))}
             </tbody>
           </table>
+
+          {linkWhatsApp && (
+            <div className="mp-acciones">
+              <a className="btn-whatsapp" href={linkWhatsApp} target="_blank" rel="noopener noreferrer">
+                💬 Escribir por WhatsApp
+              </a>
+            </div>
+          )}
 
           {c.estado === "devuelto" && (
             <p className="mp-motivo">Motivo de la devolución: {c.motivo_devolucion}</p>
