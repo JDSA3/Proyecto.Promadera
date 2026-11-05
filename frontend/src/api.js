@@ -165,7 +165,7 @@ export async function borrarCombo({ id, usuarioId }) {
   return manejarRespuesta(res);
 }
 
-export async function obtenerUsuarios() {
-  const res = await fetch(`${API_BASE}/usuarios`);
+export async function obtenerUsuarios(usuarioId) {
+  const res = await fetch(`${API_BASE}/usuarios?usuario_id=${usuarioId}`);
   return manejarRespuesta(res);
 }

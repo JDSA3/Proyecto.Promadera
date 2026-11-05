@@ -48,3 +48,15 @@ def autenticar(email: str, password: str):
             return None
 
         return _to_dict(usuario)
+
+
+def es_admin(usuario_id: int) -> bool:
+    with SessionLocal() as session:
+        usuario = session.get(UsuarioDB, usuario_id)
+        return usuario is not None and bool(usuario.activo) and usuario.rol == "admin"
+
+
+def listar() -> list[dict]:
+    with SessionLocal() as session:
+        usuarios = session.scalars(select(UsuarioDB).order_by(UsuarioDB.id)).all()
+        return [{**_to_dict(u), "activo": bool(u.activo)} for u in usuarios]

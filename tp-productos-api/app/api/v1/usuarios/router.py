@@ -1,9 +1,30 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from . import repository
-from .schemas import UsuarioLogin, UsuarioRegistro, UsuarioResponse
+from .schemas import UsuarioAdminResponse, UsuarioLogin, UsuarioRegistro, UsuarioResponse
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+
+
+@router.get(
+    "",
+    response_model=list[UsuarioAdminResponse],
+    summary="Listar usuarios (solo administrador)",
+    description=(
+        "Devuelve todos los usuarios con su rol y si están activos. usuario_id tiene que ser un administrador. "
+        "No hay login con token todavía: el usuario se pasa como parámetro."
+    ),
+    responses={403: {"description": "El usuario no es administrador"}},
+)
+def listar_usuarios(
+    usuario_id: int = Query(ge=1, description="El administrador que consulta (sin login todavía)"),
+):
+    if not repository.es_admin(usuario_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo un administrador puede ver los usuarios",
+        )
+    return repository.listar()
 
 
 @router.post(

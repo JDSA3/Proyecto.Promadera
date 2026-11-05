@@ -81,7 +81,7 @@ export default function App() {
         etiqueta="Administrador"
         onCerrarSesion={cerrarSesion}
       >
-        <AdminPanel vista={vista} />
+        <AdminPanel vista={vista} usuario={usuario} />
       </Layout>
     );
   }
