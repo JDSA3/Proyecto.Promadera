@@ -19,6 +19,7 @@ import CorralonPedidos from "./components/corralon/CorralonPedidos.jsx";
 import CorralonPerfil from "./components/corralon/CorralonPerfil.jsx";
 import CorralonCompras from "./components/corralon/CorralonCompras.jsx";
 import Comunidad from "./components/Comunidad.jsx";
+import AdminPanel from "./components/admin/AdminPanel.jsx";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
@@ -38,7 +39,15 @@ const MENU_CORRALON = [
   { id: "perfil", label: "Perfil" },
 ];
 
+const MENU_ADMIN = [
+  { id: "resumen", label: "Resumen" },
+  { id: "pedidos", label: "Pedidos" },
+  { id: "productos", label: "Productos" },
+  { id: "usuarios", label: "Usuarios" },
+];
+
 function vistaInicial(usuario) {
+  if (usuario?.rol === "admin") return "resumen";
   return usuario?.rol === "proveedor" ? "inicio" : "diseno";
 }
 
@@ -62,6 +71,20 @@ export default function App() {
   }
 
   if (!usuario) return <Auth onLogin={handleLogin} />;
+
+  if (usuario.rol === "admin") {
+    return (
+      <Layout
+        menu={MENU_ADMIN}
+        vista={vista}
+        onCambiarVista={cambiarVista}
+        etiqueta="Administrador"
+        onCerrarSesion={cerrarSesion}
+      >
+        <AdminPanel vista={vista} />
+      </Layout>
+    );
+  }
 
   if (usuario.rol === "proveedor") {
     function pantallaCorralon() {
@@ -129,7 +152,7 @@ export default function App() {
             onAlternarFavorito={alternarFavorito}
             onAgregarAlCarrito={carrito.agregar}
           />
-        );     
+        );
       case "comunidad":
         return <Comunidad usuario={usuario} carrito={carrito} onIrAlCarrito={() => setVista("carrito")} />;
       case "favoritos":
