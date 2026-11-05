@@ -1,4 +1,21 @@
-export const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/v1";
+const envUrl = import.meta.env.VITE_API_URL;
+
+export const API_BASE =
+  envUrl && /^https?:\/\//.test(envUrl)
+    ? envUrl.replace(/\/+$/, "")
+    : import.meta.env.DEV
+      ? "http://127.0.0.1:8000/api/v1"
+      : "https://promadera-api.onrender.com/api/v1";
+
+async function manejarRespuesta(res) {
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      err.detail ? JSON.stringify(err.detail) : `Error ${res.status}`
+    );
+  }
+  return res.status === 204 ? null : res.json();
+}
 
 export async function obtenerCategorias() {
   const res = await fetch(`${API_BASE}/categorias`);
@@ -16,15 +33,6 @@ export async function obtenerProductos({ query, categoriaId, proveedorId } = {})
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error ${res.status}`);
   return res.json();
-}
-async function manejarRespuesta(res) {
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      err.detail ? JSON.stringify(err.detail) : `Error ${res.status}`
-    );
-  }
-  return res.status === 204 ? null : res.json();
 }
 
 export async function obtenerRecomendados(id, limite = 6) {
