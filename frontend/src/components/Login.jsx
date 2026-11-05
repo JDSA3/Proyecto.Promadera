@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { loginUsuario } from "../api.js";
 
-const etiquetaPorRol = { cliente: "Carpintero", proveedor: "Corralón" };
+const etiquetaPorRol = {
+  cliente: "Carpintero",
+  proveedor: "Corralón",
+  admin: "Administrador",
+};
 
 function validar(form) {
   const errores = {};
@@ -40,9 +44,10 @@ export default function Login({ rol, onLogin, onIrARegistro }) {
     try {
       const usuario = await loginUsuario(form);
 
-      if (usuario.rol !== rol) {
+      // El administrador entra desde cualquiera de las dos pestañas.
+      if (usuario.rol !== "admin" && usuario.rol !== rol) {
         setErrorServidor(
-          `Esta cuenta es de ${etiquetaPorRol[usuario.rol]}, no de ${etiquetaPorRol[rol]}.`
+          `Esta cuenta es de ${etiquetaPorRol[usuario.rol] ?? usuario.rol}, no de ${etiquetaPorRol[rol]}.`
         );
         return;
       }
