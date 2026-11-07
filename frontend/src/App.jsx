@@ -18,6 +18,7 @@ import CorralonInicio from "./components/corralon/CorralonInicio.jsx";
 import CorralonPedidos from "./components/corralon/CorralonPedidos.jsx";
 import CorralonPerfil from "./components/corralon/CorralonPerfil.jsx";
 import CorralonCompras from "./components/corralon/CorralonCompras.jsx";
+import SolicitudCorralon from "./components/corralon/SolicitudCorralon.jsx";
 import Comunidad from "./components/Comunidad.jsx";
 import AdminPanel from "./components/admin/AdminPanel.jsx";
 
@@ -44,6 +45,7 @@ const MENU_ADMIN = [
   { id: "pedidos", label: "Pedidos" },
   { id: "productos", label: "Productos" },
   { id: "usuarios", label: "Usuarios" },
+  { id: "solicitudes", label: "Solicitudes" },
 ];
 
 function vistaInicial(usuario) {
@@ -126,6 +128,8 @@ export default function App() {
         etiqueta="Corralón"
         onCerrarSesion={cerrarSesion}
       >
+        {/* Se muestra mientras la cuenta no esté aprobada; después se oculta sola */}
+        <SolicitudCorralon usuario={usuario} />
         {pantallaCorralon()}
       </Layout>
     );

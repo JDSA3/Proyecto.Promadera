@@ -4,6 +4,7 @@ import {
   obtenerProductos,
   obtenerUsuarios,
 } from "../../api.js";
+import AdminSolicitudes from "./AdminSolicitudes.jsx";
 
 const AZUL = "#162039";
 const ARENA = "#c9a27a";
@@ -187,6 +188,7 @@ const TITULOS = {
   pedidos: "Pedidos",
   productos: "Productos",
   usuarios: "Usuarios",
+  solicitudes: "Solicitudes de corralón",
 };
 
 export default function AdminPanel({ vista, usuario }) {
@@ -198,6 +200,7 @@ export default function AdminPanel({ vista, usuario }) {
       {id === "pedidos" && <Pedidos />}
       {id === "productos" && <Productos />}
       {id === "usuarios" && <Usuarios usuario={usuario} />}
+      {id === "solicitudes" && <AdminSolicitudes usuario={usuario} />}
     </section>
   );
 }
