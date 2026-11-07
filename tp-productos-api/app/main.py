@@ -8,7 +8,11 @@ from app.api.v1.pedidos.router import router as pedidos_router
 from app.api.v1.pagos.router import router as pagos_router
 from app.api.v1.compras.router import ordenes_router, proveedores_router
 from app.api.v1.corralones.router import router as corralones_router
+from app.api.v1.corralones.panel import router as corralones_panel_router
 from app.api.v1.combos.router import router as combos_router
+from app.api.v1.admin.router import router as admin_router
+from app.api.v1.solicitudes.router import router as solicitudes_router
+from app.api.v1.solicitudes.router import admin_router as solicitudes_admin_router
 
 app = FastAPI(
     title="ProMadera - API de Productos",
@@ -43,3 +47,7 @@ app.include_router(proveedores_router, prefix="/api/v1")
 app.include_router(ordenes_router, prefix="/api/v1")
 app.include_router(combos_router, prefix="/api/v1")
 app.include_router(corralones_router, prefix="/api/v1")
+app.include_router(corralones_panel_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
+app.include_router(solicitudes_router, prefix="/api/v1")
+app.include_router(solicitudes_admin_router, prefix="/api/v1")

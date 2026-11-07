@@ -5,11 +5,14 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
+    LargeBinary,
     Numeric,
     String,
     UniqueConstraint,
     func,
+    text,
     true,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -45,7 +48,7 @@ class ProductoDB(Base):
     largo_cm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
     ancho_cm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
     espesor_mm: Mapped[float | None] = mapped_column(Numeric(8, 2), nullable=True)
-    
+
     categoria: Mapped[CategoriaDB] = relationship(back_populates="productos")
     proveedor: Mapped["UsuarioDB | None"] = relationship()
 
@@ -53,8 +56,9 @@ class ProductoDB(Base):
 class UsuarioDB(Base):
     __tablename__ = "usuarios"
     __table_args__ = (
-        CheckConstraint("rol IN ('cliente', 'proveedor')", name="ck_usuarios_rol"),
+        CheckConstraint("rol IN ('cliente', 'proveedor', 'admin')", name="ck_usuarios_rol"),
         CheckConstraint("telefono IS NULL OR telefono ~ '^[0-9]{8,15}$'", name="ck_usuarios_telefono"),
+        CheckConstraint("estado IN ('pendiente', 'aprobado', 'rechazado')", name="ck_usuarios_estado"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -64,6 +68,9 @@ class UsuarioDB(Base):
     rol: Mapped[str] = mapped_column(String(20), nullable=False)
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
     telefono: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    estado: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="aprobado", server_default="aprobado"
+    )
 
 
 class PedidoDB(Base):
@@ -72,12 +79,19 @@ class PedidoDB(Base):
         CheckConstraint("estado IN ('pendiente', 'pagado', 'cancelado')", name="ck_pedidos_estado"),
         CheckConstraint("total >= 0", name="ck_pedidos_total_positivo"),
         CheckConstraint("entrega IN ('retiro', 'envio')", name="ck_pedidos_entrega"),
+        CheckConstraint(
+            "metodo_pago IN ('efectivo', 'transferencia', 'tarjeta_credito', 'otros')",
+            name="ck_pedidos_metodo_pago",
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     cliente_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
     estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente", server_default="pendiente")
     entrega: Mapped[str] = mapped_column(String(10), nullable=False, default="retiro", server_default="retiro")
+    metodo_pago: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="otros", server_default="otros"
+    )
     total: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
@@ -109,7 +123,7 @@ class PedidoItemDB(Base):
     producto: Mapped[ProductoDB] = relationship()
     corralon: Mapped["PedidoCorralonDB | None"] = relationship(back_populates="items")
 
-    
+
 class ProductoCompatibleDB(Base):
     """Pareja de productos que combinan entre si (relacion simetrica: una fila por pareja)."""
 
@@ -236,3 +250,59 @@ class ComboItemDB(Base):
 
     combo: Mapped[ComboDB] = relationship(back_populates="items")
     producto: Mapped[ProductoDB] = relationship()
+
+
+class SolicitudCorralonDB(Base):
+    """Pedido de un corralón para ser habilitado, con su comprobante de monotributo/ARCA."""
+
+    __tablename__ = "solicitudes_corralon"
+    __table_args__ = (
+        CheckConstraint(
+            "estado IN ('pendiente', 'aprobada', 'rechazada')",
+            name="ck_solicitudes_corralon_estado",
+        ),
+        CheckConstraint(
+            "tipo_comprobante IN ('monotributo', 'otro_arca')",
+            name="ck_solicitudes_corralon_tipo",
+        ),
+        CheckConstraint("cuit ~ '^[0-9]{11}$'", name="ck_solicitudes_corralon_cuit"),
+        CheckConstraint("telefono ~ '^[0-9]{8,15}$'", name="ck_solicitudes_corralon_telefono"),
+        Index(
+            "uq_solicitud_pendiente_por_usuario",
+            "usuario_id",
+            unique=True,
+            postgresql_where=text("estado = 'pendiente'"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    nombre_comercial: Mapped[str] = mapped_column(String(100), nullable=False)
+    cuit: Mapped[str] = mapped_column(String(11), nullable=False)
+    telefono: Mapped[str] = mapped_column(String(20), nullable=False)
+    direccion: Mapped[str] = mapped_column(String(200), nullable=False)
+    tipo_comprobante: Mapped[str] = mapped_column(String(20), nullable=False)
+    archivo_nombre: Mapped[str] = mapped_column(String(255), nullable=False)
+    archivo_tipo: Mapped[str] = mapped_column(String(100), nullable=False)
+    archivo: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente", server_default="pendiente")
+    motivo_rechazo: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    resuelto_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    resuelto_por: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
+
+
+class CorralonPerfilDB(Base):
+    """Datos comerciales del corralón y su logo (para el comprobante)."""
+
+    __tablename__ = "corralon_perfil"
+
+    usuario_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True
+    )
+    nombre_comercial: Mapped[str] = mapped_column(String(100), nullable=False)
+    cuit: Mapped[str | None] = mapped_column(String(11), nullable=True)
+    telefono: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    direccion: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    logo: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    logo_tipo: Mapped[str | None] = mapped_column(String(100), nullable=True)

@@ -1,13 +1,16 @@
+import logging
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 
 from app.api.v1.pedidos import correos
 from app.api.v1.pedidos import repository as pedidos
 from app.api.v1.pedidos.schemas import PedidoResponse
 
-from . import mercadopago
+from . import mercadopago, metodo_pago
 from .schemas import PagoRequest, PreferenciaResponse
 
 router = APIRouter(prefix="/pagos", tags=["Pagos"])
+logger = logging.getLogger(__name__)
 
 
 def _pedido_pendiente(pedido_id: int, usuario_id: int):
@@ -112,7 +115,8 @@ def simular_pago(datos: PagoRequest, tareas: BackgroundTasks):
     description=(
         "Mercado Pago llama a esta URL cuando cambia un pago. El backend vuelve a consultar el pago en Mercado Pago "
         "con el token (no confía en lo que llega en el aviso) y, si está aprobado y el monto alcanza, pasa el pedido "
-        "de external_reference a pagado y manda los correos (comprobante al cliente y aviso a los corralones). Los avisos que no son de pagos se ignoran. Necesita una URL pública: se "
+        "de external_reference a pagado, guarda el método de pago y manda los correos (comprobante al cliente y aviso "
+        "a los corralones). Los avisos que no son de pagos se ignoran. Necesita una URL pública: se "
         "configura en MP_WEBHOOK_URL o en el panel de Mercado Pago."
     ),
     responses={
@@ -163,6 +167,12 @@ async def webhook_mercado_pago(request: Request, tareas: BackgroundTasks):
 
     if pagado is None:
         return {"procesado": False, "motivo": "El pedido ya no estaba pendiente"}
+
+    # Guardar el método no puede impedir que se manden los correos
+    try:
+        metodo_pago.guardar(pedido["id"], metodo_pago.desde_mercadopago(pago.get("payment_type_id")))
+    except Exception:
+        logger.exception("No se pudo guardar el método de pago del pedido %s", pedido["id"])
 
     tareas.add_task(correos.enviar_pago_confirmado, pagado)
     return {"procesado": True, "pedido_id": pedido["id"]}

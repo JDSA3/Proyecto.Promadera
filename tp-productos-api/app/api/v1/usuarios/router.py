@@ -4,6 +4,7 @@ from . import repository
 from .schemas import UsuarioAdminResponse, UsuarioLogin, UsuarioRegistro, UsuarioResponse
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+admin_router = APIRouter(prefix="/admin/usuarios", tags=["Usuarios Admin"])
 
 
 @router.get(
@@ -32,7 +33,10 @@ def listar_usuarios(
     response_model=UsuarioResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Registrar un usuario",
-    description="Crea un usuario nuevo con rol cliente o proveedor. La contraseña se guarda hasheada.",
+    description=(
+        "Crea un usuario nuevo con rol cliente o proveedor. La contraseña se guarda hasheada. "
+        "Los proveedores (corralones) quedan pendientes hasta que el administrador los apruebe."
+    ),
     responses={409: {"description": "Ya existe un usuario con ese email"}},
 )
 def registrar_usuario(datos: UsuarioRegistro):
@@ -51,10 +55,16 @@ def registrar_usuario(datos: UsuarioRegistro):
     response_model=UsuarioResponse,
     summary="Iniciar sesion",
     description="Verifica email y contraseña. Si son correctos, devuelve los datos del usuario y su rol.",
-    responses={401: {"description": "Email o contraseña incorrectos"}},
+    responses={
+        401: {"description": "Email o contraseña incorrectos"},
+        403: {"description": "Corralón pendiente de aprobación o rechazado"},
+    },
 )
 def login(datos: UsuarioLogin):
-    usuario = repository.autenticar(datos.email, datos.password)
+    try:
+        usuario = repository.autenticar(datos.email, datos.password)
+    except repository.CuentaNoHabilitada as error:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))
 
     if usuario is None:
         raise HTTPException(

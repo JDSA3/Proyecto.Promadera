@@ -2,6 +2,8 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException, status
 
+from app.api.v1.usuarios import repository as usuarios
+
 from . import repository
 from .schemas import (
     OrdenCompraCreate,
@@ -29,6 +31,17 @@ def _errores(funcion, *args):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
 
+def _exigir_corralon_aprobado(corralon_id: int) -> None:
+    if not usuarios.proveedor_aprobado(corralon_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Tu cuenta de corralón todavía no está aprobada. "
+                "Enviá la solicitud y esperá la aprobación del administrador."
+            ),
+        )
+
+
 @proveedores_router.get(
     "",
     response_model=list[ProveedorInsumoResponse],
@@ -44,10 +57,14 @@ def listar_proveedores(corralon_id: int | None = None):
     response_model=ProveedorInsumoResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear un proveedor de insumos",
-    description="Agrega un proveedor a la lista de un corralón.",
-    responses={400: {"description": "El corralon_id no es un corralón"}},
+    description="Agrega un proveedor a la lista de un corralón. El corralón tiene que estar aprobado.",
+    responses={
+        400: {"description": "El corralon_id no es un corralón"},
+        403: {"description": "El corralón no existe o todavía no está aprobado"},
+    },
 )
 def crear_proveedor(datos: ProveedorInsumoCreate):
+    _exigir_corralon_aprobado(datos.corralon_id)
     return _errores(repository.create_proveedor, datos)
 
 
@@ -93,11 +110,15 @@ def listar_ordenes(corralon_id: int | None = None, estado: Literal["pendiente", 
     summary="Crear una orden de compra",
     description=(
         "El corralón le pide productos a uno de sus proveedores. Queda pendiente y el stock no cambia "
-        "hasta recibirla. Los productos tienen que ser del corralón."
+        "hasta recibirla. Los productos tienen que ser del corralón. El corralón tiene que estar aprobado."
     ),
-    responses={400: {"description": "El corralón, el proveedor o algún producto no corresponde"}},
+    responses={
+        400: {"description": "El corralón, el proveedor o algún producto no corresponde"},
+        403: {"description": "El corralón no existe o todavía no está aprobado"},
+    },
 )
 def crear_orden(datos: OrdenCompraCreate):
+    _exigir_corralon_aprobado(datos.corralon_id)
     return _errores(repository.create_orden, datos)
 
 
