@@ -1,16 +1,25 @@
 """Comprobante de compra en PDF. Es un comprobante propio de ProMadera, no una factura fiscal de ARCA/AFIP."""
+import logging
 from datetime import datetime, timedelta, timezone
 from html import escape
 from io import BytesIO
+from pathlib import Path
 
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+logger = logging.getLogger(__name__)
 
 HORA_ARGENTINA = timezone(timedelta(hours=-3))
 PUNTO_DE_VENTA = "0001"
+
+# Este archivo está en app/api/v1/pedidos/: el logo está en app/assets/logo.png
+LOGO_PROMADERA = Path(__file__).resolve().parents[3] / "assets" / "logo.png"
 
 
 def fecha_argentina(fecha: datetime) -> str:
@@ -36,6 +45,54 @@ def _producto(item: dict) -> str:
     return escape(item["nombre"] + corte)
 
 
+def _imagen(origen, ancho_max: float, alto_max: float) -> Image:
+    """Imagen escalada para entrar en el recuadro sin deformarla. origen: ruta de archivo o bytes."""
+
+    def abrir():
+        return BytesIO(origen) if isinstance(origen, bytes) else str(origen)
+
+    ancho, alto = ImageReader(abrir()).getSize()
+    escala = min(ancho_max / ancho, alto_max / alto)
+    imagen = Image(abrir(), width=ancho * escala, height=alto * escala)
+    imagen.hAlign = "LEFT"
+    return imagen
+
+
+def _logo_promadera() -> Image | None:
+    try:
+        if LOGO_PROMADERA.is_file():
+            return _imagen(LOGO_PROMADERA, 2.4 * cm, 2.4 * cm)
+    except Exception:
+        # Un problema con el logo nunca tiene que impedir el comprobante
+        logger.exception("No se pudo cargar el logo de ProMadera para el comprobante")
+    return None
+
+
+def _logo_corralon(proveedor_id: int | None) -> Image | None:
+    if proveedor_id is None:
+        return None
+    try:
+        from app.api.v1.corralones.panel import obtener_logo
+
+        logo = obtener_logo(proveedor_id)
+        if logo is None:
+            return None
+        datos, _tipo = logo
+        return _imagen(datos, 3 * cm, 1.6 * cm)
+    except Exception:
+        logger.exception("No se pudo cargar el logo del corralón %s para el comprobante", proveedor_id)
+        return None
+
+
+def _fila_con_logo(logo: Image, contenido, ancho_logo: float) -> Table:
+    tabla = Table([[logo, contenido]], colWidths=[ancho_logo, 17 * cm - ancho_logo])
+    tabla.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    return tabla
+
+
 def generar_pdf(pedido: dict, cliente_email: str | None) -> bytes:
     estilos = getSampleStyleSheet()
     normal = estilos["Normal"]
@@ -49,9 +106,17 @@ def generar_pdf(pedido: dict, cliente_email: str | None) -> bytes:
     if cliente_email:
         cliente += f" ({escape(cliente_email)})"
 
-    contenido = [
-        Paragraph("ProMadera", estilos["Title"]),
-        Paragraph("Comprobante de compra", estilos["Heading2"]),
+    # Encabezado: logo de ProMadera a la izquierda y los títulos al lado
+    estilo_titulo = ParagraphStyle("TituloProMadera", parent=estilos["Title"], alignment=TA_LEFT)
+    estilo_subtitulo = ParagraphStyle("SubtituloProMadera", parent=estilos["Heading2"], alignment=TA_LEFT)
+    titulos = [
+        Paragraph("ProMadera", estilo_titulo),
+        Paragraph("Comprobante de compra", estilo_subtitulo),
+    ]
+    logo = _logo_promadera()
+    contenido = [_fila_con_logo(logo, titulos, 3 * cm)] if logo is not None else list(titulos)
+
+    contenido += [
         Paragraph(f"<b>N.º:</b> {numero(pedido['id'])}", normal),
         Paragraph(f"<b>Pedido:</b> #{pedido['id']}", normal),
         Paragraph(f"<b>Fecha del pedido:</b> {fecha_argentina(pedido['creado_en'])}", normal),
@@ -81,11 +146,16 @@ def generar_pdf(pedido: dict, cliente_email: str | None) -> bytes:
             ("LINEBELOW", (0, 0), (-1, -2), 0.5, colors.lightgrey),
             ("LINEABOVE", (0, -1), (-1, -1), 1, colors.black),
         ]))
-        contenido += [
-            Paragraph(escape(corralon["proveedor_nombre"] or "Sin corralón"), estilos["Heading3"]),
-            tabla,
-            Spacer(1, 0.4 * cm),
-        ]
+
+        # Nombre del corralón, con su logo al lado si lo subió
+        nombre = Paragraph(escape(corralon["proveedor_nombre"] or "Sin corralón"), estilos["Heading3"])
+        logo_corralon = _logo_corralon(corralon.get("proveedor_id"))
+        if logo_corralon is not None:
+            contenido += [_fila_con_logo(logo_corralon, nombre, 3.4 * cm), Spacer(1, 0.2 * cm)]
+        else:
+            contenido.append(nombre)
+
+        contenido += [tabla, Spacer(1, 0.4 * cm)]
 
     contenido += [
         Paragraph(f"<b>Total: {pesos(pedido['total'])}</b>", estilos["Heading2"]),

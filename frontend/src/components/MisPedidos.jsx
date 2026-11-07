@@ -214,16 +214,19 @@ export default function MisPedidos({ usuario }) {
             <p className="mp-motivo">Motivo de la devolución: {c.motivo_devolucion}</p>
           )}
 
-          {c.estado === "entregado" && (
+          {c.estado !== "devuelto" && c.estado !== "cancelado" && (
             <div className="mp-acciones">
               <button
                 type="button"
                 className="mp-btn-peligro"
-                disabled={trabajando}
+                disabled={trabajando || c.estado !== "entregado"}
                 onClick={() => abrirReporte(p, c)}
               >
                 Reportar problema
               </button>
+              {c.estado !== "entregado" && (
+                <small>Podés reportar un problema cuando el corralón marque la entrega.</small>
+              )}
             </div>
           )}
         </section>

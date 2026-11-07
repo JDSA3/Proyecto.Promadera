@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import useProductosCorralon, { STOCK_MINIMO } from "./useProductosCorralon.js";
 import { obtenerResumenCorralon } from "../../apiResumen.js";
 import ErrorServidor from "./ErrorServidor.jsx";
+import CorralonEstadisticas from "./CorralonEstadisticas.jsx";
 
 const ACCESOS = [
   { id: "productos", titulo: "Subir productos", texto: "Agregá nuevos productos a tu catálogo." },
@@ -60,10 +61,10 @@ export default function CorralonInicio({ usuario, onIr }) {
         </button>
       </div>
       {(error || errorResumen) && (
-  <p className="mensaje">
-    <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
-  </p>
-)}
+        <p className="mensaje">
+          <ErrorServidor onReintentar={() => setRecarga((n) => n + 1)} />
+        </p>
+      )}
 
       <div className="cr-kpis">
         <div className="cr-kpi">
@@ -175,6 +176,8 @@ export default function CorralonInicio({ usuario, onIr }) {
           </div>
         </>
       )}
+
+      <CorralonEstadisticas usuario={usuario} />
 
       <h3 className="cr-subtitulo">Accesos rápidos</h3>
       <div className="cr-accesos">
