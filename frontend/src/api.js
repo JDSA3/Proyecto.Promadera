@@ -17,6 +17,14 @@ async function manejarRespuesta(res) {
   return res.status === 204 ? null : res.json();
 }
 
+// Acepta respuesta plana o anidada y distintos nombres del campo de rol.
+// _raw guarda la respuesta original para poder depurar en pantalla.
+function normalizarUsuario(data) {
+  const u = data?.usuario ?? data?.user ?? data ?? {};
+  const rol = u.rol ?? u.role ?? u.tipo ?? u.rol_usuario;
+  return { ...u, rol, _raw: data };
+}
+
 export async function obtenerCategorias() {
   const res = await fetch(`${API_BASE}/categorias`);
   if (!res.ok) throw new Error(`Error ${res.status}`);
@@ -81,7 +89,8 @@ export async function loginUsuario({ email, password }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
-  return manejarRespuesta(res);
+  const data = await manejarRespuesta(res);
+  return normalizarUsuario(data);
 }
 
 export async function registrarUsuario({ nombre, email, password, rol }) {
@@ -90,7 +99,8 @@ export async function registrarUsuario({ nombre, email, password, rol }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nombre, email, password, rol }),
   });
-  return manejarRespuesta(res);
+  const data = await manejarRespuesta(res);
+  return normalizarUsuario(data);
 }
 
 export async function crearPedido({ clienteId, items, entrega = "retiro" }) {

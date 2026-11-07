@@ -44,6 +44,15 @@ export default function Login({ rol, onLogin, onIrARegistro }) {
     try {
       const usuario = await loginUsuario(form);
 
+      // Si el servidor no mandó el rol, mostramos qué llegó para poder depurar.
+      if (!usuario.rol) {
+        setErrorServidor(
+          "El servidor no devolvió el rol. Respuesta: " +
+            JSON.stringify(usuario._raw)
+        );
+        return;
+      }
+
       // El administrador entra desde cualquiera de las dos pestañas.
       if (usuario.rol !== "admin" && usuario.rol !== rol) {
         setErrorServidor(
@@ -74,6 +83,7 @@ export default function Login({ rol, onLogin, onIrARegistro }) {
             id={`email-${rol}`}
             name="email"
             type="email"
+            autoComplete="email"
             placeholder="tu@correo.com"
             value={form.email}
             onChange={handleChange}
@@ -88,6 +98,7 @@ export default function Login({ rol, onLogin, onIrARegistro }) {
               id={`password-${rol}`}
               name="password"
               type={verPassword ? "text" : "password"}
+              autoComplete="current-password"
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
@@ -116,7 +127,9 @@ export default function Login({ rol, onLogin, onIrARegistro }) {
           <button
             type="button"
             className="link-boton"
-            onClick={() => setAviso("La recuperación de contraseña estará disponible próximamente.")}
+            onClick={() =>
+              setAviso("La recuperación de contraseña estará disponible próximamente.")
+            }
           >
             ¿Olvidaste tu contraseña?
           </button>

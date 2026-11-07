@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { registrarUsuario } from "../api.js";
 
-const etiquetaPorRol = { cliente: "Armador", proveedor: "Proveedor" };
+const etiquetaPorRol = { cliente: "Carpintero", proveedor: "Corralón" };
 
 function validar(form) {
   const errores = {};

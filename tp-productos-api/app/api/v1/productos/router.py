@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from . import repository
 
+from app.api.v1.usuarios import repository as usuarios
 from app.api.v1.productos.schemas import (
     ProductoCreate,
     ProductoUpdate,
@@ -72,8 +73,11 @@ def listar_recomendados(producto_id: int, limite: int = Query(default=6, ge=1, l
     response_model=ProductoResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear un producto",
-    description="Crea un nuevo producto. La categoria_id debe corresponder a una categoria existente. El proveedor_id es opcional; si se envia, tiene que ser un usuario activo con rol proveedor.",
-    responses={400: {"description": "La categoria o el proveedor indicado no existe (o el usuario no es proveedor)"}},
+    description="Crea un nuevo producto. La categoria_id debe corresponder a una categoria existente. El proveedor_id es opcional; si se envia, tiene que ser un usuario activo con rol proveedor y con la solicitud de corralón aprobada.",
+    responses={
+        400: {"description": "La categoria o el proveedor indicado no existe (o el usuario no es proveedor)"},
+        403: {"description": "El corralón todavía no está aprobado"},
+    },
 )
 def crear_producto(datos: ProductoCreate):
     existe, mensaje = repository.ensure_categoria(
@@ -90,6 +94,14 @@ def crear_producto(datos: ProductoCreate):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=mensaje,
+            )
+        if not usuarios.proveedor_aprobado(datos.proveedor_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "Tu cuenta de corralón todavía no está aprobada. "
+                    "Enviá la solicitud y esperá la aprobación del administrador."
+                ),
             )
     return repository.create(datos)
 
@@ -126,6 +138,7 @@ def actualizar_producto(
             )
     return repository.update(producto_id, datos)
 
+
 @router.delete(
     "/{producto_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -133,8 +146,6 @@ def actualizar_producto(
     description="Elimina (desactiva) un producto existente por su ID.",
     responses={404: {"description": "Producto no encontrado"}},
 )
-
-
 def eliminar_producto(producto_id: int):
     eliminado = repository.delete(producto_id)
     if eliminado is None:
