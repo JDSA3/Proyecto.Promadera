@@ -5,6 +5,7 @@ import {
   obtenerUsuarios,
 } from "../../api.js";
 import AdminSolicitudes from "./AdminSolicitudes.jsx";
+import AdminCuentas from "./AdminCuentas.jsx";
 
 const AZUL = "#162039";
 const ARENA = "#c9a27a";
@@ -187,8 +188,10 @@ const TITULOS = {
   resumen: "Resumen",
   pedidos: "Pedidos",
   productos: "Productos",
-  usuarios: "Usuarios",
+  corralones: "Corralones",
+  carpinteros: "Carpinteros",
   solicitudes: "Solicitudes de corralón",
+  usuarios: "Usuarios",
 };
 
 export default function AdminPanel({ vista, usuario }) {
@@ -199,8 +202,10 @@ export default function AdminPanel({ vista, usuario }) {
       {id === "resumen" && <Resumen usuario={usuario} />}
       {id === "pedidos" && <Pedidos />}
       {id === "productos" && <Productos />}
-      {id === "usuarios" && <Usuarios usuario={usuario} />}
+      {id === "corralones" && <AdminCuentas usuario={usuario} tipo="corralones" />}
+      {id === "carpinteros" && <AdminCuentas usuario={usuario} tipo="carpinteros" />}
       {id === "solicitudes" && <AdminSolicitudes usuario={usuario} />}
+      {id === "usuarios" && <Usuarios usuario={usuario} />}
     </section>
   );
 }

@@ -44,8 +44,10 @@ const MENU_ADMIN = [
   { id: "resumen", label: "Resumen" },
   { id: "pedidos", label: "Pedidos" },
   { id: "productos", label: "Productos" },
-  { id: "usuarios", label: "Usuarios" },
+  { id: "corralones", label: "Corralones" },
+  { id: "carpinteros", label: "Carpinteros" },
   { id: "solicitudes", label: "Solicitudes" },
+  { id: "usuarios", label: "Usuarios" },
 ];
 
 function vistaInicial(usuario) {

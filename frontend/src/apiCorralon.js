@@ -54,6 +54,29 @@ export const rechazarSolicitud = (adminId, solicitudId, motivo) =>
 export const urlArchivoSolicitud = (solicitudId, adminId) =>
   `${API_BASE}/admin/solicitudes-corralon/${solicitudId}/archivo?usuario_id=${adminId}`;
 
+// ----- Cuentas (administrador) -----
+
+export const listarCarpinteros = (adminId) =>
+  fetch(`${API_BASE}/admin/cuentas/carpinteros?usuario_id=${adminId}`).then(leer);
+
+export const editarCarpintero = (adminId, id, datos) =>
+  fetch(`${API_BASE}/admin/cuentas/carpinteros/${id}?usuario_id=${adminId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+  }).then(leer);
+
+export const listarCorralonesAdmin = (adminId) =>
+  fetch(`${API_BASE}/admin/cuentas/corralones?usuario_id=${adminId}`).then(leer);
+
+// Usa el endpoint que ya existía: PUT /admin/corralones/{id}
+export const editarCorralonAdmin = (adminId, id, datos) =>
+  fetch(`${API_BASE}/admin/corralones/${id}?usuario_id=${adminId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datos),
+  }).then(leer);
+
 // ----- Panel del corralón -----
 
 export const obtenerEstadisticas = (corralonId, usuarioId, meses = 6) =>
