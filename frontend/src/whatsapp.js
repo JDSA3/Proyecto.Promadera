@@ -2,23 +2,23 @@
 // Se define en frontend/.env (VITE_WHATSAPP_NUMERO) y no se sube al repositorio.
 export const WHATSAPP_PROMADERA = import.meta.env.VITE_WHATSAPP_NUMERO || "";
 
-// Arma el link de WhatsApp para un número. Sin número devuelve null.
+// Arma el link de WhatsApp para un número de Argentina.
+// Acepta el número con o sin el 549 adelante. Sin número devuelve null.
 export function urlWhatsApp(telefono, mensaje = "") {
-  const numero = String(telefono ?? "").replace(/\D/g, "");
+  let numero = String(telefono ?? "").replace(/\D/g, "").replace(/^0+/, "");
   if (!numero) return null;
+
+  if (numero.startsWith("54")) {
+    if (!numero.startsWith("549")) numero = "549" + numero.slice(2); // 54 + área → 549 + área
+  } else {
+    numero = "549" + numero; // área + número, sin prefijo de país
+  }
+
   const texto = mensaje ? `?text=${encodeURIComponent(mensaje)}` : "";
   return `https://wa.me/${numero}${texto}`;
 }
 
-// Arma el link de WhatsApp para el número de un corralón.
-// Acepta números de Argentina con o sin el 549 adelante. Devuelve null si está vacío.
-export function urlWhatsApp(numero, mensaje) {
-  let n = String(numero ?? "").replace(/\D/g, "").replace(/^0+/, "");
-  if (!n) return null;
-  if (n.startsWith("54")) {
-    if (!n.startsWith("549")) n = "549" + n.slice(2); // 54 + área... → 549 + área...
-  } else {
-    n = "549" + n; // área + número, sin prefijo de país
-  }
-  return `https://wa.me/${n}?text=${encodeURIComponent(mensaje)}`;
+// Link de WhatsApp al número de ProMadera.
+export function urlWhatsAppProMadera(mensaje = "") {
+  return urlWhatsApp(WHATSAPP_PROMADERA, mensaje);
 }
