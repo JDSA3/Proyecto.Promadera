@@ -13,7 +13,7 @@ import { nombreItem } from "../cortes.js";
 import { urlComprobante } from "../apiComprobante.js";
 import ErrorServidor from "./corralon/ErrorServidor.jsx";
 import { etiquetaEntrega } from "../entrega.js";
-import { urlWhatsAppProMadera } from "../whatsapp.js";
+import { urlWhatsApp } from "../whatsapp.js";
 
 // Estado del pedido (el pago). "clase" reutiliza los colores de .cr-estado.
 const ESTADOS = {
@@ -35,6 +35,7 @@ const ESTADOS_CORRALON = {
 const dinero = (n) => n.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 const fecha = (iso) => new Date(iso).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
 const limpiar = (msg) => String(msg).replace(/^"|"$/g, "");
+const nombreCorralon = (c) => c.proveedor_nombre || `Corralón #${c.proveedor_id}`;
 
 // Pedidos del carpintero. Cada pedido muestra el estado de cada corralón por separado.
 // Sirve también para pagar un pedido pendiente, cancelarlo o reportar un problema con el material.
@@ -84,32 +85,31 @@ export default function MisPedidos({ usuario }) {
       window.location.href = pref.init_point;
     });
 
-  const pagarPorWhatsApp = (pedido) => {
-    // Se abre la pestaña en el click para que el navegador no la bloquee.
-    const ventana = window.open("", "_blank");
-    return ejecutar(async () => {
-      try {
-        const pref = await crearPreferenciaPago(pedido.id, usuario.id);
-        const link = urlWhatsAppProMadera(
-          `Hola, quiero pagar el pedido #${pedido.id} de ProMadera por ${dinero(pedido.total)}. Link de pago de Mercado Pago: ${pref.init_point}`
-        );
-        if (!link) throw new Error("Falta configurar VITE_WHATSAPP_NUMERO en frontend/.env");
-        if (ventana) {
-          ventana.opener = null;
-          ventana.location.href = link;
-        } else {
-          window.location.href = link;
-        }
-        setAviso({
-          tipo: "ok",
-          texto: 'Abrimos WhatsApp con el pedido y el link de pago. Cuando se pague, apretá "Actualizar" para ver el pedido pagado.',
-        });
-      } catch (err) {
-        if (ventana) ventana.close();
-        throw err;
-      }
-    });
-  };
+  // Abre el WhatsApp del corralón. Sin await antes de abrir, así el navegador no bloquea la pestaña.
+  function abrirWhatsAppCorralon(corralon, mensaje) {
+    const link = urlWhatsApp(corralon.proveedor_telefono, mensaje);
+    if (!link) {
+      setAviso({
+        tipo: "error",
+        texto: `${nombreCorralon(corralon)} no cargó un número de WhatsApp.`,
+      });
+      return;
+    }
+    setAviso({ tipo: "", texto: "" });
+    window.open(link, "_blank", "noopener,noreferrer");
+  }
+
+  const consultarCorralon = (pedido, corralon) =>
+    abrirWhatsAppCorralon(
+      corralon,
+      `Hola ${nombreCorralon(corralon)}, te escribo por el pedido #${pedido.id} de ProMadera. Quería hacerte una consulta.`
+    );
+
+  const pagarPorWhatsApp = (pedido, corralon) =>
+    abrirWhatsAppCorralon(
+      corralon,
+      `Hola ${nombreCorralon(corralon)}, quiero pagar mi parte del pedido #${pedido.id} de ProMadera por ${dinero(corralon.total)}. ¿Cómo coordinamos el pago?`
+    );
 
   const pagarSimulado = (pedido) =>
     ejecutar(async () => {
@@ -138,7 +138,7 @@ export default function MisPedidos({ usuario }) {
     setReporte({
       pedidoId: pedido.id,
       proveedorId: corralon.proveedor_id,
-      nombre: corralon.proveedor_nombre || `Corralón #${corralon.proveedor_id}`,
+      nombre: nombreCorralon(corralon),
     });
   }
 
@@ -167,16 +167,11 @@ export default function MisPedidos({ usuario }) {
   function detalleCorralones(p) {
     return (p.corralones ?? []).map((c, idx) => {
       const est = ESTADOS_CORRALON[c.estado] ?? { texto: c.estado, clase: "" };
-      const linkWhatsApp = urlWhatsAppProMadera(
-        `Hola, te escribo por el pedido #${p.id} de ProMadera.`
-      );
       return (
         <section className="cr-grupo" key={c.proveedor_id ?? idx}>
           <header className="cr-grupo-encabezado">
             <span className="cr-grupo-etiqueta">c{idx + 1}</span>
-            <h3 className="cr-grupo-nombre">
-              {c.proveedor_nombre || `Corralón #${c.proveedor_id}`}
-            </h3>
+            <h3 className="cr-grupo-nombre">{nombreCorralon(c)}</h3>
             <span className={`cr-estado ${est.clase}`}>{est.texto}</span>
             <span className="cr-grupo-total">{dinero(c.total)}</span>
           </header>
@@ -202,13 +197,26 @@ export default function MisPedidos({ usuario }) {
             </tbody>
           </table>
 
-          {linkWhatsApp && (
-            <div className="mp-acciones">
-              <a className="btn-whatsapp" href={linkWhatsApp} target="_blank" rel="noopener noreferrer">
-                💬 Escribir por WhatsApp
-              </a>
-            </div>
-          )}
+          {/* WhatsApp del corralón: consultar siempre, pagar solo si el pedido está pendiente */}
+          <div className="mp-acciones">
+            <button
+              type="button"
+              className="btn-secundario"
+              onClick={() => consultarCorralon(p, c)}
+            >
+              💬 Consultar
+            </button>
+            {p.estado === "pendiente" && (
+              <button
+                type="button"
+                className="btn-whatsapp"
+                disabled={trabajando}
+                onClick={() => pagarPorWhatsApp(p, c)}
+              >
+                💬 Pagar por WhatsApp
+              </button>
+            )}
+          </div>
 
           {c.estado === "devuelto" && (
             <p className="mp-motivo">Motivo de la devolución: {c.motivo_devolucion}</p>
@@ -312,14 +320,6 @@ export default function MisPedidos({ usuario }) {
                         onClick={() => pagarConMercadoPago(p)}
                       >
                         Pagar con Mercado Pago
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-whatsapp"
-                        disabled={trabajando}
-                        onClick={() => pagarPorWhatsApp(p)}
-                      >
-                        💬 Pagar por WhatsApp
                       </button>
                       <button
                         type="button"

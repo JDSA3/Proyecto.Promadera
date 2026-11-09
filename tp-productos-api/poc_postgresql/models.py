@@ -72,6 +72,11 @@ class UsuarioDB(Base):
         String(20), nullable=False, default="aprobado", server_default="aprobado"
     )
 
+    # Perfil comercial del corralón (solo lectura). Se usa para leer el teléfono de WhatsApp.
+    perfil_corralon: Mapped["CorralonPerfilDB | None"] = relationship(
+        "CorralonPerfilDB", uselist=False, viewonly=True
+    )
+
 
 class PedidoDB(Base):
     __tablename__ = "pedidos"

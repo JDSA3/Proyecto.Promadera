@@ -63,10 +63,15 @@ def _item_to_dict(item: PedidoItemDB):
 
 
 def _corralon_to_dict(corralon: PedidoCorralonDB):
+    proveedor = corralon.proveedor
+    perfil = proveedor.perfil_corralon if proveedor else None
+    # El teléfono de WhatsApp sale del perfil del corralón; si no tiene, del usuario.
+    telefono = (perfil.telefono if perfil else None) or (proveedor.telefono if proveedor else None)
+
     return {
         "proveedor_id": corralon.proveedor_id,
-        "proveedor_nombre": corralon.proveedor.nombre if corralon.proveedor else None,
-        "proveedor_telefono": corralon.proveedor.telefono if corralon.proveedor else None,
+        "proveedor_nombre": proveedor.nombre if proveedor else None,
+        "proveedor_telefono": telefono,
         "estado": corralon.estado,
         "total": float(corralon.total),
         "motivo_devolucion": corralon.motivo_devolucion,
@@ -100,7 +105,9 @@ def _consulta_pedidos():
     return select(PedidoDB).options(
         selectinload(PedidoDB.cliente),
         selectinload(PedidoDB.items).selectinload(PedidoItemDB.producto),
-        selectinload(PedidoDB.corralones).selectinload(PedidoCorralonDB.proveedor),
+        selectinload(PedidoDB.corralones)
+        .selectinload(PedidoCorralonDB.proveedor)
+        .selectinload(UsuarioDB.perfil_corralon),
         selectinload(PedidoDB.corralones)
         .selectinload(PedidoCorralonDB.items)
         .selectinload(PedidoItemDB.producto),
