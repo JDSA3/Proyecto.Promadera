@@ -6,6 +6,7 @@ import {
 } from "../../api.js";
 import AdminSolicitudes from "./AdminSolicitudes.jsx";
 import AdminCuentas from "./AdminCuentas.jsx";
+import AdminEstadisticas from "./AdminEstadisticas.jsx";
 
 const AZUL = "#162039";
 const ARENA = "#c9a27a";
@@ -116,6 +117,7 @@ function Resumen({ usuario }) {
                 <Tarjeta key={e} titulo={e} valor={n} />
               ))}
             </div>
+            <AdminEstadisticas pedidos={lista} />
           </>
         );
       })()}

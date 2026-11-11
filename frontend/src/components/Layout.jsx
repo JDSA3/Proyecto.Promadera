@@ -6,6 +6,7 @@ export default function Layout({
   onCambiarVista,
   etiqueta,
   onCerrarSesion,
+  bloqueado = false, // true: el menú no se puede desplegar (cuenta de corralón sin aprobar)
   children,
 }) {
   const [menuVisible, setMenuVisible] = useState(() => window.innerWidth > 760);
@@ -22,6 +23,9 @@ export default function Layout({
           type="button"
           className="btn-hamburguesa"
           onClick={() => setMenuVisible(!menuVisible)}
+          disabled={bloqueado}
+          title={bloqueado ? "El menú se habilita cuando se apruebe tu cuenta" : undefined}
+          style={bloqueado ? { opacity: 0.4, cursor: "not-allowed" } : undefined}
           aria-label="Mostrar u ocultar menú"
         >
           ☰
@@ -30,10 +34,21 @@ export default function Layout({
           <img src="/logo.png" alt="" />
           <span>ProMadera</span>
         </div>
+        {/* Con el menú bloqueado, el botón de salir va en el encabezado para no quedar sin salida */}
+        {bloqueado && onCerrarSesion && (
+          <button
+            type="button"
+            className="menu-item menu-salir"
+            onClick={onCerrarSesion}
+            style={{ width: "auto", marginLeft: "auto", marginRight: 16 }}
+          >
+            Cerrar sesión
+          </button>
+        )}
       </header>
 
       <div className="app-cuerpo">
-        {menuVisible && (
+        {menuVisible && !bloqueado && (
           <nav className="app-menu">
             {etiqueta && <p className="menu-etiqueta">{etiqueta}</p>}
             {menu.map((item) => (

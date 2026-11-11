@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "./components/Layout.jsx";
 import Auth from "./components/Auth.jsx";
 import Diseno from "./components/Diseno.jsx";
@@ -21,6 +21,7 @@ import CorralonCompras from "./components/corralon/CorralonCompras.jsx";
 import SolicitudCorralon from "./components/corralon/SolicitudCorralon.jsx";
 import Comunidad from "./components/Comunidad.jsx";
 import AdminPanel from "./components/admin/AdminPanel.jsx";
+import { obtenerMiSolicitud } from "./apiCorralon.js";
 
 const MENU_CARPINTERO = [
   { id: "diseno", label: "Diseño" },
@@ -63,6 +64,23 @@ export default function App() {
   const misProyectos = useProyectos(usuario?.id);
   const [proyectoAbierto, setProyectoAbierto] = useState(null);
   const [compraInicial, setCompraInicial] = useState(null); // producto elegido desde Stock
+  // Estado de la cuenta del corralón ("pendiente", "aprobado", "rechazado"). null = todavía no se sabe.
+  const [estadoCuenta, setEstadoCuenta] = useState(null);
+
+  useEffect(() => {
+    if (usuario?.rol !== "proveedor") return undefined;
+    let vivo = true;
+    setEstadoCuenta(null);
+    obtenerMiSolicitud(usuario.id)
+      .then((d) => {
+        if (vivo) setEstadoCuenta(d.estado_cuenta);
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, [usuario?.id, usuario?.rol]);
+
   const cambiarVista = (id) => {
     setProyectoAbierto(null);
     setCompraInicial(null);
@@ -91,6 +109,23 @@ export default function App() {
   }
 
   if (usuario.rol === "proveedor") {
+    // Mientras la cuenta no esté aprobada: menú bloqueado (no se puede desplegar) y solo la solicitud.
+    // SolicitudCorralon avisa (onEstado) cuando cambia el estado, así el menú se habilita al aprobarse.
+    if (estadoCuenta !== "aprobado") {
+      return (
+        <Layout
+          menu={MENU_CORRALON}
+          bloqueado
+          vista={vista}
+          onCambiarVista={cambiarVista}
+          etiqueta="Corralón"
+          onCerrarSesion={cerrarSesion}
+        >
+          <SolicitudCorralon usuario={usuario} onEstado={setEstadoCuenta} />
+        </Layout>
+      );
+    }
+
     function pantallaCorralon() {
       switch (vista) {
         case "productos":
@@ -130,8 +165,6 @@ export default function App() {
         etiqueta="Corralón"
         onCerrarSesion={cerrarSesion}
       >
-        {/* Se muestra mientras la cuenta no esté aprobada; después se oculta sola */}
-        <SolicitudCorralon usuario={usuario} />
         {pantallaCorralon()}
       </Layout>
     );

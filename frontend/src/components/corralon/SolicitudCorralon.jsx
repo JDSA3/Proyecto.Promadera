@@ -35,7 +35,7 @@ const boton = {
   cursor: "pointer",
 };
 
-export default function SolicitudCorralon({ usuario }) {
+export default function SolicitudCorralon({ usuario, onEstado }) {
   const [info, setInfo] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -48,6 +48,7 @@ export default function SolicitudCorralon({ usuario }) {
       .then((d) => {
         setInfo(d);
         setError(null);
+        onEstado?.(d.estado_cuenta);
       })
       .catch((e) => setError(e.message))
       .finally(() => setCargando(false));
